@@ -1,13 +1,15 @@
 import requests
 import json
+from DataFetcher import DataFetcher
 
-test_coords = [1,2]
+data_fetcher = DataFetcher()
 
-def switch_coords(input_list):
-    temp = input_list[0]
-    input_list[0] = input_list[1]
-    input_list[1] = temp
+endpoint = "Datastreams"
 
-switch_coords(test_coords)
+params = {
+    "$top" : 3
+}
 
-print(test_coords)
+data_fetcher.fetch_data(endpoint,params)
+
+data_fetcher.print_raw_data()

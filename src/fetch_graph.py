@@ -3,7 +3,7 @@ import json
 import os
 import requests
 
-body = {"bbox":[[8.681495,49.41461],[8.686507,49.41943]]}
+body = {"bbox":[[9.98, 53.54], [10.0, 53.56]]}
 
 headers = {
     'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',

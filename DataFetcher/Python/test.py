@@ -1,5 +1,6 @@
 import requests
 import json
+import folium
 from DataFetcher import DataFetcher
 
 data_fetcher = DataFetcher()

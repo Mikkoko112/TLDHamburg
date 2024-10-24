@@ -37,11 +37,20 @@ class DataFetcher():
 
         #get all entries if no top parameter is set
         if not "$top" in params:
+            print("hi")
             #add max $top parameter so the max amount of values are fetched per page
             #significantly reduces fetch times, as API GET requests are slow
             params["$top"] = 1000
             response = requests.get(full_url,params=params)
-            fetched_data = response.json().get("value",[])
+            if response.status_code != 200: #exit data fetching if request failed
+                print(f"Failed to fetch data. Status code: {response.status_code}")
+                return
+            #only if a Entity is accessed directly e.g. Things(1), there is no value key
+            if "value" in response.json():
+                fetched_data = response.json().get("value",[])
+            else:
+                self.data = response.json()
+                return
             all_data = list()
             all_data.extend(fetched_data)
             #repeatedly fetch next page of results until last one is reached
@@ -55,7 +64,7 @@ class DataFetcher():
                     return
                 fetched_data = response.json().get("value",[])
                 all_data.extend(fetched_data)
-
+            
             self.data = all_data
             return
         
@@ -63,7 +72,15 @@ class DataFetcher():
         elif params["top"] > 1000:
             entries_fetched = 0
             response = requests.get(full_url,params=params)
-            fetched_data = response.json().get("value",[])
+            if response.status_code != 200: #exit data fetching if request failed
+                print(f"Failed to fetch data. Status code: {response.status_code}")
+                return
+            #only if a Entity is accessed directly e.g. Things(1), there is no value key
+            if "value" in response.json():
+                fetched_data = response.json().get("value",[])
+            else:
+                self.data = response.json()
+                return
             all_data = list()
             all_data.extend(fetched_data)
             entries_fetched += 1000
@@ -91,6 +108,12 @@ class DataFetcher():
             response = requests.get(full_url,params=params)
             if response.status_code != 200: #exit data fetching if request failed
                 print(f"Failed to fetch data. Status code: {response.status_code}")
+                return
+            #only if a Entity is accessed directly e.g. Things(1), there is no value key
+            if "value" in response.json():
+                fetched_data = response.json().get("value",[])
+            else:
+                self.data = response.json()
                 return
             fetched_data = response.json().get("value",[])
             self.data = fetched_data

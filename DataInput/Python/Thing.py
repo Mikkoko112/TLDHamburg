@@ -1,8 +1,8 @@
-import requests, json
+from DataFetcher import DataFetcher
 
 
 class Thing:
-    BASE_URL = "https://tld.iot.hamburg.de/v1.1/Things"
+    FETCHER = DataFetcher()
 
     def __init__(self, idnumber: int):
         """
@@ -13,11 +13,11 @@ class Thing:
         """
         # Initial attributes
         self.id = idnumber
-        self.thing_url = f"{self.BASE_URL}({self.id})"
+        self.thing_endpoint = f"/Things({self.id})"
         # Attribute obtained only if necessary
         self.data = None
         self.coordinates = None
-        self.primary_signal_url = None
+        self.primary_signal_endpoint = None
 
     def get_data(self):
         """
@@ -32,7 +32,7 @@ class Thing:
             self._fetch_data()
         return self.data
 
-    def get_coordinates(self):
+    def get_coordinates(self):  # Done
         """
         Used to obtain geographic coordinates of Thing.
 
@@ -48,122 +48,88 @@ class Thing:
         """
         if self.coordinates:
             return self.coordinates
-
+        # Fetching data
         params = {"$expand": "Locations"}
-        response = requests.get(self.thing_url, params)
-        if response.status_code == 200:
-            json_data = response.json()
-            locations_data = json_data.get("Locations", [])
-            # Check if general locations info available.
-            if locations_data:
-                primary_location = locations_data[0].get("location", {})
-                # If available:
-                # Extract geometry information (ingress lane, egress lane and real route)
-                geometry = primary_location.get("geometry")
-                if geometry:
-                    self.coordinates = geometry["coordinates"]
-                    return self.coordinates
-                else:
-                    raise ValueError(
-                        f"No geometry information available for Thing({self.id})."
-                    )
+        self.FETCHER.fetch_data(endpoint=self.thing_endpoint, params=params)
+        locations_data = self.FETCHER.data["Locations"]
+        # Check if general locations info available.
+        if locations_data:
+            primary_location = locations_data[0].get("location", {})
+            # If available:
+            # Extract geometry information (ingress lane, egress lane and real route)
+            geometry = primary_location.get("geometry")
+            if geometry:
+                self.coordinates = geometry["coordinates"]
+                return self.coordinates
             else:
-                raise ValueError(f"No Locations data available for Thing({self.id}).")
+                raise ValueError(
+                    f"No geometry information available for Thing({self.id})."
+                )
         else:
-            self._handle_error(response.url)
+            raise ValueError(f"No Locations data available for Thing({self.id}).")
 
-    def last_tf_observation(self, resultTime=False):
+    def last_tf_observation(self, phenomenonTime=False):
         """
         Retrieves the latest observation for the Thing's primary signal.
 
         Parameters:
-            return_result_time (bool): If set to True, the method returns a tuple containing
-                                    (resultTime, result). Otherwise, it returns only the result.
+            phenomenonTime (bool): If set to True, the method returns a tuple containing
+                                    (phenomenonTime, result). Otherwise, it returns only the result.
 
         Returns:
             int or tuple:
-                - If `return_result_time` is False, returns the latest `result` (e.g., 0).
-                - If `return_result_time` is True, returns a tuple (`resultTime`, `result`).
+                - If `phenomenonTime` is False, returns the latest `result` (e.g., 0).
+                - If `phenomenonTime` is True, returns a tuple (`phenomenonTime`, `result`).
         """
-        if self.primary_signal_url is None:
-            self._get_primary_signal_url()
+        if self.primary_signal_endpoint is None:
+            self._get_primary_signal_endpoint()
 
-        params = {"$expand": "Observations($top=1;$orderby=resultTime desc)"}
-        response = requests.get(self.primary_signal_url, params)
-        if response.status_code == 200:
-            json_data = response.json()
-            observations = json_data.get("Observations", [])
+        params = {"$expand": "Observations($top=1;$orderby=phenomenonTime desc)"}
+        self.FETCHER.fetch_data(self.primary_signal_endpoint, params)
 
-            if not observations:
-                raise ValueError(f"No observations found for Thing({self.id}).")
+        observations = self.FETCHER.data["Observations"]
+        if not observations:
+            raise ValueError(f"No observations found for Thing({self.id}).")
 
-            last_observation = observations[0]
-            result = last_observation.get("result")
+        # Extracting result of last observation
+        last_observation = observations[0]
+        result = last_observation["result"]
 
-            if resultTime:
-                resultTime = last_observation["resultTime"]
-                return resultTime, result
+        if phenomenonTime:
+            phenomenonTime = last_observation["phenomenonTime"]
+            return phenomenonTime, result
 
-            return result
-        else:
-            self._handle_error(response.url)
+        return result
 
-    def _fetch_data(self):
+    def _fetch_data(self):  # Done
         """
         Fetches the Thing's data from the SensorThings API and updates the instance.
         """
-        response = requests.get(self.thing_url)
-        if response.status_code == 200:
-            self.data = response.json()
-        else:
-            self._handle_error(response.url)
+        self.FETCHER.fetch_data(endpoint=self.thing_endpoint)
+        self.data = self.FETCHER.data
 
-    def _handle_error(self, response_url: str):
-        """
-        Handles HTTP errors based on the response status code and raises a specific error
-        with a descriptive message.
-
-        Parameters:
-        - response_url (str): The URL that caused an error response.
-        """
-        response = requests.get(response_url)
-        if response.status_code == 404:
-            raise requests.exceptions.HTTPError(
-                f"404 Not Found Error: Thing({self.id}) could not be found!"
-            )
-        elif response.status_code == 400:
-            raise requests.exceptions.HTTPError(
-                f"400 Client Error:Bad Request for URL: {response_url}"
-            )
-        else:
-            response.raise_for_status()
-
-    def _get_primary_signal_url(self):
+    def _get_primary_signal_endpoint(self):  # Done
         """
         Retrieves the URL of the datastream associated with the traffic light's primary signal.
         This allows relevant information about the traffic light's current behavior to be obtained more quickly.
 
         The filter ensures that the correct datastream is selected online by the API.
         """
-        datastreams_url = f"{self.thing_url}/Datastreams"
+        # Fetching data
+        datastreams_endpoint = self.thing_endpoint + "/Datastreams"
         params = {"$filter": "properties/layerName eq 'primary_signal'"}
+        self.FETCHER.fetch_data(datastreams_endpoint, params=params)
+        datastreams = self.FETCHER.data
 
-        response = requests.get(datastreams_url, params)
-        if response.status_code == 200:
-            json_data = response.json()
-            datastreams = json_data.get("value", [])
+        if not datastreams:
+            raise ValueError(
+                f"No primary_signal datastream found for Thing({self.id})."
+            )
 
-            if not datastreams:
-                raise ValueError(
-                    f"No primary_signal datastream found for Thing({self.id})."
-                )
+        # Extracting endpoint
+        self.primary_signal_endpoint = f'/Datastreams({datastreams[0]["@iot.id"]})'
 
-            # Extracting link
-            self.primary_signal_url = datastreams[0].get("@iot.selfLink")
-
-            if not self.primary_signal_url:
-                raise ValueError(
-                    f"@iot.selfLink is missing in the datastream for Thing({self.id})."
-                )
-        else:
-            self._handle_error(response.url)
+        if self.primary_signal_endpoint is None:
+            raise ValueError(
+                f"@iot.id is missing in the primary signal datastream for Thing({self.id})."
+            )

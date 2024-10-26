@@ -6,7 +6,7 @@ class Thing:
 
     def __init__(self, idnumber: int):
         """
-        Initialize a Thing instance by fetching its data from the TLD IoT Hamburg.
+        Initializes a Thing instance by fetching its data from the TLD IoT Hamburg.
 
         Parameters:
         - idnumber (int): The @iot.id of Thing to fetch data for.
@@ -15,14 +15,26 @@ class Thing:
         self.id = idnumber
         self.thing_url = f"{self.BASE_URL}({self.id})"
         # Attribute obtained only if necessary
-        self.primary_signal_url = None
         self.data = None
         self.coordinates = None
-        self._fetch_data()
+        self.primary_signal_url = None
+
+    def get_data(self):
+        """
+        Retrieves the Thing's data.
+
+        If the data has not been fetched yet, it fetches the data from the API.
+
+        Returns:
+            dict: The data associated with the Thing.
+        """
+        if self.data is None:
+            self._fetch_data()
+        return self.data
 
     def get_coordinates(self):
         """
-        This method is used to obtain geographic coordinates of Thing.
+        Used to obtain geographic coordinates of Thing.
 
         If the coordinates have already been obtained, it returns them immediately.
         Otherwise, it fetches the Locations associated with the Thing and extracts the
@@ -60,9 +72,45 @@ class Thing:
         else:
             self._handle_error(response.url)
 
+    def last_tf_observation(self, resultTime=False):
+        """
+        Retrieves the latest observation for the Thing's primary signal.
+
+        Parameters:
+            return_result_time (bool): If set to True, the method returns a tuple containing
+                                    (resultTime, result). Otherwise, it returns only the result.
+
+        Returns:
+            int or tuple:
+                - If `return_result_time` is False, returns the latest `result` (e.g., 0).
+                - If `return_result_time` is True, returns a tuple (`resultTime`, `result`).
+        """
+        if self.primary_signal_url is None:
+            self._get_primary_signal_url()
+
+        params = {"$expand": "Observations($top=1;$orderby=resultTime desc)"}
+        response = requests.get(self.primary_signal_url, params)
+        if response.status_code == 200:
+            json_data = response.json()
+            observations = json_data.get("Observations", [])
+
+            if not observations:
+                raise ValueError(f"No observations found for Thing({self.id}).")
+
+            last_observation = observations[0]
+            result = last_observation.get("result")
+
+            if resultTime:
+                resultTime = last_observation["resultTime"]
+                return resultTime, result
+
+            return result
+        else:
+            self._handle_error(response.url)
+
     def _fetch_data(self):
         """
-        This method fetches the Thing's data from the SensorThings API and updates the instance.
+        Fetches the Thing's data from the SensorThings API and updates the instance.
         """
         response = requests.get(self.thing_url)
         if response.status_code == 200:
@@ -72,7 +120,7 @@ class Thing:
 
     def _handle_error(self, response_url: str):
         """
-        This method handles HTTP errors based on the response status code and raises a specific error
+        Handles HTTP errors based on the response status code and raises a specific error
         with a descriptive message.
 
         Parameters:

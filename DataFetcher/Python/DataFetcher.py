@@ -5,13 +5,13 @@ import shapely
 import time
 
 class DataFetcher():
+    BASE_URL = "https://tld.iot.hamburg.de/v1.1/"
     """---------------------------------------------------------------------------------------------
     class structure for fetching Traffic Light Data from IoT Hamburg. 
     TLD IoT Hamburg is based on the OGC SensorThingsAPI.
     More Information on "https://docs.ogc.org/is/18-088/18-088.html"
     ---------------------------------------------------------------------------------------------"""
     def __init__(self):
-        self.base_url = "https://tld.iot.hamburg.de/v1.1/"
         self.data = None
 
     def fetch_data(self,endpoint="Datastreams",params={}):
@@ -36,7 +36,7 @@ class DataFetcher():
         Examples:
             To be added later
         -----------------------------------------------------------------------------------------"""
-        full_url = self.base_url + endpoint
+        full_url = self.BASE_URL + endpoint
 
         #get all entries if no top parameter is set
         if not "$top" in params:
@@ -48,11 +48,10 @@ class DataFetcher():
                 print(f"Failed to fetch data. Status code: {response.status_code}")
                 return
             #only if a Entity is accessed directly e.g. Things(1), there is no value key
-            if "value" in response.json():
-                fetched_data = response.json().get("value",[])
-            else:
+            if not "value" in response.json():
                 self.data = response.json()
                 return
+            fetched_data = response.json().get("value",[])
             all_data = list()
             all_data.extend(fetched_data)
             #repeatedly fetch next page of results until last one is reached
@@ -121,6 +120,8 @@ class DataFetcher():
             self.data = fetched_data
 
     def get_data(self):
+        if not self.data:
+            raise ValueError("No data fetched yet")
         return self.data
     
     def get_Datastream_id_by_coordinates(self,coordinates,error):
@@ -168,9 +169,5 @@ class DataFetcher():
 
     def print_raw_data(self):
         if not self.data:
-            print("No data collected yet")
-        else:
-            print(json.dumps(self.data, indent=4))
-
-
-            
+            raise ValueError("No data fetched yet")
+        print(json.dumps(self.data, indent=4))

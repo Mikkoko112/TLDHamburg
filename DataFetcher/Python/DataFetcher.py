@@ -1,5 +1,8 @@
 import requests
 import json
+import pickle
+import shapely
+import time
 
 class DataFetcher():
     """---------------------------------------------------------------------------------------------
@@ -37,7 +40,6 @@ class DataFetcher():
 
         #get all entries if no top parameter is set
         if not "$top" in params:
-            print("hi")
             #add max $top parameter so the max amount of values are fetched per page
             #significantly reduces fetch times, as API GET requests are slow
             params["$top"] = 1000
@@ -69,7 +71,7 @@ class DataFetcher():
             return
         
         #get top x entries over multiple pages if top param exceeds 1000
-        elif params["top"] > 1000:
+        elif params["$top"] > 1000:
             entries_fetched = 0
             response = requests.get(full_url,params=params)
             if response.status_code != 200: #exit data fetching if request failed
@@ -121,10 +123,48 @@ class DataFetcher():
     def get_data(self):
         return self.data
     
-    def get_ID_by_coordinates(self,coordinates):
+    def get_Datastream_id_by_coordinates(self,coordinates,error):
         # Input: Type
-        # coordinates: 2-Tuple (x_coordinate,y_coordinate)
-        return
+        # coordinates: list [x_coord,y_coord]
+
+        if coordinates[0] > coordinates[1]:#switch coords if they are given in wrong orientation
+            temp = coordinates[0]
+            coordinates[0] = coordinates[1]
+            coordinates[1] = temp
+
+        with open("datastreams_id-observedArea.pkl", "rb") as file:
+            data = pickle.load(file)
+        
+        all_matched_Datastreams_ids = list()
+        reference_point = shapely.geometry.Point(coordinates[0],coordinates[1])
+        for entry in data:
+            if not "observedArea" in entry:
+                continue
+            geoJSON_observedArea = shapely.geometry.shape(entry["observedArea"])
+            distance = reference_point.distance(geoJSON_observedArea)
+            if distance < error:
+                if not "@iot.id" in entry:
+                    print("whoops")
+                datastream_id = entry["@iot.id"]
+                all_matched_Datastreams_ids.append(datastream_id)
+        return all_matched_Datastreams_ids
+
+    def get_live_Observations_for_Datastream_id(self,id):
+        endpoint = f"Datastreams({id})"
+        params = {
+            "$expand" : "Observations($orderby=phenomenonTime desc;$top=1;$select=id,result,phenomenonTime)"
+        }
+        self.fetch_data(endpoint,params)
+        print(f"current Status: {self.data["Observations"][0]["result"]}\t at Timestamp: {self.data["Observations"][0]["phenomenonTime"]}")
+        last_Observation_id = self.data["Observations"][0]["@iot.id"]
+        while True:
+            time.sleep(1)
+            self.fetch_data(endpoint,params)
+            if last_Observation_id == self.data["Observations"][0]["@iot.id"]:
+                continue
+            last_Observation_id = self.data["Observations"][0]["@iot.id"]
+            print(f"current Status: {self.data["Observations"][0]["result"]}\t at Timestamp: {self.data["Observations"][0]["phenomenonTime"]}")
+            
 
     def print_raw_data(self):
         if not self.data:

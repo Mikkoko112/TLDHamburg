@@ -68,7 +68,7 @@ class Thing:
         else:
             raise ValueError(f"No Locations data available for Thing({self.id}).")
 
-    def last_tf_observation(self, phenomenonTime=False):
+    def get_tl_observation(self, phenomenonTime=False):
         """
         Retrieves the latest observation for the Thing's primary signal.
 
@@ -82,7 +82,7 @@ class Thing:
                 - If `phenomenonTime` is True, returns a tuple (`phenomenonTime`, `result`).
         """
         if self.primary_signal_endpoint is None:
-            self._get_primary_signal_endpoint()
+            self._fetch_primary_signal_endpoint()
 
         params = {"$expand": "Observations($top=1;$orderby=phenomenonTime desc)"}
         self.FETCHER.fetch_data(self.primary_signal_endpoint, params)
@@ -96,8 +96,8 @@ class Thing:
         result = last_observation["result"]
 
         if phenomenonTime:
-            phenomenonTime = last_observation["phenomenonTime"]
-            return phenomenonTime, result
+            pTime = last_observation["phenomenonTime"]
+            return pTime, result
 
         return result
 
@@ -108,7 +108,7 @@ class Thing:
         self.FETCHER.fetch_data(endpoint=self.thing_endpoint)
         self.data = self.FETCHER.data
 
-    def _get_primary_signal_endpoint(self):  # Done
+    def _fetch_primary_signal_endpoint(self):  # Done
         """
         Retrieves the URL of the datastream associated with the traffic light's primary signal.
         This allows relevant information about the traffic light's current behavior to be obtained more quickly.

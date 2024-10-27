@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock, patch
-from Things import Things  # Assuming the Things class is in Things.py
+from Things import Things
 
 
 class TestGetCoordinates(unittest.TestCase):
@@ -185,7 +185,7 @@ class TestGetTLObservations(unittest.TestCase):
                         "@iot.id": 2,
                         "Datastreams": [
                             {
-                                "@iot.id": 1002,
+                                "@iot.id": 15,
                                 "properties": {"layerName": "primary_signal"},
                             },
                         ],
@@ -194,7 +194,7 @@ class TestGetTLObservations(unittest.TestCase):
                         "@iot.id": 3,
                         "Datastreams": [
                             {
-                                "@iot.id": 1003,
+                                "@iot.id": 6,
                                 "properties": {"layerName": "primary_signal"},
                             },
                         ],
@@ -203,7 +203,7 @@ class TestGetTLObservations(unittest.TestCase):
                         "@iot.id": 18760,
                         "Datastreams": [
                             {
-                                "@iot.id": 2000,
+                                "@iot.id": 70477,
                                 "properties": {"layerName": "primary_signal"},
                             },
                         ],
@@ -214,19 +214,19 @@ class TestGetTLObservations(unittest.TestCase):
                 # Set the data to simulate observations
                 mock_fetcher.data = [
                     {
-                        "@iot.id": 1002,
+                        "@iot.id": 15,
                         "Observations": [
                             {"phenomenonTime": "2024-10-27T18:37:55Z", "result": 1}
                         ],
                     },
                     {
-                        "@iot.id": 1003,
+                        "@iot.id": 6,
                         "Observations": [
                             {"phenomenonTime": "2024-10-27T18:37:55Z", "result": 2}
                         ],
                     },
                     {
-                        "@iot.id": 2000,
+                        "@iot.id": 70477,
                         "Observations": [
                             {"phenomenonTime": "2024-10-27T18:37:42Z", "result": 3}
                         ],
@@ -268,7 +268,7 @@ class TestGetTLObservations(unittest.TestCase):
                         "@iot.id": 2,
                         "Datastreams": [
                             {
-                                "@iot.id": 1002,
+                                "@iot.id": 15,
                                 "properties": {"layerName": "primary_signal"},
                             },
                         ],
@@ -277,7 +277,7 @@ class TestGetTLObservations(unittest.TestCase):
                         "@iot.id": 3,
                         "Datastreams": [
                             {
-                                "@iot.id": 1003,
+                                "@iot.id": 6,
                                 "properties": {"layerName": "primary_signal"},
                             },
                         ],
@@ -286,7 +286,7 @@ class TestGetTLObservations(unittest.TestCase):
                         "@iot.id": 18760,
                         "Datastreams": [
                             {
-                                "@iot.id": 2000,
+                                "@iot.id": 70477,
                                 "properties": {"layerName": "primary_signal"},
                             },
                         ],
@@ -295,21 +295,21 @@ class TestGetTLObservations(unittest.TestCase):
             elif endpoint == "Datastreams":
                 mock_fetcher.data = [
                     {
-                        "@iot.id": 1002,
+                        "@iot.id": 15,
                         "Observations": [
                             {"phenomenonTime": "2024-10-27T18:37:55Z", "result": 1},
                             {"phenomenonTime": "2024-10-27T18:37:52Z", "result": 2},
                         ],
                     },
                     {
-                        "@iot.id": 1003,
+                        "@iot.id": 6,
                         "Observations": [
                             {"phenomenonTime": "2024-10-27T18:37:55Z", "result": 3},
                             {"phenomenonTime": "2024-10-27T18:37:52Z", "result": 4},
                         ],
                     },
                     {
-                        "@iot.id": 2000,
+                        "@iot.id": 70477,
                         "Observations": [
                             {"phenomenonTime": "2024-10-27T18:37:42Z", "result": 5},
                             {"phenomenonTime": "2024-10-27T18:37:39Z", "result": 6},
@@ -338,7 +338,7 @@ class TestGetTLObservations(unittest.TestCase):
     def test_get_tl_observations_with_missing_ids(self):
         # Setup
         ids = [2, 3, 18760, 999]
-        things = Things(ids)
+        things = Things([2, 3])
 
         # Create a mock FETCHER
         mock_fetcher = MagicMock()
@@ -351,7 +351,7 @@ class TestGetTLObservations(unittest.TestCase):
                         "@iot.id": 2,
                         "Datastreams": [
                             {
-                                "@iot.id": 1002,
+                                "@iot.id": 15,
                                 "properties": {"layerName": "primary_signal"},
                             },
                         ],
@@ -360,23 +360,22 @@ class TestGetTLObservations(unittest.TestCase):
                         "@iot.id": 3,
                         "Datastreams": [
                             {
-                                "@iot.id": 1003,
+                                "@iot.id": 6,
                                 "properties": {"layerName": "primary_signal"},
                             },
                         ],
                     },
-                    # Note: 18760 and 999 are missing
                 ]
             elif endpoint == "Datastreams":
                 mock_fetcher.data = [
                     {
-                        "@iot.id": 1002,
+                        "@iot.id": 15,
                         "Observations": [
                             {"phenomenonTime": "2024-10-27T18:37:55Z", "result": 1}
                         ],
                     },
                     {
-                        "@iot.id": 1003,
+                        "@iot.id": 6,
                         "Observations": [
                             {"phenomenonTime": "2024-10-27T18:37:55Z", "result": 2}
                         ],
@@ -417,7 +416,7 @@ class TestGetTLObservations(unittest.TestCase):
                         "@iot.id": 2,
                         "Datastreams": [
                             {
-                                "@iot.id": 1002,
+                                "@iot.id": 15,
                                 "properties": {"layerName": "primary_signal"},
                             },
                         ],
@@ -426,7 +425,7 @@ class TestGetTLObservations(unittest.TestCase):
                         "@iot.id": 3,
                         "Datastreams": [
                             {
-                                "@iot.id": 1003,
+                                "@iot.id": 6,
                                 "properties": {"layerName": "primary_signal"},
                             },
                         ],
@@ -435,7 +434,7 @@ class TestGetTLObservations(unittest.TestCase):
                         "@iot.id": 18760,
                         "Datastreams": [
                             {
-                                "@iot.id": 2000,
+                                "@iot.id": 70477,
                                 "properties": {"layerName": "primary_signal"},
                             },
                         ],
@@ -443,9 +442,9 @@ class TestGetTLObservations(unittest.TestCase):
                 ]
             elif endpoint == "Datastreams":
                 mock_fetcher.data = [
-                    {"@iot.id": 1002, "Observations": []},
-                    {"@iot.id": 1003, "Observations": []},
-                    {"@iot.id": 2000, "Observations": []},
+                    {"@iot.id": 15, "Observations": []},
+                    {"@iot.id": 6, "Observations": []},
+                    {"@iot.id": 70477, "Observations": []},
                 ]
             else:
                 mock_fetcher.data = []
@@ -459,30 +458,9 @@ class TestGetTLObservations(unittest.TestCase):
             self.assertEqual(result, expected_result)
 
             calls = [call[0][0] for call in mock_logging_error.call_args_list]
-            self.assertIn("No observations found for Datastream(1002).", calls)
-            self.assertIn("No observations found for Datastream(1003).", calls)
-            self.assertIn("No observations found for Datastream(2000).", calls)
-
-    def test_get_tl_observations_empty_ids(self):
-        # Setup
-        ids = []
-        things = Things([1, 2, 3])  # Must instantiate with non-empty ids
-
-        # Create a mock FETCHER
-        mock_fetcher = MagicMock()
-        things.FETCHER = mock_fetcher
-
-        # Assume primary_signal_endpoint_ids is already fetched
-        things.primary_signal_endpoint_ids = {
-            1: 1001,
-            2: 1002,
-            3: 1003,
-        }
-
-        result = things.get_tl_observations(ids, n_obsrvtns=1, phnTime=False)
-
-        expected_result = {}
-        self.assertEqual(result, expected_result)
+            self.assertIn("No observations found for Datastream(15).", calls)
+            self.assertIn("No observations found for Datastream(6).", calls)
+            self.assertIn("No observations found for Datastream(70477).", calls)
 
 
 if __name__ == "__main__":

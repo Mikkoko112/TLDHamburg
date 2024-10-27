@@ -1,5 +1,4 @@
 from DataFetcher import DataFetcher
-from Thing import Thing
 import logging
 
 

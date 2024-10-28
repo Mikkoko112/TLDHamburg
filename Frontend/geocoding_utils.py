@@ -55,5 +55,5 @@ def return_coordinates(address: str, geolocator = Nominatim):
     return lat,lon
 
 #geolocator = Nominatim(user_agent="http")
-x = return_coordinates("Lehmweg 9 Hamburg")
-print(x)
+#x = return_coordinates("Lehmweg 9 Hamburg")
+#print(x)

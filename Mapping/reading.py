@@ -1,9 +1,13 @@
+#!/usr/bin/env python3
 import pickle, os
+import json
 
 cwd = os.getcwd()
 
-locations_file = cwd + "/DataInput/Python/data/things_no_locations.pkl"
+locations_file = cwd + "/things_locations.pkl"
 with open(locations_file, "rb") as file:
     things_locations = pickle.load(file)
+    
+with open("thingsLoc.json","w") as file:
+    json.dump(things_locations,file,indent=4)
 
-print(len(things_locations))

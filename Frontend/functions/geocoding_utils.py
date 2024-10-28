@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 from geopy.geocoders import Nominatim
 from geopy.point import Point

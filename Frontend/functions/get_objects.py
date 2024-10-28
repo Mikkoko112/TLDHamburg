@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import dash_leaflet as dl
 import base64
 from functions import Things

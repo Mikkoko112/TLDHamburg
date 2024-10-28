@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 import json
 import requests
-from math import floor,ceil
+from math import floor,ceil,dist
 
 modif = 100
 
 def findSmalestAndLagestCoord(coords)->list:
     sm,la = [100,100],[0,0]
-    for name,coord in coords.items():
-        
+    for name,coord in coords:
         for j,c in enumerate(coord):
             for i,ax in enumerate(c):
-               
+                
                 if ax < sm[i]:
                     sm[i] = ax
                 elif ax > la[i]:
@@ -52,6 +51,32 @@ def getSystematicCalles(coordsMinMax:list):
             #print(x/modif,y/modif)
             pass
 
+def getCallingAreas(traficLights:dict)->list:
+    def isInRange(ent:list,sr:list)->bool:
+        minDistance = 0.1 #pls change magic number until now
+        
+
+        distance = dist((ent[0], ent[1]), (sr[0], sr[1]))
+
+        if distance < minDistance:
+            return True
+        
+        return False
+    def isMarked(ent:list)->bool:
+        return len(ent)==4
+
+    outPutAreas = {}
+    for name,ent in traficLights.items():
+        if(not isMarked(ent)):
+            coordMinMax,traficLightsPerArea = [],[ent]
+            ent.append([True])
+            for nameSr,sr in traficLights.items():
+                if(not isMarked(sr)):
+                    if(isInRange(ent,sr)):
+                        traficLightsPerArea.append([nameSr,sr])
+            coordMinMax = findSmalestAndLagestCoord(traficLightsPerArea)
+        outPutAreas[name] = [coordMinMax,traficLightsPerArea]
+    return outPutAreas
 
 
 def mapPaths():
@@ -59,14 +84,7 @@ def mapPaths():
     with open("cleanedCoors.json","r") as file:
         coords = json.load(file)
 
-    for name,setCord in coords.items():
-        #requestArea = [
-        #    [setCord[1][0]-searchArea,setCord[1][1]+searchArea],
-        #    [setCord[1][0]+searchArea,setCord[1][1]-searchArea]
-        #]
-        requestArea = [[9.82, 53.65], [10.21, 53.54]]
-        relevantNotes = getNotes(requestArea)
-        print(relevantNotes)
+    areas = getCallingAreas()
 
 if __name__ == "__main__":
     mapPaths()

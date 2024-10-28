@@ -157,21 +157,25 @@ class DataFetcher:
                 all_matched_Datastreams_ids.append(datastream_id)
         return all_matched_Datastreams_ids
 
-    """ def get_live_Observations_for_Datastream_id(self,id):
+    def get_live_Observations_for_Datastream_id(self, id):
         endpoint = f"Datastreams({id})"
         params = {
-            "$expand" : "Observations($orderby=phenomenonTime desc;$top=1;$select=id,result,phenomenonTime)"
+            "$expand": "Observations($orderby=phenomenonTime desc;$top=1;$select=id,result,phenomenonTime)"
         }
-        self.fetch_data(endpoint,params)
-        print(f"current Status: {self.data["Observations"][0]["result"]}\t at Timestamp: {self.data["Observations"][0]["phenomenonTime"]}")
+        self.fetch_data(endpoint, params)
+        print(
+            f"current Status: {self.data['Observations'][0]['result']}\t at Timestamp: {self.data['Observations'][0]['phenomenonTime']}"
+        )
         last_Observation_id = self.data["Observations"][0]["@iot.id"]
         while True:
             time.sleep(1)
-            self.fetch_data(endpoint,params)
+            self.fetch_data(endpoint, params)
             if last_Observation_id == self.data["Observations"][0]["@iot.id"]:
                 continue
             last_Observation_id = self.data["Observations"][0]["@iot.id"]
-            print(f"current Status: {self.data["Observations"][0]["result"]}\t at Timestamp: {self.data["Observations"][0]["phenomenonTime"]}") """
+            print(
+                f"current Status: {self.data['Observations'][0]['result']}\t at Timestamp: {self.data['Observations'][0]['phenomenonTime']}"
+            )
 
     def print_raw_data(self):
         if not self.data:

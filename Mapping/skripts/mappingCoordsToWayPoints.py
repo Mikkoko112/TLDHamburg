@@ -28,9 +28,8 @@ def roundValues(coords:list)->list:
             coordsCopy[i][j] = (func[i](ax*modif))/modif 
     return coordsCopy
 
-def getNotes(coordsMinMax:list):
+def getNotes(coordsMinMax:list)->dict:
     body = {"bbox": coordsMinMax}
-    print(body)
     headers = {
         "Accept": "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8",
         "Authorization": "5b3ce3597851110001cf6248803978b4d3c14162a51793eab41b47c1",
@@ -63,7 +62,7 @@ def getAreaBetweenPoints(NW:list,SO:list)->float:
 
 def getCallingAreas(traficLights:dict)->list:
     def isInRange(ent:list,sr:list)->bool:
-        minDistance = 2.2
+        minDistance = 1.5
         distance = getDistanceBetweenPoints(ent,sr)
 
         if distance <= minDistance:
@@ -99,18 +98,44 @@ def getCallingAreas(traficLights:dict)->list:
     return outPutAreas
 
 
-def mapPaths():
+def generateAreas():
     searchArea = 0.015
-    with open("cleanedCoors.json","r") as file:
+    with open("../data/cleanedCoors.json","r") as file:
         coords = json.load(file)
 
     areas = getCallingAreas(coords)
     print(len(areas))
-    with open("outPutAres.json","w") as file:
+    with open("../data/outPutAresSmall.json","w") as file:
+        json.dump(areas, file, indent=4)
+
+def fetchAreas(relevantAres:dict):
+    holeData = {}
+    for name, note in relevantAres.items():
+        coords = note[0]
+        print(coords)
+        #holeData[name] = getNotes(coords)
+    
+    return holeData
+
+
+def getSingleNoteInfoTest():
+    data = getNotes([[8.681495, 49.41461], [8.686057,49.41943]])
+
+    with open("../data/testData.json","w") as file:
+        json.dump(data, file, indent=4)
+
+def mapPaths():
+    with open("../data/outPutAres.json","r") as file:
+        coords = json.load(file)
+
+    areas = fetchAreas(coords)
+    
+    with open("holeData.json","w") as file:
         json.dump(areas, file, indent=4)
 
 if __name__ == "__main__":
-    mapPaths()
+    generateAreas()
+    #mapPaths()
     #print(getDistanceBetweenPoints([],[]))
     #print(getAreaBetweenPoints([9.82, 53.65], [9.82, 53.65]))
 

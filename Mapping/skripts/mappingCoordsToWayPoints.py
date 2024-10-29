@@ -28,23 +28,6 @@ def roundValues(coords:list)->list:
             coordsCopy[i][j] = (func[i](ax*modif))/modif 
     return coordsCopy
 
-def getNotes(coordsMinMax:list)->dict:
-    body = {"bbox": coordsMinMax}
-    headers = {
-        "Accept": "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8",
-        "Authorization": "5b3ce3597851110001cf6248803978b4d3c14162a51793eab41b47c1",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-    call = requests.post(
-        "https://api.openrouteservice.org/v2/export/driving-car",
-        json=body,
-        headers=headers,
-        timeout=5,
-    )
-
-    return json.loads(call.text)
-
-#def getPath(startEnd:list):
 
 def getDistanceBetweenPoints(ent:list,sr:list)->float:
     return distance.distance(ent,sr).km
@@ -54,73 +37,35 @@ def getAreaBetweenPoints(NW:list,SO:list)->float:
     length = getDistanceBetweenPoints([NW[1],NW[0]],[NW[1],SO[0]])
     return height*length
 
-def getCallingAreas(traficLights:dict)->list:
-    def isInRange(ent:list,sr:list)->bool:
-        minDistance = 1.5
-        distance = getDistanceBetweenPoints(ent,sr)
 
-        if distance <= minDistance:
-            return True
-        
-        return False
-    def isMarked(ent:list)->bool:
-        
-        return len(ent)==4
-
-    outPutAreas = {}
-    dictLen,ind,ismarked,summarked = len(traficLights),0,0,0
-    for name,ent in traficLights.items(): #geht über alle Items
-        
-        if(not isMarked(ent)): #guckt ob das nächste Item bearbeitet wurde
-            coordMinMax,traficLightsPerArea = [],[[name,ent]]
-            traficLights[name].append([True])
-            ismarked+=1
-            for nameSr,sr in traficLights.items():
-                if(not isMarked(sr)):
-                    if(isInRange(ent[1],sr[1])):
-                        traficLightsPerArea.append([nameSr,sr])
-                        traficLights[nameSr].append([True])
-                        ismarked+=1
-            coordMinMax = findSmalestAndLagestCoord(traficLightsPerArea)
-            outPutAreas[name] = [coordMinMax,traficLightsPerArea]
-            summarked += len(traficLightsPerArea)
-            print("{:.2f}% {} {}/{} {}".format(ismarked/dictLen*100
-                                     ,len(traficLightsPerArea)
-                                     ,summarked,len(traficLights)
-                                     ,[[coordMinMax[0][0]<coordMinMax[1][0]],[coordMinMax[0][1]>coordMinMax[1][1]]]))
-        ind+=1
-    return outPutAreas
-
-
-def generateAreas():
-    searchArea = 0.015
-    with open("../data/cleanedCoors.json","r") as file:
-        coords = json.load(file)
-
-    areas = getCallingAreas(coords)
-    print(len(areas))
-    with open("../data/outPutAresSmall.json","w") as file:
-        json.dump(areas, file, indent=4)
-
-def fetchAreas(relevantAres:dict):
-    holeData = {}
-    for name, note in relevantAres.items():
-        coords = note[0]
-        print(coords)
-        #holeData[name] = getNotes(coords)
-    
-    return holeData
-
-
+def mapCoordsToArea(lightsInArea,areaCords):
+    notePoints = areaCords["nodes"]
+    lightDict = dict()
+    for i,points in enumerate(lightsInArea):
+        name = points[0]
+        #print(name,points[1][:3])
+        print("{:.2f}".format(i/len(lightsInArea)*100))
+        pointIds = ["0","0","0"]
+        for j,point in enumerate(points[1][1:3]):
+            
+            for node in areaCords["nodes"]:
+                if getDistanceBetweenPoints(node["location"][::-1]
+                                           ,point[::-1]) <= 0.01:
+                    pointIds[j] = "{}".format(node["nodeId"])
+                    print("hit")
+                    break
+        lightDict[name] = pointIds
+    return lightDict
+            
 def getSingleNoteInfoTest():
     coord = [
             [
-                9.967018833333334,
-                53.5653059
+                9.947890533333332,
+                53.559770762499994
             ],
             [
-                9.99308755,
-                53.5432904923077
+                9.956933744444443,
+                53.54600926249999
             ]
         ]
     changedPos = [[coord[0][0],coord[1][1]],[coord[1][0],coord[0][1]]]
@@ -129,23 +74,22 @@ def getSingleNoteInfoTest():
     with open("../data/testData.json","w") as file:
         json.dump(data, file, indent=4)
 
-def mapPaths():
-    with open("../data/outPutAres.json","r") as file:
-        coords = json.load(file)
 
-    areas = fetchAreas(coords)
+
+def testMapping():
+    with open("../data/outPutAresSmall.json","r") as file:
+        coords = json.load(file)
+    with open("../data/testData.json","r") as file:
+        testData = json.load(file)
     
-    with open("holeData.json","w") as file:
-        json.dump(areas, file, indent=4)
+    mapCo = mapCoordsToArea(coords["23229"][1],testData)
+
+    with open("../data/mappingTest.json","w") as file:
+        json.dump(mapCo, file, indent=4)
 
 if __name__ == "__main__":
-    #generateAreas()
-    getSingleNoteInfoTest()
     
-    
-    #mapPaths()
-    #print(getDistanceBetweenPoints([],[]))
-    #print(getAreaBetweenPoints([9.82, 53.65], [9.82, 53.65]))
+    testMapping()
 
 
 

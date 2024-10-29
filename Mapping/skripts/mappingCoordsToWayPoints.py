@@ -5,7 +5,7 @@ from math import floor,ceil,dist
 from geopy import distance
 
 
-modif = 100
+modif = 1000
 
 def findSmalestAndLagestCoord(coords)->list:
     sm,la = [100,100],[0,0]
@@ -45,12 +45,6 @@ def getNotes(coordsMinMax:list)->dict:
     return json.loads(call.text)
 
 #def getPath(startEnd:list):
-
-def getSystematicCalles(coordsMinMax:list):
-    for x in range(int(coordsMinMax[0][0]*modif),int(coordsMinMax[1][0]*modif),int(0.01*modif)):
-        for y in range(int(coordsMinMax[0][1]*modif),int(coordsMinMax[1][1]*modif),int((-0.01)*modif)):
-            #print(x/modif,y/modif)
-            pass
 
 def getDistanceBetweenPoints(ent:list,sr:list)->float:
     return distance.distance(ent,sr).km
@@ -119,7 +113,18 @@ def fetchAreas(relevantAres:dict):
 
 
 def getSingleNoteInfoTest():
-    data = getNotes([[8.681495, 49.41461], [8.686057,49.41943]])
+    coord = [
+            [
+                9.967018833333334,
+                53.5653059
+            ],
+            [
+                9.99308755,
+                53.5432904923077
+            ]
+        ]
+    changedPos = [[coord[0][0],coord[1][1]],[coord[1][0],coord[0][1]]]
+    data = getNotes(roundValues(changedPos))
 
     with open("../data/testData.json","w") as file:
         json.dump(data, file, indent=4)
@@ -134,7 +139,10 @@ def mapPaths():
         json.dump(areas, file, indent=4)
 
 if __name__ == "__main__":
-    generateAreas()
+    #generateAreas()
+    getSingleNoteInfoTest()
+    
+    
     #mapPaths()
     #print(getDistanceBetweenPoints([],[]))
     #print(getAreaBetweenPoints([9.82, 53.65], [9.82, 53.65]))

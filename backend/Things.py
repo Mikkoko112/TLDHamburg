@@ -177,7 +177,6 @@ class Things:
                 3: [['2024-10-27T18:37:55Z', 1], ['2024-10-27T18:37:52Z', 2]],
                 18760: [['2024-10-27T18:37:42Z', 1], ['2024-10-27T18:37:39Z', 2]]
             }
-        Exapmle 2:
             >>> things = Things([2, 3, 18760])
             >>> obervations = things.get_tl_observations(n_obsrvtns=1)
             >>> print(obervations)

@@ -70,6 +70,32 @@ class Things:
 
         Returns:
             dict: A dictionary mapping Thing IDs to their corresponding geometry coordinates.
+
+        Example:
+            >>> things = Things([2])
+            >>> things.get_coordinates()
+            >>> print(things.coordinates)
+            {
+                2: [[
+                        [9.9196439, 53.5638321],
+                        [9.9197085, 53.5637359],
+                        [9.9198219, 53.5635865],
+                        [9.9198451, 53.5635559],
+                        [9.9198231, 53.5634831],
+                        [9.9198481, 53.563453]
+                    ],
+                    [
+                        [9.9197087, 53.563736],
+                        [9.9195566, 53.5639624],
+                        [9.9195566, 53.5639624],
+                        [9.919899, 53.5639529]
+                    ],
+                    [
+                        [9.9197629, 53.5639568],
+                        [9.9198989, 53.5639531],
+                        [9.9200006, 53.5639497]
+                    ]]
+            }
         """
         if not self.coordinates:
             self._fetch_coordinates()
@@ -93,7 +119,6 @@ class Things:
         filterquery = " or ".join(f"@iot.id eq {idn}" for idn in self.ids)
         params = {"$filter": filterquery, "$expand": "Datastreams"}
         self.FETCHER.fetch_data(endpoint=self.things_endpoint, params=params)
-        self.FETCHER.print_raw_data()
 
         # Iterate through all Things
         for thing_data in self.FETCHER.data:
@@ -121,7 +146,7 @@ class Things:
                 )
 
     def get_tl_observations(
-        self, ids: list[int], n_obsrvtns: int = 1, phnTime: bool = False
+        self, ids: list[int] = None, n_obsrvtns: int = 1, phnTime: bool = False
     ):
         """
         Fetches the latest observations for primary signal datastreams of specified Thing IDs.
@@ -143,21 +168,31 @@ class Things:
             dict: Maps each Thing ID to its latest observation result.
                 If `phnTime` is True, maps to a list of (timestamp, result) tuples.
 
-         Example:
+        Example 1:
             >>> things = Things([2, 3, 18760])
-            >>> observations = things.get_tl_observations(ids, n_obsrvtns=2, phnTime=True)
-            >>> print(observations)
+            >>> obervations = things.get_tl_observations(n_obsrvtns=2, phnTime=True)
+            >>> print(obervations)
             {
                 2: [['2024-10-27T18:37:55Z', 1], ['2024-10-27T18:37:52Z', 2]],
                 3: [['2024-10-27T18:37:55Z', 1], ['2024-10-27T18:37:52Z', 2]],
-                4: [['2024-10-27T18:37:55Z', 1], ['2024-10-27T18:37:52Z', 2]],
                 18760: [['2024-10-27T18:37:42Z', 1], ['2024-10-27T18:37:39Z', 2]]
+            }
+        Exapmle 2:
+            >>> things = Things([2, 3, 18760])
+            >>> obervations = things.get_tl_observations(n_obsrvtns=1)
+            >>> print(obervations)
+            {
+                2: [[1]],
+                3: [[1]],
+                18760: [[1]]
             }
         """
 
         if not self.primary_signal_endpoint_ids:
             self._fetch_primary_signal_endpoint_ids()
 
+        if ids is None:
+            ids = self.ids
         # Construct the filter query to include all primary signal datastream IDs
         filter_conditions = []
         for thing_id in ids:

@@ -26,7 +26,7 @@ def fetchAreas(relevantAres:dict):
         holeData[name] = getNotes(roundValues(coords))
         print("{:.2f}% {} {}".format(idx/len(relevantAres)*100,len(holeData[name]),roundValues(coords)))
         idx+=1
-        with open("holeData.json","w") as file:
+        with open("holeData.json","w") as file: #after Run change
             json.dump(holeData, file, indent=4)
 
         sleep(15)
@@ -50,16 +50,17 @@ def getNotes(coordsMinMax:list)->dict:
     return json.loads(call.text)
 
 def singleCall():
-    area = [[
+    area = [
+            [
                 9.9733078,
-                53.5644245
+                53.5440408
             ],
             [
                 9.9930477,
-                53.5440408
-            ]]
-    area = roundValues(area)
-    print(area)
+                53.5644245
+            ]
+        ]
+   
     areas = getNotes(area)
 
     with open("holeDataTest.json","w") as file:
@@ -73,6 +74,29 @@ def mapPaths():
     with open("holeData.json","w") as file:
         json.dump(areas, file, indent=4)
 
+def getWrongSquares(coords:dict,coordsBase)->dict:
+    out = dict()
+    for name,coord in coords.items():
+        if len(coord) != 4:
+            out[name] = coordsBase[name]
+
+    return out
+def correctTheHoleData():
+    with open("../data/outPutAreasSmallMin.json","r") as file:
+        coordsBase = json.load(file)
+
+    with open("holeData.json","r") as file:
+        coords = json.load(file)
+    refatchedData = getWrongSquares(coords,coordsBase)
+    areas = fetchAreas(refatchedData)
+    
+    for name,coord in areas:
+        coords[name] = coord
+
+    with open("holeData.json","w") as file:
+        json.dump(coords, file, indent=4)
+
+
 if __name__ == "__main__":
-    #mapPaths()
-    singleCall()
+    mapPaths()
+    #singleCall()

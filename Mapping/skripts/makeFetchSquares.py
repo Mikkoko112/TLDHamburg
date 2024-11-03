@@ -18,7 +18,7 @@ def findSmalestAndLagestCoord(coords)->list:
                         sm[i] = ax
                     elif ax > la[i]:
                         la[i] = ax
-    return [[sm[0],la[1]],[la[0],sm[1]]]
+    return [[sm[0],sm[1]],[la[0],la[1]]]
 
 def getCallingAreas(traficLights:dict)->list:
     def isInRange(ent:list,sr:list)->bool:
@@ -53,7 +53,7 @@ def getCallingAreas(traficLights:dict)->list:
             print("{:.2f}% {} {}/{} {}".format(ismarked/dictLen*100
                                      ,len(traficLightsPerArea)
                                      ,summarked,len(traficLights)
-                                     ,[[coordMinMax[0][0]<coordMinMax[1][0]],[coordMinMax[0][1]>coordMinMax[1][1]]]))
+                                     ,[[coordMinMax[0][0]<coordMinMax[1][0]],[coordMinMax[0][1]<coordMinMax[1][1]]]))
         ind+=1
     return outPutAreas
 

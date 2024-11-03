@@ -12,7 +12,7 @@ class TraficConjunction:
                     if ax != True:    
                         if ax < sm[i]:
                             sm[i] = ax
-                        elif ax > la[i]:
+                        if ax > la[i]:
                             la[i] = ax
         return [[sm[0],sm[1]],[la[0],la[1]]]
 

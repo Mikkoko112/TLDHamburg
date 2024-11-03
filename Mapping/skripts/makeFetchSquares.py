@@ -16,13 +16,13 @@ def findSmalestAndLagestCoord(coords)->list:
                 if ax != True:    
                     if ax < sm[i]:
                         sm[i] = ax
-                    elif ax > la[i]:
+                    if ax > la[i]:
                         la[i] = ax
     return [[sm[0],sm[1]],[la[0],la[1]]]
 
 def getCallingAreas(traficLights:dict)->list:
     def isInRange(ent:list,sr:list)->bool:
-        minDistance = 1.5
+        minDistance = 0.1
         distance = getDistanceBetweenPoints(ent,sr)
 
         if distance <= minDistance:
@@ -66,7 +66,7 @@ def generateAreas():
 
     areas = getCallingAreas(coords)
     print(len(areas))
-    with open("../data/outPutAreasSmallMin.json","w") as file:
+    with open("../data/conjunctions.json","w") as file:
         json.dump(areas, file, indent=4)
 
 if __name__ == "__main__":

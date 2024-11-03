@@ -5,7 +5,7 @@ from math import floor,ceil,dist
 from geopy import distance
 from time import sleep
 
-modif = 100
+modif = 10000
 
 def roundValues(coords:list)->list:
    
@@ -37,7 +37,7 @@ def getNotes(coordsMinMax:list)->dict:
     body = {"bbox": coordsMinMax}
     headers = {
         "Accept": "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8",
-        "Authorization": "5b3ce3597851110001cf6248803978b4d3c14162a51793eab41b47c1",
+        "Authorization": "5b3ce3597851110001cf62481657b4e645c0426a82d21a1932c60b2e",
         "Content-Type": "application/json; charset=utf-8",
     }
     call = requests.post(
@@ -49,6 +49,21 @@ def getNotes(coordsMinMax:list)->dict:
 
     return json.loads(call.text)
 
+def singleCall():
+    area = [[
+                9.9733078,
+                53.5644245
+            ],
+            [
+                9.9930477,
+                53.5440408
+            ]]
+    area = roundValues(area)
+    print(area)
+    areas = getNotes(area)
+
+    with open("holeDataTest.json","w") as file:
+        json.dump(areas, file, indent=4)
 def mapPaths():
     with open("../data/outPutAreasSmallMin.json","r") as file:
         coords = json.load(file)
@@ -59,4 +74,5 @@ def mapPaths():
         json.dump(areas, file, indent=4)
 
 if __name__ == "__main__":
-    mapPaths()
+    #mapPaths()
+    singleCall()

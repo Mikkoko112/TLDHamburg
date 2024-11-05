@@ -16,6 +16,29 @@ colours = [
     "black" #buffer
 ]
 
+def generateLines(m):
+    with open(sys.argv[4],"r") as file:
+        vectors = json.load(file)
+    print(len(vectors))
+    i = 0
+    for name,vec in vectors.items():
+        print("{:.2f}%".format(i/len(vectors)*100))
+        i+=1
+        if len(vec[0][0:2]) != 2: vec[0][0:2] = vec[1][::-1]
+        if len(vec[2][0:2]) != 2: vec[2][0:2] = vec[1][::-1]
+
+        lines= [
+            [-x+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
+            vec[1][0:2][::-1],
+            [-x+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
+        ]
+        print(lines)
+        if i < 100 or sys.argv[3] == "2": 
+            folium.PolyLine(
+                lines,
+                color='red',
+                weight=2
+            ).add_to(m)
 
 ind = 0
 for name,dat in data.items():
@@ -46,5 +69,7 @@ for name,dat in data.items():
                         location=locData[::-1],
                         icon=folium.Icon(color=colours[i])
                     ).add_to(m)
+if((sys.argv[3] == "3" or sys.argv[3]=="2") and len(sys.argv) > 4):
+    generateLines(m)
 
 m.save("{}.html".format(sys.argv[2]))

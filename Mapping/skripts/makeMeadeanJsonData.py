@@ -37,21 +37,27 @@ def calcMean(coords:list)->list:
 with open("../data/thingsLoc.json","r") as file:
     dataLanes = json.load(file)
 
+print(dataLanes)
+
+print(len(dataLanes.keys()))
 midCoords = {}
 
-for n,lanes in enumerate(dataLanes):
-    #print(lanes)
+j = 0
+
+for name,lane in dataLanes.items():
+    print(name)
     sumCords = [
         [0,0],
         [0,0]
     ]
+    j+=1
     if True:
         ingress,path,exgress = list(),list(),list()
         
-        if len(dataLanes[lanes]) < 2: break
+        if len(lane) < 2: break
 
-        meanPath = calcMean(dataLanes[lanes][1])
-        for i,paths in enumerate(dataLanes[lanes]):
+        meanPath = calcMean(lane[1])
+        for i,paths in enumerate(lane):
             
             #if i == 0: ingress = calcMean(paths)
             #if i == 2: exgress = calcMean(paths)
@@ -59,8 +65,9 @@ for n,lanes in enumerate(dataLanes):
             if i == 0: ingress = closestCordToMid(meanPath,paths) #evtl hier nächste Coordinate zu mean path
             if i == 1: path = meanPath
             if i == 2: exgress = closestCordToMid(meanPath,paths) #.||.
-        midCoords[lanes] = [ingress,path,exgress]
+        midCoords[name] = [ingress,path,exgress]
 
+print(len(midCoords))
 with open("../data/cleanedCoorsMin.json","w") as jsonFile:
     json.dump(midCoords,jsonFile,indent=4)
 

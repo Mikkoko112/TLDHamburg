@@ -1,24 +1,27 @@
 #!/usr/bin/env python3
-import makeFetchSquares
+from makeFetchSquares import findSmalestAndLagestCoord
 import json
 from shapely.geometry import box
 
 def combineAreas(areas:dict)->dict:
     out = {}
     for name, values in areas.items():
-        values.append(True)
-        listOfName = values[1]
-        coord1 = values[0]
-        rect1 = box(coord1[0][0],coord1[0][1],coord1[1][0],coord1[1][1])
-        for name2,values2 in areas.items(): 
-            if len(values2) != 3:
-                coord2 = values2[0]
-                rect2 = box(coord2[0][0],coord2[0][1],coord2[1][0],coord2[1][1])
-                if rect1.intersects(rect2):
-                    values2.append(True)
-                    listOfName += values2[1]
-        
-        out[name] = listOfName
+        if len(values) != 3:
+            values.append(True)
+            listOfName = values[1]
+            coord1 = values[0]
+            rect1 = box(coord1[0][0],coord1[0][1],coord1[1][0],coord1[1][1])
+            #print(rect1)
+            for name2,values2 in areas.items(): 
+                if len(values2) != 3 or True:
+                    coord2 = values2[0]
+                    rect2 = box(coord2[0][0],coord2[0][1],coord2[1][0],coord2[1][1])
+                    if rect1.intersects(rect2):
+                        
+                        values2.append(True)
+                        listOfName += values2[1]
+            coordMinMax = findSmalestAndLagestCoord(listOfName)
+            out[name] = [coordMinMax,listOfName]
     return out
 
 
@@ -26,7 +29,7 @@ def combineAreas(areas:dict)->dict:
 def runCombination()->None:
     with open("../data/conjunctions.json","r") as file:
         coords = json.load(file)
-
+    print(len(coords))
     areas = combineAreas(coords)
     print(len(areas))
     with open("../data/conjunctionsJoint.json","w") as file:

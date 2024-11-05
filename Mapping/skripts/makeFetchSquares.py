@@ -35,6 +35,7 @@ def getCallingAreas(traficLights:dict)->list:
 
     outPutAreas = {}
     dictLen,ind,ismarked,summarked = len(traficLights),0,0,0
+    print(len(traficLights))
     for name,ent in traficLights.items(): #geht über alle Items
         
         if(not isMarked(ent)): #guckt ob das nächste Item bearbeitet wurde

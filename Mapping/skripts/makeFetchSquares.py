@@ -22,7 +22,7 @@ def findSmalestAndLagestCoord(coords)->list:
 
 def getCallingAreas(traficLights:dict)->list:
     def isInRange(ent:list,sr:list)->bool:
-        minDistance = 0.1
+        minDistance = 0.1 #0.1 ist für conjunctions, 1.5 für fatch areas
         distance = getDistanceBetweenPoints(ent,sr)
 
         if distance <= minDistance:
@@ -67,7 +67,7 @@ def generateAreas():
 
     areas = getCallingAreas(coords)
     print(len(areas))
-    with open("../data/conjunctions.json","w") as file:
+    with open("../data/fetchAreasFullData.json","w") as file:
         json.dump(areas, file, indent=4)
 
 if __name__ == "__main__":

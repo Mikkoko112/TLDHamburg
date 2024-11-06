@@ -54,7 +54,7 @@ for name,lane in dataLanes.items():
     if True:
         ingress,path,exgress = list(),list(),list()
         
-        if len(lane) < 2: break
+        if len(lane) < 2: continue
 
         meanPath = calcMean(lane[1])
         for i,paths in enumerate(lane):

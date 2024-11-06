@@ -5,7 +5,7 @@ from math import floor,ceil,dist
 from geopy import distance
 from time import sleep
 
-modif = 10000
+modif = 1000
 
 def roundValues(coords:list)->list:
    

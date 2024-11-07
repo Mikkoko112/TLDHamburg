@@ -3,7 +3,7 @@ import json
 import requests
 from math import floor,ceil,dist
 from geopy import distance
-
+import sys
 def getDistanceBetweenPoints(ent:list,sr:list)->float:
     return distance.distance(ent,sr).km
 
@@ -22,7 +22,8 @@ def findSmalestAndLagestCoord(coords)->list:
 
 def getCallingAreas(traficLights:dict)->list:
     def isInRange(ent:list,sr:list)->bool:
-        minDistance = 0.1 #0.1 ist für conjunctions, 1.5 für fatch areas
+        minDistance = 0.1 if len(sys.argv) > 1 and sys.argv[1] == "1" else 1.5 #0.1 ist fuer conjunctions, 1.5 fuer fatch areas
+        
         distance = getDistanceBetweenPoints(ent,sr)
 
         if distance <= minDistance:
@@ -36,9 +37,9 @@ def getCallingAreas(traficLights:dict)->list:
     outPutAreas = {}
     dictLen,ind,ismarked,summarked = len(traficLights),0,0,0
     print(len(traficLights))
-    for name,ent in traficLights.items(): #geht über alle Items
+    for name,ent in traficLights.items(): #geht ueber alle Items
         
-        if(not isMarked(ent)): #guckt ob das nächste Item bearbeitet wurde
+        if(not isMarked(ent)): #guckt ob das naechste Item bearbeitet wurde
             coordMinMax,traficLightsPerArea = [],[[name,ent]]
             traficLights[name].append([True])
             ismarked+=1
@@ -64,7 +65,7 @@ def generateAreas():
 
     with open("../data/cleanedCoorsMin.json","r") as file:
         coords = json.load(file)
-
+    print("minDistance ist:{}".format( 0.1 if len(sys.argv) > 1 and sys.argv[1] == "1" else 1.5))
     areas = getCallingAreas(coords)
     print(len(areas))
     with open("../data/fetchAreasFullData.json","w") as file:

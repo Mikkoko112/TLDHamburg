@@ -23,13 +23,15 @@ def fetchAreas(relevantAres:dict):
     for name, note in relevantAres.items():
         
         coords = note[0]
-        holeData[name] = getNotes(roundValues(coords))
-        print("{:.2f}% {} {}".format(idx/len(relevantAres)*100,len(holeData[name]),roundValues(coords)))
-        idx+=1
-        with open("holeData.json","w") as file: #after Run change
-            json.dump(holeData, file, indent=4)
+        
+        if(name != "13937"):
+            holeData[name] = getNotes(roundValues(coords))
+            print("{:.2f}% {} {} {}".format(idx/len(relevantAres)*100,name,len(holeData[name]),roundValues(coords)))
+            idx+=1
+            with open("holeDataSAFE.json","w") as file: #after Run change
+                json.dump(holeData, file, indent=4)
 
-        sleep(20)
+        sleep(15)
 
     return holeData
 
@@ -37,7 +39,7 @@ def getNotes(coordsMinMax:list)->dict:
     body = {"bbox": coordsMinMax}
     headers = {
         "Accept": "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8",
-        "Authorization": "5b3ce3597851110001cf62481657b4e645c0426a82d21a1932c60b2e",
+        "Authorization": "5b3ce3597851110001cf624884e5ad2d208a4ef2abb164f9f203b5b5",
         "Content-Type": "application/json; charset=utf-8",
     }
     call = requests.post(
@@ -79,7 +81,10 @@ def getWrongSquares(coords:dict,coordsBase)->dict:
     for name,coord in coords.items():
         if len(coord) != 4:
             out[name] = coordsBase[name]
-
+    for name,coord in coordsBase.items():
+        if not name in coords:
+            out[name] = coord
+        
     return out
 def correctTheHoleData():
     with open("../data/fetchAreasFullData.json","r") as file:
@@ -87,16 +92,38 @@ def correctTheHoleData():
 
     with open("holeData.json","r") as file:
         coords = json.load(file)
+    
+    print(len(coords),len(coordsBase),len(coordsBase)-len(coords))
+
     refatchedData = getWrongSquares(coords,coordsBase)
     areas = fetchAreas(refatchedData)
     
-    for name,coord in areas:
+    print(len(refatchedData))
+
+    for name,coord in areas.items():
         coords[name] = coord
 
-    with open("holeData.json","w") as file:
-        json.dump(coords, file, indent=4)
+    with open("refetchData.json","w") as file:
+        json.dump(areas, file, indent=4)
+
+def checkLength():
+    with open("../data/fetchAreasFullData.json","r") as file:
+        coordsBase = json.load(file)
+
+    with open("refetchData.json","r") as file:
+        coords = json.load(file)
+
+    print(len(coordsBase),len(coords))
+
+    out = getWrongSquares(coords,coordsBase)
+    print(len(out))
+    
+    with open("missingData.json","w") as file:
+        json.dump(out,file,indent=4)
 
 
 if __name__ == "__main__":
     #mapPaths()
-    singleCall()
+    #singleCall()
+    #correctTheHoleData()
+    checkLength()

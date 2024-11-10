@@ -86,6 +86,7 @@ def getWrongSquares(coords:dict,coordsBase)->dict:
             out[name] = coord
         
     return out
+    
 def correctTheHoleData():
     with open("../data/fetchAreasFullData.json","r") as file:
         coordsBase = json.load(file)

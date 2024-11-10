@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import json
-
+import sys
 class TraficConjunction:
-    offset = 0.01
+    offset = 0.0003 #i am magic puff ★now you are impressed★ puff "0.0003" klappt gut
     traficLights:list = list()
     
     def getMinMaxLocation(self,coords)->list: 
@@ -20,9 +20,9 @@ class TraficConjunction:
     def setOffset(self,coords:list)->list:
         
         sm,lm = coords[0],coords[1]
-        print(coords,sm,lm)
+        #print(coords,sm,lm)
         of = self.offset
-        return [[sm[0]-of,sm[1]-of],[sm[0]+of,sm[1]+of]]
+        return [[sm[0]-of,sm[1]-of],[lm[0]+of,lm[1]+of]]
     
     def inbound(self,coord:list)->bool: #vllt schneller, wenn Gegensatzt getestet
         out = ((self.bound[0][0] <= coord[0]) and (coord[0]<=self.bound[1][0]) and
@@ -31,61 +31,68 @@ class TraficConjunction:
 
     def checkIfInBound(self,relevantORSNotes)->list:
         out = []
-        print(relevantORSNotes["nodes"])
+        #print(relevantORSNotes["nodes"])
         
         for node in relevantORSNotes["nodes"]:
-            exit()
+            
             if  self.inbound(node["location"]):
+                
                 out.append(node)
-        print(out)
+        
         return out
 
     def __init__(self,name:str,traficList:list,relevantORSNotes:dict):
-        self.traficLights = traficList
+        self.traficLights = [name[0] for name in traficList]
         self.bound = self.setOffset(self.getMinMaxLocation(traficList))
         self.junctionNodes = self.checkIfInBound(relevantORSNotes)
         self.name = name
     
     def returnValue(self)->tuple:
-        return (self.name,self.junctionNodes,self.traficLights)
+        node = self.junctionNodes
+        if len(sys.argv) == 1:
+            node = [name["location"]for name in self.junctionNodes]
+        return (self.name,node,self.traficLights,self.bound)
 
 
 def run():
-    with open("holeData.json","r") as file:
+    with open("refetchData.json","r") as file:
         notes = json.load(file)
     with open("../data/conjunctionsJoint.json","r") as file:
         conj = json.load(file)
     with open("../data/fetchAreasFullData.json","r") as file:
         fetchAreas = json.load(file)
+    
+    with open("missingData.json","r") as file:
+        missingAreas = json.load(file)
 
     traficConjunctionList = []
     outDict = {}
     conjCOunt = 0
-    for conjunctionName,conjunction in conj.items():
+    for conjunctionName,conjunction in conj.items():    #Geht über die Conjunctions
         
-        for areaName,area in fetchAreas.items():
+        for areaName,area in fetchAreas.items():        #Geht über alle relevanten Bereiche
         
-            for noteInArea in area[1]:
-                if noteInArea[0] == conjunctionName:
-                    print(areaName,noteInArea[0],conjunctionName)
+            for nodeInArea in area[1]:                  #Geht über jede Ampel im Area
+                if (not (areaName in missingAreas) ) and  nodeInArea[0] == conjunctionName:    #Wenn die Conjunction in der Area ist
+                    #print(areaName,nodeInArea[0],conjunctionName)
                     conjCOunt+=1
                     traficList =  conjunction[1]
                     relevantORSNotes = notes[areaName]
-                    print(len(relevantORSNotes))
-                    #print(relevantORSNotes)
                     traficConjunctionList.append(TraficConjunction(conjunctionName,traficList,relevantORSNotes))
+                    
     
-    print(traficConjunctionList)
+    #print(len(traficConjunctionList))
     
-    '''
+    
     for conjunctionObject in traficConjunctionList:
-        name,junctionNodes,traficLights = conjunctionObject.returnValue()
-        outDict[name] = {"junctionNodes":junctionNodes,
-                         "traficLights":traficLights}
+        name,junctionNodes,traficLights,bound = conjunctionObject.returnValue()
+        outDict[name] = {"bound"        :bound,
+                         "junctionNodes":junctionNodes,
+                         "traficLights" :traficLights}
     
-    print(conjCOunt,len(conj))
+    #print(conjCOunt,len(conj))
     with open("../data/conjuctionDict.json","w") as file:
-        json.dump(outDict, file, indent=4)    '''
+        json.dump(outDict, file, indent=4)    
 
 if __name__ == "__main__":
     run()

@@ -51,7 +51,8 @@ class TraficConjunction:
         node = self.junctionNodes
         if len(sys.argv) == 1:
             node = [name["location"]for name in self.junctionNodes]
-        return (self.name,node,self.traficLights,self.bound)
+        
+        return (self.name,node,list(set(self.traficLights)),self.bound)
 
 
 def run():

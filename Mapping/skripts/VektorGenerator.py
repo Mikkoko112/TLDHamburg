@@ -18,8 +18,11 @@ def findFurthestAndNearesCoord(mainCoord:list,coordList:list):
     return (nearest,furthest)
 
 def generateVektor(mainCoord:list,coordList:list): #Vektor zeigt zum point!
-    minCo,maxCo = findFurthestAndNearesCoord(mainCoord,coordList)
-    vec = [minCo[0]-maxCo[0],minCo[1]-maxCo[1]]
+    #minCo,maxCo = findFurthestAndNearesCoord(mainCoord,coordList)
+    meanCo = getZentroid(coordList)
+    vec = [mainCoord[0]-meanCo[0],mainCoord[1]-meanCo[1]] #hier wird es jetzt auf das Centroid focosiert
+    #hier könnte noch der vektor normiert werden.
+
     return vec
 
 def getZentroid(coordList:list)->list:
@@ -50,6 +53,7 @@ def genPerPrimarySignal(coords)->dict:
                 vec0.append(getDegree(vec0))
             if len(coords) > 2:
                 vec2 = generateVektor(meanCoord,coords[2])
+                vec2 = [-x for x in vec2]
                 vec2.append(getDegree(vec2))
             out[name] = [vec0,meanCoord,vec2]
     return out

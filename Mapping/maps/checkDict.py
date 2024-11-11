@@ -18,6 +18,8 @@ with open(filePath,"r") as file:
 with open("../data/conjunctionsJoint.json","r") as file:
     conj = json.load(file)
 
+with open("../data/vectorisation.json","r") as file:
+    vect = json.load(file)
 
 
 m = folium.Map(localtion = [9.99,53.55], zoom_start=0.01)
@@ -33,6 +35,11 @@ colours = [
     "red",  #exgress
     "black" #buffer
 ]
+
+def generateLines(m):
+    
+    
+
 
 #erstmal die originalen conj
 for name,dat in conj.items():
@@ -50,6 +57,8 @@ for name,dat in conj.items():
             fill_opacity=0.2,
             tooltip=name
         ).add_to(m)
+       
+
 
 
 #jetzt die neuen
@@ -64,7 +73,7 @@ for name,dat in data.items():
             fill_opacity=0.2,
             tooltip=name
         ).add_to(m)
-        
+
         if(name == fieldToVisualise) or True:
             for loc in dat["junctionNodes"]:
             
@@ -72,6 +81,9 @@ for name,dat in data.items():
                     location=loc["location"][::-1],
                     icon=folium.Icon(color='darkred')
                 ).add_to(m)
+
+
+
 
 
 

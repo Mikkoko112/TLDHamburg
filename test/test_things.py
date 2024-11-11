@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock, patch
-from Things import Things
+from backend.Things import Things
 
 
 class TestFetchCoordinates(unittest.TestCase):

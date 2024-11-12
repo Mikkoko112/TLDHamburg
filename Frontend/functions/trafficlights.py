@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import json
 import time
 from functions import Things
@@ -51,3 +52,15 @@ class Trafficlight:
         pass
         
     
+||||||| parent of 7aa8600 (visualize pos lights)
+=======
+import json
+from pathlib import Path
+
+def get_trafficlights():
+    cwd = Path.cwd()
+    directory = f"{cwd}/schnittstelle"
+    with open(f"{directory}/trafficlights.geojson", "r") as f:
+        data = json.load(f)
+    return data
+>>>>>>> 7aa8600 (visualize pos lights)

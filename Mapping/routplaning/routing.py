@@ -63,8 +63,8 @@ def getDegree(vec:list)->float:
     return acos(dot/lengthVec)
 
 def inDegreeOffset(inputDegree, offsetDegree):
-    lowerValue,upperValue = offsetDegree-0.6108652,offsetDegree+0.6108652 #das ist ein offset von 20°
-    #lowerValue,upperValue = offsetDegree-0.4363323,offsetDegree+0.4363323 #das ist ein offset von 25°
+    #lowerValue,upperValue = offsetDegree-0.6108652,offsetDegree+0.6108652 #das ist ein offset von 45
+    lowerValue,upperValue = offsetDegree-0.4363323,offsetDegree+0.4363323 #das ist ein offset von 25°
     return (inputDegree >= lowerValue and inputDegree <= upperValue)
 
 def roundValues(value:float)->list:
@@ -83,16 +83,19 @@ def getRouteTraficLights(route:list, conjFile:dict,conjList:list,vectorisation:d
         pointList    = [dat[1] for dat in data]
         pointIndex   = [dat[0] for dat in data]
         
-        meanofPoints = getZentroid(pointList)#hier muessen noch index fixes gemacht werden, z.b. wenn route endet auf straße
-        
-        vecIn,vecOut = generateVektor(route[pointIndex[0]-1],meanofPoints),generateVektor(meanofPoints,route[pointIndex[-1]+1])
-        vecOut       = [-x for x in vecOut]
-        degIn,degOut = getDegree(vecIn),getDegree(vecOut)
 
         for primarySignal in conjFile[name]['traficLights']:
-            print(conjFile[name]['traficLights'])
+            print(primarySignal)
+            meanofPoints =  vectorisation[primarySignal][1]
+        #hier muessen noch index fixes gemacht werden, z.b. wenn route endet auf straße
+        
+            vecIn,vecOut = generateVektor(route[pointIndex[0]-1],meanofPoints),generateVektor(meanofPoints,route[pointIndex[-1]+1])
+            vecOut       = [-x for x in vecOut]
+            degIn,degOut = getDegree(vecIn),getDegree(vecOut)
+            
             if lanesOverlape(vectorisation[primarySignal],degIn,degOut):
-                
+
+
                 traficLights.append(primarySignal)
                 
                 print(primarySignal)
@@ -114,7 +117,7 @@ def run():
     with open("../data/vectorisation.json","r") as file:
         vectorisation = json.load(file)
 
-    routeHole = getRoute([[9.946091651916504,53.59207534790039 ],[10.063329,53.6111179 ]])
+    routeHole = getRoute([[9.946091651916504,53.59207534790039 ],[10.0772705078125,53.61192321777344 ]])
     pureRoute = pruifyRoute(routeHole)
     conjList = getRouteConjunctionList(pureRoute,conj)
     traficLightsList = getRouteTraficLights(pureRoute,conj,conjList,vectorisation)

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module makeMeadeanJsonData</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title">makeMeadeanJsonData</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/home/bbb7727/cis-projekt-2024/Mapping/skripts/makeMeadeanJsonData.py">/home/bbb7727/cis-projekt-2024/Mapping/skripts/makeMeadeanJsonData.py</a></td></tr></table>
+    <p></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="geopy.distance.html">geopy.distance</a><br>
+</td><td class="multicolumn"><a href="json.html">json</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-calcMean"><strong>calcMean</strong></a>(coords: list) -&gt; list</dt><dd><span class="code">coords:list&nbsp;&lt;-&nbsp;This&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;coordinates.<br>
+&nbsp;<br>
+return:list&nbsp;-&gt;&nbsp;This&nbsp;returns&nbsp;the&nbsp;mean&nbsp;element</span></dd></dl>
+ <dl><dt><a name="-closestCordToMid"><strong>closestCordToMid</strong></a>(ent: list, srList: list) -&gt; list</dt><dd><span class="code">ent:list&nbsp;&lt;-&nbsp;This&nbsp;is&nbsp;the&nbsp;first&nbsp;item&nbsp;in&nbsp;coordinates.&nbsp;ent&nbsp;is&nbsp;the&nbsp;primary&nbsp;stationary&nbsp;Element<br>
+srList:&nbsp;list&nbsp;&lt;-&nbsp;This&nbsp;is&nbsp;the&nbsp;second&nbsp;item&nbsp;in&nbsp;lists&nbsp;of&nbsp;coordiantes.&nbsp;stList&nbsp;contain&nbsp;the&nbsp;differend&nbsp;the&nbsp;street&nbsp;element&nbsp;<br>
+&nbsp;<br>
+return:list&nbsp;-&gt;&nbsp;this&nbsp;returns&nbsp;the&nbsp;coordinate&nbsp;that&nbsp;is&nbsp;the&nbsp;minimal&nbsp;distance</span></dd></dl>
+ <dl><dt><a name="-getDistanceBetweenPoints"><strong>getDistanceBetweenPoints</strong></a>(ent: list, sr: list) -&gt; float</dt><dd><span class="code">ent:list&nbsp;&lt;-&nbsp;This&nbsp;is&nbsp;the&nbsp;first&nbsp;item&nbsp;in&nbsp;coordinates.&nbsp;ent&nbsp;is&nbsp;the&nbsp;primary&nbsp;stationary&nbsp;Element<br>
+sr:&nbsp;list&nbsp;&lt;-&nbsp;This&nbsp;is&nbsp;the&nbsp;second&nbsp;item&nbsp;in&nbsp;coordiantes.&nbsp;st&nbsp;is&nbsp;the&nbsp;street&nbsp;element&nbsp;<br>
+&nbsp;<br>
+return:float&nbsp;-&gt;&nbsp;This&nbsp;returns&nbsp;the&nbsp;distance&nbsp;in&nbsp;km</span></dd></dl>
+ <dl><dt><a name="-run"><strong>run</strong></a>()</dt><dd><span class="code">This&nbsp;goes&nbsp;over&nbsp;every&nbsp;Element&nbsp;of&nbsp;the&nbsp;File&nbsp;providet&nbsp;and&nbsp;returns&nbsp;it&nbsp;with&nbsp;reduced&nbsp;lists.<br>
+&nbsp;<br>
+There&nbsp;are&nbsp;two&nbsp;procedueres&nbsp;to&nbsp;chouse&nbsp;from.&nbsp;<br>
+-Meanvalue&nbsp;for&nbsp;ingress,&nbsp;exgress<br>
+-Neares&nbsp;coord&nbsp;to&nbsp;meanvalue<br>
+This&nbsp;can&nbsp;be&nbsp;changed&nbsp;in&nbsp;code&nbsp;by&nbsp;commeting&nbsp;in&nbsp;and&nbsp;out&nbsp;of&nbsp;the&nbsp;procedures</span></dd></dl>
+</td></tr></table>
+</body></html>

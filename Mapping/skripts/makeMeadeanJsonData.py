@@ -6,9 +6,21 @@ from geopy import distance
 
 
 def getDistanceBetweenPoints(ent:list,sr:list)->float:
+    '''
+    ent:list <- This is the first item in coordinates. ent is the primary stationary Element
+    sr: list <- This is the second item in coordiantes. st is the street element 
+    
+    return:float -> This returns the distance in km
+    '''
     return distance.distance(ent,sr).km
 
-def closestCordToMid(ent:list,srList:list):
+def closestCordToMid(ent:list,srList:list)->list:
+    '''
+    ent:list <- This is the first item in coordinates. ent is the primary stationary Element
+    srList: list <- This is the second item in lists of coordiantes. stList contain the differend the street element 
+    
+    return:list -> this returns the coordinate that is the minimal distance 
+    '''
     minDist,minCoord = 1,[100,100]
     zminDist,zminCoord = 1.5,[100,100]
     
@@ -25,6 +37,11 @@ def closestCordToMid(ent:list,srList:list):
                 zminCoord = cord
     return minCoord
 def calcMean(coords:list)->list:
+    '''
+    coords:list <- This is a list of coordinates.
+    
+    return:list -> This returns the mean element
+    '''
     xmean,ymean = 0,0
     for item in coords:
         xmean += item[0]
@@ -34,40 +51,51 @@ def calcMean(coords:list)->list:
 
     return [xmean,ymean]
 
-with open("../data/thingsLoc.json","r") as file:
-    dataLanes = json.load(file)
+def run():
+    '''
+    This goes over every Element of the File providet and returns it with reduced lists.
 
-print(dataLanes)
+    There are two procedueres to chouse from. 
+    -Meanvalue for ingress, exgress
+    -Neares coord to meanvalue
+    This can be changed in code by commeting in and out of the procedures
+    '''
+    with open("../data/thingsLoc.json","r") as file:
+        dataLanes = json.load(file)
 
-print(len(dataLanes.keys()))
-midCoords = {}
+    print(dataLanes)
 
-j = 0
+    print(len(dataLanes.keys()))
+    midCoords = {}
 
-for name,lane in dataLanes.items():
-    print(name)
-    sumCords = [
-        [0,0],
-        [0,0]
-    ]
-    j+=1
-    if True:
-        ingress,path,exgress = list(),list(),list()
-        
-        if len(lane) < 2: continue
+    j = 0
 
-        meanPath = calcMean(lane[1])
-        for i,paths in enumerate(lane):
+    for name,lane in dataLanes.items():
+        print(name)
+        sumCords = [
+            [0,0],
+            [0,0]
+        ]
+        j+=1
+        if True:
+            ingress,path,exgress = list(),list(),list()
             
-            #if i == 0: ingress = calcMean(paths)
-            #if i == 2: exgress = calcMean(paths)
+            if len(lane) < 2: continue
 
-            if i == 0: ingress = closestCordToMid(meanPath,paths) #evtl hier nächste Coordinate zu mean path
-            if i == 1: path = meanPath
-            if i == 2: exgress = closestCordToMid(meanPath,paths) #.||.
-        midCoords[name] = [ingress,path,exgress]
+            meanPath = calcMean(lane[1])
+            for i,paths in enumerate(lane):
+                
+                if i == 0: ingress = calcMean(paths)
+                if i == 2: exgress = calcMean(paths)
 
-print(len(midCoords))
-with open("../data/cleanedCoorsMin.json","w") as jsonFile:
-    json.dump(midCoords,jsonFile,indent=4)
+                #if i == 0: ingress = closestCordToMid(meanPath,paths) #evtl hier nächste Coordinate zu mean path
+                if i == 1: path = meanPath
+                #if i == 2: exgress = closestCordToMid(meanPath,paths) #.||.
+            midCoords[name] = [ingress,path,exgress]
 
+    print(len(midCoords))
+    with open("../data/cleanedCoorsAverage.json","w") as jsonFile:
+        json.dump(midCoords,jsonFile,indent=4)
+
+if __name__ == "__main__":
+    run()

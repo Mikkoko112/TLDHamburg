@@ -1,0 +1,25 @@
+stages:
+  -backend
+
+before_script:
+  - apk add python3 py3-pip make
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+unit-test-job:
+  stage: backend
+  cache:
+    paths:
+      - .cache/pip 
+  before_script:
+    - apk update && apk add --no-cache make
+    - pip install --upgrade pip
+    - pip install hatch
+    - hatch install
+  script:
+    - hatch run python test/test_things.py
+    - echo "Congratulations test_things.py passed."
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'

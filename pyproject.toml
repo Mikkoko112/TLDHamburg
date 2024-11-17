@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tldhamburg"
+version = "0.1.0"
+authors = [
+    { name = "Max Mustermann" },
+]
+description = "TLD Hamburg project."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pandas",
+    "requests",
+    "shapely",
+]

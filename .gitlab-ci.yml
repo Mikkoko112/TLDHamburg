@@ -3,6 +3,7 @@ stages:
 
 before_script:
   - apk add python3 py3-pip make
+  - pip install --upgrade pip
   - python -m venv venv
   - source venv/bin/activate
   - pip install .

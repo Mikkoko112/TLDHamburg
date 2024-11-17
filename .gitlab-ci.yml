@@ -2,7 +2,7 @@ stages:
   - backend
 
 before_script:
-  - apk add --no-cache python3 py3-pip make gcc musl-dev geos-dev
+  - apk add --no-cache python3 py3-pip make gcc musl-dev geos-dev python3-dev
   - python -m venv venv
   - source venv/bin/activate
   - pip install --upgrade pip

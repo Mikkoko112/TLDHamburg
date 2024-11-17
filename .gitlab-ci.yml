@@ -14,7 +14,6 @@ unit-test-job:
       - .cache/pip 
   before_script:
     - apk update && apk add --no-cache make
-    - pip install --upgrade pip
     - pip install hatch
     - hatch install
   script:

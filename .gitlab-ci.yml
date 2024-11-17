@@ -1,5 +1,5 @@
 stages:
-  - backend
+  -backend
 
 before_script:
   - apk add python3 py3-pip make
@@ -18,7 +18,7 @@ unit-test-job:
     - pip install hatch
     - hatch install
   script:
-    - $CI_PROJECT_DIR/test/test_things.py
+    - hatch run python test/test_things.py
     - echo "Congratulations test_things.py passed."
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'

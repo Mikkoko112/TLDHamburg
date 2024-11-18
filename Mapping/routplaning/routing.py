@@ -73,11 +73,10 @@ def roundValues(value:float)->list:
 def lanesOverlape(primary:list,inDeg:list,outDeg:list)->bool:
     
     primaryInDeg,primaryOutDeg = primary[0][2],primary[2][2]
-    print([inDeg,outDeg],[primaryInDeg,primaryOutDeg])
     return (inDegreeOffset(roundValues(inDeg),primaryInDeg) and inDegreeOffset(roundValues(outDeg),primaryOutDeg))
 
-def getRouteTraficLights(route:list, conjFile:dict,conjList:list,vectorisation:dict)->list:
-    traficLights,debugVector = [],[]
+def getRouteTraficLights(route:list, conjFile:dict,conjList:list,vectorisation:dict)->dict:
+    traficLights,debugVector = dict(),[]
     skipnext = False
     for name,data in conjList.items():
         pointList    = [dat[1] for dat in data]
@@ -85,7 +84,7 @@ def getRouteTraficLights(route:list, conjFile:dict,conjList:list,vectorisation:d
         
 
         for primarySignal in conjFile[name]['traficLights']:
-            print(primarySignal)
+            
             meanofPoints =  vectorisation[primarySignal][1]
         #hier muessen noch index fixes gemacht werden, z.b. wenn route endet auf straße
         
@@ -96,18 +95,59 @@ def getRouteTraficLights(route:list, conjFile:dict,conjList:list,vectorisation:d
             if lanesOverlape(vectorisation[primarySignal],degIn,degOut):
 
 
-                traficLights.append(primarySignal)
-                
-                print(primarySignal)
+                traficLights[name]=primarySignal
                 #break
                 
-
     return traficLights
 
+def generateGeoJsonData(traficLights:dict,conjList:dict)->dict:
+    def getPointData(conjNodes:list)->list: #needs Change
+        return conjNodes[0]
 
-def pruifyRoute(route:dict)->list:
+    out = {
+        "type":"FeatureCollection",
+    }
+    features = []
+    i=1
+    for conj,trafic in traficLights.items():
+        element =         {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": getPointData(conjList[conj])[1]
+            },
+            "properties": {
+                "id": "{}".format(conj),
+                "object": "primary_signal",
+                "way-point": getPointData(conjList[conj])[0]
+            }
+        }
+        features.append(element)
+
+        i+=1
+    out["features"] = features
+    return out
+
+def pruifyRoute(route:dict,index:int=0)->list:
     return list(route['features'][0]['geometry']['coordinates'])
 
+def getTraficLightsperRoute(routeList:dict)->dict:
+    with open("data/conjuctionDict.json","r") as file:
+        conj = json.load(file)
+    
+    with open("data/vectorisation.json","r") as file:
+        vectorisation = json.load(file)
+
+    for i in range(len(routeList['features'])):
+        pureRoute = pruifyRoute(routeList,index=i)
+        
+        conjList = getRouteConjunctionList(pureRoute,conj)
+        
+        traficLightsList = getRouteTraficLights(pureRoute,conj,conjList,vectorisation)
+        jsonData = generateGeoJsonData(traficLightsList,conjList)
+        routeList["features"][i]["properties"]["traficlights"] = jsonData
+        
+    return routeList
 
 
 def run():
@@ -121,8 +161,6 @@ def run():
     pureRoute = pruifyRoute(routeHole)
     conjList = getRouteConjunctionList(pureRoute,conj)
     traficLightsList = getRouteTraficLights(pureRoute,conj,conjList,vectorisation)
-    print(traficLightsList)
-    
     
     dic = {"wayPoints":pureRoute,
            "conjList":conjList,

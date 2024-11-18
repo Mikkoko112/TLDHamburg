@@ -380,7 +380,9 @@ class TestGetTLObservations(unittest.TestCase):
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
 
         # Call the method under test
-        result = things.get_tl_observations(ids, n_obsrvtns=1, phnTime=False)
+        result = things.get_primary_signal_observations(
+            ids, n_obsrvtns=1, phnTime=False
+        )
 
         # Expected result
         expected_result = {
@@ -431,7 +433,7 @@ class TestGetTLObservations(unittest.TestCase):
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
 
         # Call the method under test
-        result = things.get_tl_observations(ids, n_obsrvtns=2, phnTime=True)
+        result = things.get_primary_signal_observations(ids, n_obsrvtns=2, phnTime=True)
 
         # Expected result
         expected_result = {
@@ -472,7 +474,9 @@ class TestGetTLObservations(unittest.TestCase):
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
 
         with patch("logging.error") as mock_logging_error:
-            result = things.get_tl_observations(ids, n_obsrvtns=1, phnTime=False)
+            result = things.get_primary_signal_observations(
+                ids, n_obsrvtns=1, phnTime=False
+            )
 
             expected_result = {
                 2: [[1]],
@@ -505,7 +509,9 @@ class TestGetTLObservations(unittest.TestCase):
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
 
         with patch("logging.error") as mock_logging_error:
-            result = things.get_tl_observations(ids, n_obsrvtns=1, phnTime=False)
+            result = things.get_primary_signal_observations(
+                ids, n_obsrvtns=1, phnTime=False
+            )
 
             expected_result = {}
             self.assertEqual(result, expected_result)

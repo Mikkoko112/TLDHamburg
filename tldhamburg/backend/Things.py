@@ -145,7 +145,7 @@ class Things:
                     f"No primary signal datastream available for Thing({thing_data['@iot.id']})"
                 )
 
-    def get_tl_observations(
+    def get_primary_signal_observations(
         self, ids: list[int] = None, n_obsrvtns: int = 1, phnTime: bool = False
     ):
         """

@@ -202,17 +202,17 @@ class DataFetcher:
         }
         self.fetch_data(endpoint, params)
         print(
-            f"current Status: {self.data['Observations'][0]['result']}\t at Timestamp: {self.data['Observations'][0]['phenomenonTime']}"
+            f"current Status: {self.data[0]['Observations'][0]['result']}\t at Timestamp: {self.data[0]['Observations'][0]['phenomenonTime']}"
         )
-        last_Observation_id = self.data["Observations"][0]["@iot.id"]
+        last_Observation_id = self.data[0]["Observations"][0]["@iot.id"]
         while True:
             time.sleep(1)
             self.fetch_data(endpoint, params)
-            if last_Observation_id == self.data["Observations"][0]["@iot.id"]:
+            if last_Observation_id == self.data[0]["Observations"][0]["@iot.id"]:
                 continue
-            last_Observation_id = self.data["Observations"][0]["@iot.id"]
+            last_Observation_id = self.data[0]["Observations"][0]["@iot.id"]
             print(
-                f"current Status: {self.data['Observations'][0]['result']}\t at Timestamp: {self.data['Observations'][0]['phenomenonTime']}"
+                f"current Status: {self.data[0]['Observations'][0]['result']}\t at Timestamp: {self.data[0]['Observations'][0]['phenomenonTime']}"
             )
 
     def print_raw_data(self):

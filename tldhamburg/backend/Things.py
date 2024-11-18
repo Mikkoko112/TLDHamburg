@@ -1,4 +1,5 @@
 from tldhamburg.backend.DataFetcher import DataFetcher
+from tldhamburg.backend.DBMaintainer import DBMaintainer
 import logging
 
 
@@ -144,6 +145,11 @@ class Things:
                 logging.error(
                     f"No primary signal datastream available for Thing({thing_data['@iot.id']})"
                 )
+
+    def _lookup_primary_signal_endpoint_ids(self):
+        self.primary_signal_endpoint_ids = DBMaintainer.read_datastreams_db(
+            ids=self.ids, attribute="primary_signal"
+        )
 
     def get_primary_signal_observations(
         self, ids: list[int] = None, n_obsrvtns: int = 1, phnTime: bool = False

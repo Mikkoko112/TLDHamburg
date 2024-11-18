@@ -1,8 +1,31 @@
-import sqlite3
+import sqlite3, os
 import pandas as pd
+import logging
 
 
 class DBMaintainer:
+    allowed_columns = [
+        "primary_signal",
+        "secondary_signal",
+        "auxiliary_signal",
+        "acoustic_signal",
+        "detector_car",
+        "detector_cyclists",
+        "detector_pedestrian",
+        "detector_acoustic_traffic_request",
+        "bus_pre_request_point",
+        "bus_request_point",
+        "bus_checkout",
+        "signal_program",
+        "cycle_second",
+    ]
+
+    tables = ["Things", "Datastreams"]
+
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+
     def create_tables():
         create_things_table = """
         CREATE TABLE IF NOT EXISTS Things (
@@ -38,14 +61,14 @@ class DBMaintainer:
             cursor.execute(create_things_table)
             cursor.execute(create_datastreams_table)
             connection.commit()
-            print("Tables created or verified successfully.")
+            logging.info("Tables created or verified successfully.")
 
     def delete_thing(thingID):
         """
         Deletes a thing entity from the Things table based on the provided thing_id.
 
-        Parameters:
-        - thing_id (int): The unique identifier of the thing to be deleted.
+        Args:
+            thing_id (int): The unique identifier of the thing to be deleted.
         """
         try:
             with sqlite3.connect("TLDHamburg.db") as connection:
@@ -54,11 +77,11 @@ class DBMaintainer:
                 cursor.execute("DELETE FROM Things WHERE thing_id = ?;", (thingID,))
                 connection.commit()
                 if cursor.rowcount > 0:
-                    print(f"Deleted thing with ID {thingID}.")
+                    logging.info(f"Deleted thing with ID {thingID}.")
                 else:
-                    print(f"No Thing found with ID {thingID}.")
+                    logging.info(f"No Thing found with ID {thingID}.")
         except sqlite3.Error as error:
-            print(f"An error occurred: {error}")
+            logging.info(f"An error occurred: {error}")
 
     def insert_things(things_data):
         insert_query = """
@@ -73,16 +96,16 @@ class DBMaintainer:
                 connection.commit()
                 print(f"Inserted {cursor.rowcount} record(s) into Things.")
         except sqlite3.IntegrityError as error:
-            print(f"Integrity Error: {error}")
+            logging.error(f"Integrity Error: {error}")
         except sqlite3.Error as error:
-            print(f"Database Error: {error}")
+            logging.error(f"Database Error: {error}")
 
     def insert_datastreams(datastreams):
         """
         Inserts multiple datastream records into the Datastreams table.
 
-        Parameters:
-        - datastreams (list of dict): Each dictionary should contain 'thingID' and any optional datastream attributes.
+        Args:
+            datastreams (list of dict): Each dictionary should contain 'thingID' and any optional datastream attributes.
 
         Example:
         datastreams = [
@@ -91,49 +114,28 @@ class DBMaintainer:
             {'thingID': 6}  # Uses default values for all optional columns
         ]
         """
-        allowed_columns = [
-            "primary_signal",
-            "secondary_signal",
-            "auxiliary_signal",
-            "acoustic_signal",
-            "detector_car",
-            "detector_cyclists",
-            "detector_pedestrian",
-            "detector_acoustic_traffic_request",
-            "bus_pre_request_point",
-            "bus_request_point",
-            "bus_checkout",
-            "signal_program",
-            "cycle_second",
-        ]
 
         try:
             with sqlite3.connect("TLDHamburg.db") as connection:
                 cursor = connection.cursor()
                 cursor.execute("PRAGMA foreign_keys = ON;")
-
                 for datastream in datastreams:
                     thingID = datastream.get("thingID")
                     if thingID is None:
                         print("Skipping entry without 'thingID'.")
                         continue
-
                     columns = ["thingID"]
                     values = [thingID]
-
                     for key, value in datastream.items():
-                        if key in allowed_columns:
+                        if key in DBMaintainer.allowed_columns:
                             columns.append(key)
                             values.append(value)
                         elif key != "thingID":
                             print(f"Ignoring invalid column: {key}")
-
                     columns_str = ", ".join(columns)
                     placeholders = ", ".join(["?"] * len(columns))
                     insert_query = f"INSERT INTO Datastreams ({columns_str}) VALUES ({placeholders});"
-
                     cursor.execute(insert_query, values)
-
                 connection.commit()
                 print(f"Inserted datastream id(s) of {len(datastreams)} Thing(s).")
         except sqlite3.IntegrityError as error:
@@ -142,7 +144,80 @@ class DBMaintainer:
             print(f"Database Error: {error}")
 
     def print_table(table="Things"):
-        connection = sqlite3.connect("TLDHamburg.db")
-        df = pd.read_sql_query(f"SELECT * FROM {table};", connection)
-        print(df)
-        connection.close()
+        """
+        Prints all records from the specified table in the TLDHamburg database.
+
+        Args:
+            table (str, optional): The name of the table to retrieve data from.
+                Defaults to "Things".
+
+        Raises:
+            sqlite3.Error: If an error occurs while connecting to the database or executing the query.
+            ValueError: If the specified table does not exist in the database.
+
+        """
+        if table not in DBMaintainer.tables:
+            raise ValueError(f"Table {table} was not found in the database.")
+
+        db_path = DBMaintainer.get_db_path()
+        try:
+            with sqlite3.connect(db_path) as connection:
+                df = pd.read_sql_query(f"SELECT * FROM {table};", connection)
+                print(df)
+        except sqlite3.DatabaseError as error:
+            logging.error(f"Database Error: {error}")
+
+    def get_db_path():
+        """
+        Constructs and returns the absolute path to the TLDHamburg.db database file. It is assumed
+        that the database is in the same directory as the class DBMaintainer.
+
+        Returns:
+            str: The absolute path to the TLDHamburg.db database file.
+        """
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        db_path = os.path.join(current_dir, "TLDHamburg.db")
+        return db_path
+
+    def read_datastreams_db(ids: list, attribute: str):
+        """
+        Reads a specific attribute from the Datastreams table for given thingIDs.
+
+        Args:
+            ids (list of int): List of thingID values to filter the records.
+            attribute (str): The specific column/attribute to retrieve.
+
+        Returns:
+            list: A list of values corresponding to the specified attribute for each thingID.
+                If a thingID does not have the attribute set, None is returned for that entry.
+        """
+
+        if attribute not in DBMaintainer.allowed_columns:
+            logging.error(
+                f"Invalid attribute: '{attribute}'. Allowed attributes are: {DBMaintainer.allowed_columns}"
+            )
+            return {}
+
+        if not ids:
+            logging.error(
+                "The 'ids' list is empty. Please provide at least one thingID."
+            )
+            return {}
+
+        placeholders = ", ".join(["?"] * len(ids))
+        query = f"SELECT thingID, {attribute} FROM Datastreams WHERE thingID IN ({placeholders});"
+
+        try:
+            with sqlite3.connect(DBMaintainer.get_db_path()) as connection:
+                cursor = connection.cursor()
+                cursor.execute("PRAGMA foreign_keys = ON;")
+                cursor.execute(query, ids)
+                rows = cursor.fetchall()
+                # Mapping thingId to the corresponding Datastream ID.
+                id_to_value = {row[0]: row[1] for row in rows}
+                logging.info(
+                    f"Retrieved attribute '{attribute}' for {len(ids)} Thing(s)."
+                )
+                return id_to_value
+        except sqlite3.Error as error:
+            logging.error(f"Database Error: {error}")

@@ -17,27 +17,19 @@ class Things:
         self.primary_signal_endpoint_ids = dict()
         self.coordinates = dict()
 
-    def get_coordinates(self):
+    def _fetch_coordinates(self):
         """
-        Retrieves and stores the coordinates of Things based on their iot.ids.
+        Fetches and stores the coordinates of Things based on their iot.ids.
 
         This method performs the following steps:
-            1. Checks if coordinates are already fetched and returns them if available.
-            2. Constructs filter query to fetch data for the specified Thing IDs.
-            3. Sends a request to the Things API endpoint with the filter and expansion parameters.
-            4. Iterates through the fetched data to extract and store geometry coordinates.
-            5. Logs errors for Things without location data or geometry information.
-
-        Returns:
-            dict: A dictionary mapping Thing IDs to their corresponding geometry coordinates.
+            1. Constructs filter query to fetch data for the specified Thing IDs.
+            2. Sends a request to the Things API endpoint with the filter and expansion parameters.
+            3. Iterates through the fetched data to extract and store geometry coordinates.
+            4. Logs errors for Things without location data or geometry information.
 
         Logs:
             ERROR: If a Thing has no location data or lacks geometry information.
         """
-
-        # Return cached coordinates if already fetched
-        if self.coordinates:
-            return self.coordinates
 
         # Build the filter query to include all Thing IDs
         filterquery = f"@iot.id eq {self.ids[0]}"
@@ -53,7 +45,7 @@ class Things:
 
             if not locations_data:
                 logging.error(
-                    f"No Locations data available for Thing({thing_data['@iot.id']})"
+                    f"No Locations data available for Thing({thing_data['@iot.id']})."
                 )
                 continue
 
@@ -68,11 +60,51 @@ class Things:
                     f"No geometry information available for Thing({thing_data['@iot.id']})."
                 )
 
+    def get_coordinates(self):
+        """
+        Returns the coordinates of all Things stored in the instance.
+
+        This method performs the following steps:
+            1. Fetches coordinates of all Things if not already available.
+            2. Returns the coordinates.
+
+        Returns:
+            dict: A dictionary mapping Thing IDs to their corresponding geometry coordinates.
+
+        Example:
+            >>> things = Things([2])
+            >>> things.get_coordinates()
+            >>> print(things.coordinates)
+            {
+                2: [[
+                        [9.9196439, 53.5638321],
+                        [9.9197085, 53.5637359],
+                        [9.9198219, 53.5635865],
+                        [9.9198451, 53.5635559],
+                        [9.9198231, 53.5634831],
+                        [9.9198481, 53.563453]
+                    ],
+                    [
+                        [9.9197087, 53.563736],
+                        [9.9195566, 53.5639624],
+                        [9.9195566, 53.5639624],
+                        [9.919899, 53.5639529]
+                    ],
+                    [
+                        [9.9197629, 53.5639568],
+                        [9.9198989, 53.5639531],
+                        [9.9200006, 53.5639497]
+                    ]]
+            }
+        """
+        if not self.coordinates:
+            self._fetch_coordinates()
+
         return self.coordinates
 
     def _fetch_primary_signal_endpoint_ids(self):
         """
-        Retrieves the primary signal datastream IDs and maps them to the corresponding Thing ID.
+        Fetches the primary signal datastream IDs and maps them to the corresponding Thing ID.
 
         This method performs the following steps:
             1. Constructs filter query to fetch data for the specified Datastreams IDs.
@@ -114,10 +146,10 @@ class Things:
                 )
 
     def get_tl_observations(
-        self, ids: list[int], n_obsrvtns: int = 1, phnTime: bool = False
+        self, ids: list[int] = None, n_obsrvtns: int = 1, phnTime: bool = False
     ):
         """
-        Retrieves the latest observations for primary signal datastreams of specified Thing IDs.
+        Fetches the latest observations for primary signal datastreams of specified Thing IDs.
 
         This method performs the following steps:
             1. Fetches primary signal datastream IDs if not already available.
@@ -136,21 +168,30 @@ class Things:
             dict: Maps each Thing ID to its latest observation result.
                 If `phnTime` is True, maps to a list of (timestamp, result) tuples.
 
-         Example:
+        Examples:
             >>> things = Things([2, 3, 18760])
-            >>> observations = things.get_tl_observations(ids, n_obsrvtns=2, phnTime=True)
-            >>> print(observations)
+            >>> obervations = things.get_tl_observations(n_obsrvtns=2, phnTime=True)
+            >>> print(obervations)
             {
                 2: [['2024-10-27T18:37:55Z', 1], ['2024-10-27T18:37:52Z', 2]],
                 3: [['2024-10-27T18:37:55Z', 1], ['2024-10-27T18:37:52Z', 2]],
-                4: [['2024-10-27T18:37:55Z', 1], ['2024-10-27T18:37:52Z', 2]],
                 18760: [['2024-10-27T18:37:42Z', 1], ['2024-10-27T18:37:39Z', 2]]
+            }
+            >>> things = Things([2, 3, 18760])
+            >>> obervations = things.get_tl_observations(n_obsrvtns=1)
+            >>> print(obervations)
+            {
+                2: [[1]],
+                3: [[1]],
+                18760: [[1]]
             }
         """
 
         if not self.primary_signal_endpoint_ids:
             self._fetch_primary_signal_endpoint_ids()
 
+        if ids is None:
+            ids = self.ids
         # Construct the filter query to include all primary signal datastream IDs
         filter_conditions = []
         for thing_id in ids:

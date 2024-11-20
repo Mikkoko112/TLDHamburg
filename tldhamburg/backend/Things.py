@@ -194,7 +194,7 @@ class Things:
         """
 
         if not self.primary_signal_endpoint_ids:
-            self._fetch_primary_signal_endpoint_ids()
+            self._lookup_primary_signal_endpoint_ids()
 
         if ids is None:
             ids = self.ids

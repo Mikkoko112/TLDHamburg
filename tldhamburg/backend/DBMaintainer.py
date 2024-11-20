@@ -157,7 +157,7 @@ class DBMaintainer:
 
         """
         if table not in DBMaintainer.tables:
-            raise ValueError(f"Table {table} was not found in the database.")
+            raise ValueError(f"Table '{table}' was not found in the database.")
 
         db_path = DBMaintainer.get_db_path()
         try:

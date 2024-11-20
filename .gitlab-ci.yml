@@ -19,6 +19,8 @@ unit-test-job:
   script:
     - python test/test_things.py
     - echo "Congratulations test_things.py passed."
+    - python test/test_data_fetcher.py
+    - echo "Congratulations test_data_fetcher.py passed."
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'

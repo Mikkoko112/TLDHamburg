@@ -16,6 +16,7 @@ class Things:
         self.ids = ids
         self.things_endpoint = "Things"
         self.primary_signal_endpoint_ids = dict()
+        self.secondary_signal_endpoint_ids = dict()
         self.coordinates = dict()
 
     def _fetch_coordinates(self):
@@ -147,23 +148,104 @@ class Things:
                 )
 
     def _lookup_primary_signal_endpoint_ids(self):
+
         self.primary_signal_endpoint_ids = DBMaintainer.read_datastreams_db(
             ids=self.ids, attribute="primary_signal"
         )
+
+    def _lookup_secondary_signal_endpoint_ids(self):
+        self.secondary_signal_endpoint_ids = DBMaintainer.read_datastreams_db(
+            ids=self.ids, attribute="secondary_signal"
+        )
+
+    def _get_signal_observations(
+        self,
+        signal_type: str,
+        ids: list[int] = None,
+        n_obsrvtns: int = 1,
+        phnTime: bool = False,
+    ):
+        """
+        General method to fetch latest observations for a given signal type (primary or secondary).
+
+        This method performs the following steps:
+            1. Builds a filter query based on the datastream IDs.
+            2. Requests the latest observations from the API.
+            3. Processes the fetched observations.
+            4. Maps each Thing ID to its latest observation (and timestamp if requested).
+
+        Args:
+            signal_type (str): The type of signal to fetch observations for. Must be either 'primary' or 'secondary'.
+            ids (list[int]): Thing IDs to retrieve observations for.
+            n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
+            phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
+
+        Returns:
+            dict: Maps each Thing ID to its latest observation result.
+                If `phnTime` is True, maps to a list of (timestamp, result) tuples.
+        """
+        if signal_type == "primary":
+            endpoint_ids = self.primary_signal_endpoint_ids
+            lookup_method = self._lookup_primary_signal_endpoint_ids
+        elif signal_type == "secondary":
+            endpoint_ids = self.secondary_signal_endpoint_ids
+            lookup_method = self._lookup_secondary_signal_endpoint_ids
+        else:
+            raise ValueError("signal_type must be either 'primary' or 'secondary'.")
+
+        if not endpoint_ids:
+            lookup_method()
+
+        if ids is None:
+            ids = self.ids
+
+        # Construct the filter query
+        filter_conditions = []
+        for thing_id in ids:
+            datastream_id = endpoint_ids.get(thing_id)
+            # Datastream IDs zero are not
+            if datastream_id:
+                filter_conditions.append(f"@iot.id eq {datastream_id}")
+            else:
+                logging.error(
+                    f"Thing({thing_id}) not found in currently observed Things."
+                )
+
+        filterquery = " or ".join(filter_conditions)
+        params = {
+            "$filter": filterquery,
+            "$expand": f"Observations($top={n_obsrvtns};$orderby=phenomenonTime desc)",
+        }
+        self.FETCHER.fetch_data(endpoint="Datastreams", params=params)
+        # Initialize a dictionary to hold the observations
+        observations_dict = {}
+        # Process fetched data
+        for datastream in self.FETCHER.data:
+            observations = datastream.get("Observations", [])
+            if not observations:
+                logging.error(
+                    f"No observations found for Datastream({datastream.get('@iot.id')})."
+                )
+                continue
+            # Extract observations
+            extracted_observations = [
+                [obs["phenomenonTime"], obs["result"]] if phnTime else [obs["result"]]
+                for obs in observations
+            ]
+            observations_dict[datastream["@iot.id"]] = extracted_observations
+        # Map to Thing IDs
+        things_observations = {
+            key: observations_dict[value]
+            for key, value in endpoint_ids.items()
+            if value in observations_dict
+        }
+        return things_observations
 
     def get_primary_signal_observations(
         self, ids: list[int] = None, n_obsrvtns: int = 1, phnTime: bool = False
     ):
         """
         Fetches the latest observations for primary signal datastreams of specified Thing IDs.
-
-        This method performs the following steps:
-            1. Fetches primary signal datastream IDs if not already available.
-            2. Builds a filter query for the datastream IDs.
-            3. Requests the latest observations from the Datastreams API.
-            4. Processes the fetched observations.
-            5. Maps each Thing ID to its latest observation (and timestamp if requested).
-            6. Logs errors for missing datastreams or observations.
 
         Args:
             ids (list[int]): Thing IDs to retrieve observations for.
@@ -176,7 +258,7 @@ class Things:
 
         Examples:
             >>> things = Things([2, 3, 18760])
-            >>> obervations = things.get_tl_observations(n_obsrvtns=2, phnTime=True)
+            >>> obervations = things.get_primary_signal_observations(n_obsrvtns=2, phnTime=True)
             >>> print(obervations)
             {
                 2: [['2024-10-27T18:37:55Z', 1], ['2024-10-27T18:37:52Z', 2]],
@@ -184,7 +266,7 @@ class Things:
                 18760: [['2024-10-27T18:37:42Z', 1], ['2024-10-27T18:37:39Z', 2]]
             }
             >>> things = Things([2, 3, 18760])
-            >>> obervations = things.get_tl_observations(n_obsrvtns=1)
+            >>> obervations = things.get_primary_signal_observations(n_obsrvtns=1)
             >>> print(obervations)
             {
                 2: [[1]],
@@ -192,55 +274,35 @@ class Things:
                 18760: [[1]]
             }
         """
+        return self._get_signal_observations(
+            signal_type="primary", ids=ids, n_obsrvtns=n_obsrvtns, phnTime=phnTime
+        )
 
-        if not self.primary_signal_endpoint_ids:
-            self._lookup_primary_signal_endpoint_ids()
+    def get_secondary_signal_observations(
+        self, ids: list[int] = None, n_obsrvtns: int = 1, phnTime: bool = False
+    ):
+        """
+        Fetches the latest observations for secondary signal datastreams of specified Thing IDs.
 
-        if ids is None:
-            ids = self.ids
-        # Construct the filter query to include all primary signal datastream IDs
-        filter_conditions = []
-        for thing_id in ids:
-            datastream_id = self.primary_signal_endpoint_ids.get(thing_id)
-            if datastream_id:
-                filter_conditions.append(f"@iot.id eq {datastream_id}")
-            else:
-                logging.error(
-                    f"Thing({thing_id}) not found in currently observed Things."
-                )
+        Args:
+            ids (list[int]): Thing IDs to retrieve observations for.
+            n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
+            phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
 
-        filterquery = " or ".join(filter_conditions)
+        Returns:
+            dict: Maps each Thing ID to its latest observation result.
+                If `phnTime` is True, maps to a list of (timestamp, result) tuples.
 
-        params = {
-            "$filter": filterquery,
-            "$expand": f"Observations($top={n_obsrvtns};$orderby=phenomenonTime desc)",
-        }
-        self.FETCHER.fetch_data(endpoint="Datastreams", params=params)
-
-        # Initialize a dictionary to hold the latest observations
-        trafficlight_observations = dict()  # key: datastream id, value: tf observations
-
-        # Iterate through each fetched datastream to extract the latest observation
-        for datastream in self.FETCHER.data:
-            observations = datastream["Observations"]
-            if not observations:
-                logging.error(
-                    f"No observations found for Datastream({datastream['@iot.id']})."
-                )
-                continue
-
-            # Exatracting last n observations
-            thing_observations = [
-                [obs["phenomenonTime"], obs["result"]] if phnTime else [obs["result"]]
-                for obs in observations
-            ]
-            trafficlight_observations[datastream["@iot.id"]] = thing_observations
-
-        # Map each Thing ID to its corresponding latest observation (and timestamp, if applicable)
-        things_observations = {
-            key: trafficlight_observations[value]
-            for key, value in self.primary_signal_endpoint_ids.items()
-            if value in trafficlight_observations
-        }
-
-        return things_observations
+        Examples:
+            >>> things = Things([4, 30, 6519])
+            >>> observations = things.get_secondary_signal_observations(n_obsrvtns=2, phnTime=True)
+            >>> print(observations)
+            {
+                4: [['2024-11-20T21:21:24Z', 0], ['2024-11-20T21:21:19Z', 3]],
+                30: [['2024-11-20T21:21:24Z', 0], ['2024-11-20T21:21:19Z', 3]],
+                6519: [['2024-11-20T17:55:27Z', 0], ['2024-11-20T17:55:24Z', 2]]
+            }
+        """
+        return self._get_signal_observations(
+            signal_type="secondary", ids=ids, n_obsrvtns=n_obsrvtns, phnTime=phnTime
+        )

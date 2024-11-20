@@ -23,7 +23,7 @@ class DBMaintainer:
     tables = ["Things", "Datastreams"]
 
     logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+        level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
     def create_tables():

@@ -372,6 +372,46 @@ class TestLookUpPrimarySignalEndpointIds(unittest.TestCase):
         self.assertEqual(result, expected_result)
 
 
+class TestLookUpSecondarySignalEndpointIds(unittest.TestCase):
+    def test_lookup_primary_signal_endpoint_ids_non_zero(self):
+        ids = [4, 7, 30, 42, 181, 6519, 8211, 8180]
+        things = Things(ids)
+        things._lookup_secondary_signal_endpoint_ids()
+
+        result = things.secondary_signal_endpoint_ids
+        expected_result = {
+            4: 26,
+            7: 28,
+            30: 4512,
+            42: 12430,
+            181: 87671,
+            6519: 73821,
+            8180: 35348,
+            8211: 32212,
+        }
+
+        self.assertEqual(result, expected_result)
+
+    def test_lookup_secondary_signal_endpoint_ids_zero(self):
+        ids = [3, 5, 8, 265, 1044, 1045, 8475, 8479, 18250]
+        things = Things(ids)
+        things._lookup_secondary_signal_endpoint_ids()
+
+        result = things.secondary_signal_endpoint_ids
+        expected_result = {
+            3: 0,
+            5: 0,
+            8: 0,
+            265: 0,
+            1044: 0,
+            1045: 0,
+            8475: 0,
+            8479: 0,
+            18250: 0,
+        }
+        self.assertEqual(result, expected_result)
+
+
 class TestGetTLObservations(unittest.TestCase):
     def test_get_tl_observations_valid_ids_phnTime_false(self):
         # Setup

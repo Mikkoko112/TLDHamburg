@@ -5,6 +5,7 @@
         "thingsLoc":"/data/thingsLoc.json",
         "vectorData":"/data/vectorisation.json",
         "conjunctionData":"/data/conjunctionsMeanSmall.json",
-        "cleanedConjunctionData":"/data/conjunctionsJoint.json"
+        "cleanedConjunctionData":"/data/conjunctionsJoint.json",
+        "GraphData":"/data/hamburg.gml"
     }
 }

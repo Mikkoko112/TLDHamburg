@@ -150,7 +150,7 @@ def getTraficLightsperRoute(routeList:dict)->dict:
     return routeList
 
 
-def run():
+def test():
     with open("../data/conjuctionDict.json","r") as file:
         conj = json.load(file)
     
@@ -169,4 +169,4 @@ def run():
         json.dump(dic,file,indent=4)
 
 if __name__ == "__main__":
-    run()
+    test()

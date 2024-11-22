@@ -1,6 +1,32 @@
 #!/usr/bin/env python3
 import requests
 import json
+import igraph
+from geopy import distance
+
+def getDistanceBetweenPoints(ent:list,sr:list)->float:
+    return distance.distance(ent,sr).km
+
+def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->dict:
+    def getFirstLast(coordsStartEnd:list,graph:igraph.GraphBase):
+        start,end = coordsStartEnd[0],coordsStartEnd[1]
+        first,last = -1,-1
+        minDistFirst,minDistLast = 1000,1000 #magic magic
+        for vert in graph.vs:
+            if minDistFirst > getDistanceBetweenPoints(start,[vert["lat"],vert["lon"]]):
+                first = vert["node_id"]
+            
+            if minDistLast > getDistanceBetweenPoints(start,):
+                first = vert["node_id"]
+            
+        return first,last
+
+    def combineRouteToGeoJson(routeList:list):
+        pass
+
+    first,last = getFirstLast(normalRoute)
+    all_paths = graph.get_all_shortest_paths(first,to=last)
+
 
 
 def getRoute(coordsStartEnd:list)->dict:

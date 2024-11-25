@@ -4,8 +4,10 @@
         "meanValueData":"/data/cleanedCoorsAverage.json",
         "thingsLoc":"/data/thingsLoc.json",
         "vectorData":"/data/vectorisation.json",
-        "conjunctionData":"/data/conjunctionsMeanSmall.json",
+        "conjunctionData":"/data/conjunctionsMean.json",
         "cleanedConjunctionData":"/data/conjunctionsJoint.json",
-        "GraphData":"/data/hamburg.gml"
+        "allFetchAreas":"/data/fetchAreasFullData.json",
+        "GraphData":"/data/shHamburg.gml",
+        "holeData":"/data/holeData.json"
     }
 }

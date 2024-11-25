@@ -9,23 +9,23 @@ import json
 class RoutePlaner:
 
     def getUpdateOnTraficLight(self,traficLightsId):
-        status,nextPhase,rapidUpdate = 0,0,False
+        status,nextPhase,nextPhaseTime,rapidUpdate = 0,0,0,False
         
         if isinstance(traficLightsId, list):
             out = []
             for elem in traficLightsId:
                 if not isinstance(elem,list):
-                    out.append(getUpdateOnTraficLight(elem))  
+                    out.append(self.getUpdateOnTraficLight(elem))  
                 else:
                     print("Wrong format. Input should be a list of strings")
                     exit(1)
             
             return out
         elif isinstance(traficLightsId,str):
-            return (traficLightsId,status,nextPhase,rapidUpdate)
+            return (traficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
 
         elif isinstance(traficLightsId,int):
-            return getUpdateOnTraficLight(str(traficLightsId))
+            return self.getUpdateOnTraficLight(str(traficLightsId))
 
     def safeRoute(self)->None:
         with open("{}/route.geojson".format(self.path),"w") as file:
@@ -55,7 +55,7 @@ class RoutePlaner:
 
     def __init__(self,path:str):
         self.path = path
-        _initMapData()
+        #self._initMapData()
         
 
 

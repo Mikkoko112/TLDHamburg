@@ -7,7 +7,7 @@ from time import sleep
 
 modif = 1000
 
-def roundValues(coords:list)->list:
+def roundValues(coords:list,modif:int)->list:
    
     coordsCopy = list(coords)
     func = [floor,ceil]
@@ -25,8 +25,8 @@ def fetchAreas(relevantAres:dict):
         coords = note[0]
         
         if(name != "13937"):
-            holeData[name] = getNotes(roundValues(coords))
-            print("{:.2f}% {} {} {}".format(idx/len(relevantAres)*100,name,len(holeData[name]),roundValues(coords)))
+            holeData[name] = getNotes(roundValues(coords,modif))
+            print("{:.2f}% {} {} {}".format(idx/len(relevantAres)*100,name,len(holeData[name]),roundValues(coords,modif)))
             idx+=1
             with open("holeDataSAFE.json","w") as file: #after Run change
                 json.dump(holeData, file, indent=4)
@@ -76,16 +76,7 @@ def mapPaths():
     with open("holeData.json","w") as file:
         json.dump(areas, file, indent=4)
 
-def getWrongSquares(coords:dict,coordsBase)->dict:
-    out = dict()
-    for name,coord in coords.items():
-        if len(coord) != 4:
-            out[name] = coordsBase[name]
-    for name,coord in coordsBase.items():
-        if not name in coords:
-            out[name] = coord
-        
-    return out
+
     
 def correctTheHoleData():
     with open("../data/fetchAreasFullData.json","r") as file:
@@ -107,23 +98,13 @@ def correctTheHoleData():
     with open("refetchData.json","w") as file:
         json.dump(areas, file, indent=4)
 
-def checkLength():
-    with open("../data/fetchAreasFullData.json","r") as file:
-        coordsBase = json.load(file)
-
-    with open("refetchData.json","r") as file:
-        coords = json.load(file)
-
-    print(len(coordsBase),len(coords))
-
-    out = getWrongSquares(coords,coordsBase)
-    print(len(out))
-    
-    with open("missingData.json","w") as file:
-        json.dump(out,file,indent=4)
-
 
 if __name__ == "__main__":
+    with open("../optionsfile.json","r") as file:
+        options = json.load(file)
+
+    modif = options["modif"]
+
     #mapPaths()
     #singleCall()
     #correctTheHoleData()

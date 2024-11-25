@@ -450,10 +450,7 @@ class TestGetTLObservations(unittest.TestCase):
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
 
         # Call the method under test
-        result = things.get_primary_signal_observations(
-            ids, n_obsrvtns=1, phnTime=False
-        )
-
+        result = things.get_primary_signal_observations(n_obsrvtns=1, phnTime=False)
         # Expected result
         expected_result = {
             2: [[1]],
@@ -503,7 +500,7 @@ class TestGetTLObservations(unittest.TestCase):
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
 
         # Call the method under test
-        result = things.get_primary_signal_observations(ids, n_obsrvtns=2, phnTime=True)
+        result = things.get_primary_signal_observations(n_obsrvtns=2, phnTime=True)
 
         # Expected result
         expected_result = {
@@ -514,51 +511,6 @@ class TestGetTLObservations(unittest.TestCase):
 
         # Assert
         self.assertEqual(result, expected_result)
-
-    def test_get_tl_observations_with_missing_ids(self):
-        # Setup
-        ids = [2, 3, 18760, 999]
-        things = Things([2, 3])
-        things.primary_signal_endpoint_ids = {2: 15, 3: 6}
-
-        # Create a mock FETCHER
-        mock_fetcher = MagicMock()
-        things.FETCHER = mock_fetcher
-
-        def side_effect_fetch_data(endpoint, params):
-            mock_fetcher.data = [
-                {
-                    "@iot.id": 15,
-                    "Observations": [
-                        {"phenomenonTime": "2024-10-27T18:37:55Z", "result": 1}
-                    ],
-                },
-                {
-                    "@iot.id": 6,
-                    "Observations": [
-                        {"phenomenonTime": "2024-10-27T18:37:55Z", "result": 2}
-                    ],
-                },
-            ]
-
-        mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
-
-        with patch("logging.error") as mock_logging_error:
-            result = things.get_primary_signal_observations(
-                ids, n_obsrvtns=1, phnTime=False
-            )
-
-            expected_result = {
-                2: [[1]],
-                3: [[2]],
-            }
-
-            self.assertEqual(result, expected_result)
-
-            # Check that logging.error was called for the missing IDs
-            calls = [call[0][0] for call in mock_logging_error.call_args_list]
-            self.assertIn("Thing(18760) not found in currently observed Things.", calls)
-            self.assertIn("Thing(999) not found in currently observed Things.", calls)
 
     def test_get_tl_observations_no_observations(self):
         # Setup
@@ -579,9 +531,7 @@ class TestGetTLObservations(unittest.TestCase):
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
 
         with patch("logging.error") as mock_logging_error:
-            result = things.get_primary_signal_observations(
-                ids, n_obsrvtns=1, phnTime=False
-            )
+            result = things.get_primary_signal_observations(n_obsrvtns=1, phnTime=False)
 
             expected_result = {}
             self.assertEqual(result, expected_result)

@@ -17,6 +17,10 @@ class Things:
         self.things_endpoint = "Things"
         self.primary_signal_endpoint_ids = dict()
         self.secondary_signal_endpoint_ids = dict()
+        self.acoustic_signal_endpoints_ids = dict()
+        self.detector_car_endpoints_ids = dict()
+        self.detector_cyclists_endpoints_ids = dict()
+        self.signal_program_endpoints_ids = dict()
         self.coordinates = dict()
 
     def _fetch_coordinates(self):
@@ -148,7 +152,6 @@ class Things:
                 )
 
     def _lookup_primary_signal_endpoint_ids(self):
-
         self.primary_signal_endpoint_ids = DBMaintainer.read_datastreams_db(
             ids=self.ids, attribute="primary_signal"
         )
@@ -158,15 +161,34 @@ class Things:
             ids=self.ids, attribute="secondary_signal"
         )
 
+    def _lookup_acoustic_signal_endpoint_ids(self):
+        self.acoustic_signal_endpoints_ids = DBMaintainer.read_datastreams_db(
+            ids=self.ids, attribute="acoustic_signal"
+        )
+
+    def _lookup_detector_car_endpoint_ids(self):
+        self.detector_car_endpoints_ids = DBMaintainer.read_datastreams_db(
+            ids=self.ids, attribute="detector_car"
+        )
+
+    def _lookup_detector_cyclists_ids(self):
+        self.detector_cyclists_endpoints_ids = DBMaintainer.read_datastreams_db(
+            ids=self.ids, attribute="detector_cyclists"
+        )
+
+    def _lookup_signal_program_endpoint_ids(self):
+        self.signal_program_endpoints_ids = DBMaintainer.read_datastreams_db(
+            ids=self.ids, attribute="signal_program"
+        )
+
     def _get_signal_observations(
         self,
         signal_type: str,
-        ids: list[int] = None,
         n_obsrvtns: int = 1,
         phnTime: bool = False,
     ):
         """
-        General method to fetch latest observations for a given signal type (primary or secondary).
+        General method to fetch latest observations for a given signal type.
 
         This method performs the following steps:
             1. Builds a filter query based on the datastream IDs.
@@ -176,7 +198,6 @@ class Things:
 
         Args:
             signal_type (str): The type of signal to fetch observations for. Must be either 'primary' or 'secondary'.
-            ids (list[int]): Thing IDs to retrieve observations for.
             n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
             phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
 
@@ -185,29 +206,46 @@ class Things:
                 If `phnTime` is True, maps to a list of (timestamp, result) tuples.
         """
         if signal_type == "primary":
+            if not self.primary_signal_endpoint_ids:
+                self._lookup_primary_signal_endpoint_ids()
             endpoint_ids = self.primary_signal_endpoint_ids
-            lookup_method = self._lookup_primary_signal_endpoint_ids
+
         elif signal_type == "secondary":
+            if not self.secondary_signal_endpoint_ids:
+                self._lookup_secondary_signal_endpoint_ids()
             endpoint_ids = self.secondary_signal_endpoint_ids
-            lookup_method = self._lookup_secondary_signal_endpoint_ids
+
+        elif signal_type == "acoustic":
+            if not self.acoustic_signal_endpoints_ids:
+                self._lookup_acoustic_signal_endpoint_ids()
+            endpoint_ids = self.acoustic_signal_endpoints_ids
+
+        elif signal_type == "detector_car":
+            if not self.detector_car_endpoints_ids:
+                self._lookup_detector_car_endpoint_ids()
+            endpoint_ids = self.detector_car_endpoints_ids
+
+        elif signal_type == "detector_cyclists":
+            if not self.detector_cyclists_endpoints_ids:
+                self._lookup_detector_cyclists_ids()
+            endpoint_ids = self.detector_cyclists_endpoints_ids
+
+        elif signal_type == "signal_program":
+            if not self.signal_program_endpoints_ids:
+                self._lookup_signal_program_endpoint_ids()
+            endpoint_ids = self.signal_program_endpoints_ids
         else:
-            raise ValueError("signal_type must be either 'primary' or 'secondary'.")
-
-        if not endpoint_ids:
-            lookup_method()
-
-        if ids is None:
-            ids = self.ids
+            raise ValueError("signal_type must be either not supported.")
 
         # Construct the filter query
         filter_conditions = []
-        for thing_id in ids:
+        for thing_id in self.ids:
             datastream_id = endpoint_ids.get(thing_id)
             # Datastream IDs zero are not
             if datastream_id:
                 filter_conditions.append(f"@iot.id eq {datastream_id}")
             else:
-                logging.error(
+                logging.info(
                     f"Thing({thing_id}) not found in currently observed Things."
                 )
 
@@ -242,13 +280,12 @@ class Things:
         return things_observations
 
     def get_primary_signal_observations(
-        self, ids: list[int] = None, n_obsrvtns: int = 1, phnTime: bool = False
+        self, n_obsrvtns: int = 1, phnTime: bool = False
     ):
         """
         Fetches the latest observations for primary signal datastreams of specified Thing IDs.
 
         Args:
-            ids (list[int]): Thing IDs to retrieve observations for.
             n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
             phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
 
@@ -275,17 +312,16 @@ class Things:
             }
         """
         return self._get_signal_observations(
-            signal_type="primary", ids=ids, n_obsrvtns=n_obsrvtns, phnTime=phnTime
+            signal_type="primary", n_obsrvtns=n_obsrvtns, phnTime=phnTime
         )
 
     def get_secondary_signal_observations(
-        self, ids: list[int] = None, n_obsrvtns: int = 1, phnTime: bool = False
+        self, n_obsrvtns: int = 1, phnTime: bool = False
     ):
         """
         Fetches the latest observations for secondary signal datastreams of specified Thing IDs.
 
         Args:
-            ids (list[int]): Thing IDs to retrieve observations for.
             n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
             phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
 
@@ -304,5 +340,31 @@ class Things:
             }
         """
         return self._get_signal_observations(
-            signal_type="secondary", ids=ids, n_obsrvtns=n_obsrvtns, phnTime=phnTime
+            signal_type="secondary", n_obsrvtns=n_obsrvtns, phnTime=phnTime
+        )
+
+    def get_acoustic_signal_observations(
+        self, n_obsrvtns: int = 1, phnTime: bool = False
+    ):
+        return self._get_signal_observations(
+            signal_type="acoustic", n_obsrvtns=n_obsrvtns, phnTime=phnTime
+        )
+
+    def get_detector_car_observations(self, n_obsrvtns: int = 1, phnTime: bool = False):
+        return self._get_signal_observations(
+            signal_type="detector_car", n_obsrvtns=n_obsrvtns, phnTime=phnTime
+        )
+
+    def get_detector_cyclists_observations(
+        self, n_obsrvtns: int = 1, phnTime: bool = False
+    ):
+        return self._get_signal_observations(
+            signal_type="detector_cyclists", n_obsrvtns=n_obsrvtns, phnTime=phnTime
+        )
+
+    def get_signal_program_observations(
+        self, n_obsrvtns: int = 1, phnTime: bool = False
+    ):
+        return self._get_signal_observations(
+            signal_type="signal_program", n_obsrvtns=n_obsrvtns, phnTime=phnTime
         )

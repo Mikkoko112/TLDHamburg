@@ -346,11 +346,53 @@ class Things:
     def get_acoustic_signal_observations(
         self, n_obsrvtns: int = 1, phnTime: bool = False
     ):
+        """
+        Fetches the latest observations for acoustic signal datastreams of specified Thing IDs.
+
+        Args:
+            n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
+            phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
+
+        Returns:
+            dict: Maps each Thing ID to its latest observation result.
+                If `phnTime` is True, maps to a list of (timestamp, result) tuples.
+
+        Examples:
+            >>> things = Things([17, 21, 3850])
+            >>> observations = things.get_acoustic_signal_observations(n_obsrvtns=2, phnTime=True)
+            >>> print(observations)
+            {
+                17: [['2024-11-26T08:39:19Z', 0], ['2024-11-26T08:39:05Z', 3]],
+                21: [['2024-11-26T08:49:13Z', 0], ['2024-11-26T08:48:38Z', 3]],
+                3850: [['2024-11-20T23:21:49Z', 0], ['2024-11-19T23:21:49Z', 0]]
+            }
+        """
         return self._get_signal_observations(
             signal_type="acoustic", n_obsrvtns=n_obsrvtns, phnTime=phnTime
         )
 
     def get_detector_car_observations(self, n_obsrvtns: int = 1, phnTime: bool = False):
+        """
+        Fetches the latest observations for car detector datastreams of specified Thing IDs.
+
+        Args:
+            n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
+            phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
+
+        Returns:
+            dict: Maps each Thing ID to its latest observation result.
+                If `phnTime` is True, maps to a list of (timestamp, result) tuples.
+
+        Examples:
+            >>> things = Things([6, 2687, 5803])
+            >>> observations = things.get_detector_car_observations(n_obsrvtns=2, phnTime=True)
+            >>> print(observations)
+            {
+                6: [['2024-11-26T08:56:13Z', 0], ['2024-11-26T08:56:12Z', 40]],
+                2687: [['2024-11-26T08:52:10Z', 0], ['2024-11-26T08:52:09Z', 10]],
+                5803: [['2024-11-26T08:56:23Z', 100], ['2024-11-26T08:56:22Z', 60]]
+            }
+        """
         return self._get_signal_observations(
             signal_type="detector_car", n_obsrvtns=n_obsrvtns, phnTime=phnTime
         )
@@ -358,6 +400,27 @@ class Things:
     def get_detector_cyclists_observations(
         self, n_obsrvtns: int = 1, phnTime: bool = False
     ):
+        """
+        Fetches the latest observations for cyclists detector datastreams of specified Thing IDs.
+
+        Args:
+            n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
+            phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
+
+        Returns:
+            dict: Maps each Thing ID to its latest observation result.
+                If `phnTime` is True, maps to a list of (timestamp, result) tuples.
+
+        Examples:
+            >>> things = Things([10, 91, 8044])
+            >>> observations = things.get_detector_cyclists_observations(n_obsrvtns=2, phnTime=True)
+            >>> print(observations)
+            {
+                10: [['2024-11-26T08:51:05Z', True], ['2024-11-26T08:50:51Z', False]],
+                91: [['2024-11-26T08:45:20Z', False], ['2024-11-26T08:45:18Z', True]],
+                8044: [['2024-11-26T08:27:46Z', False], ['2024-11-26T08:27:45Z', True]]
+            }
+        """
         return self._get_signal_observations(
             signal_type="detector_cyclists", n_obsrvtns=n_obsrvtns, phnTime=phnTime
         )
@@ -365,6 +428,27 @@ class Things:
     def get_signal_program_observations(
         self, n_obsrvtns: int = 1, phnTime: bool = False
     ):
+        """
+        Fetches the latest observations for signal program datastreams of specified Thing IDs.
+
+        Args:
+            n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
+            phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
+
+        Returns:
+            dict: Maps each Thing ID to its latest observation result.
+                If `phnTime` is True, maps to a list of (timestamp, result) tuples.
+
+        Examples:
+            >>> things = Things([2, 3, 6])
+            >>> observations = things.get_signal_program_observations(n_obsrvtns=2, phnTime=True)
+            >>> print(observations)
+            {
+                2: [['2024-11-26T04:01:50Z', 1], ['2024-11-25T23:01:30Z', 2]],
+                3: [['2024-11-26T04:01:50Z', 1], ['2024-11-25T23:01:30Z', 2]],
+                6: [['2024-11-26T04:01:50Z', 1], ['2024-11-25T23:01:30Z', 2]]
+            }
+        """
         return self._get_signal_observations(
             signal_type="signal_program", n_obsrvtns=n_obsrvtns, phnTime=phnTime
         )

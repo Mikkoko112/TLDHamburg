@@ -8,16 +8,6 @@ geopy==2.4.1
 loguru==0.7.2
 requests==2.32.3
 shapely==2.0.6
-
-sys
 pathlib
-os
-webbrowser
-base64
-urllib.parse
-threading
-json
-pickle
-time
 # pip show module 
 

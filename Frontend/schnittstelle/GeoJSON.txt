@@ -1,0 +1,48 @@
+Point: Ein einzelner Punkt, z. B. Wegpunkt oder Ampel [lon, lat]
+{
+  "type": "Point",
+  "coordinates": [53.5524079, 10.0084222]
+}
+
+LineString: Eine Linie, die aus einer Reihe von Punkten besteht. 
+Sie repräsentiert z. B. eine Straße oder einen Fluss.
+{
+  "type": "LineString",
+  "coordinates": [
+                    [10.008591,53.552349],
+                    [10.008522,53.552278],
+                    [10.008246,53.552141],
+                    [10.008027,53.552094],
+                    [10.006768,53.551935]
+  ]
+}
+
+Polygon: Ein Polygon beschreibt eine Fläche, die von Punkten umschlossen wird, z. B. ein See oder ein Grundstück.
+{
+  "type": "Polygon",
+  "coordinates": [
+    [
+      [30.0, 10.0],
+      [40.0, 40.0],
+      [20.0, 40.0],
+      [10.0, 20.0],
+      [30.0, 10.0]
+    ]
+  ]
+}
+
+Ein Feature kombiniert eine Geometrie mit zusätzlichen Attributen (Eigenschaften). 
+Es repräsentiert eine echte geografische Entität, wie z. B. eine Stadt oder einen Park, 
+und ermöglicht es, Eigenschaften wie Name, Bevölkerung usw. zu speichern.
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [53.5524079, 10.0084222]
+  },
+  "properties": {
+    "id": "1",
+    "object": "primary_signal",
+    "status": "red"
+  }
+}

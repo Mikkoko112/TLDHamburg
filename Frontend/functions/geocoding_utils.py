@@ -54,6 +54,9 @@ def return_coordinates(address: str, geolocator = Nominatim):
         logger.warning(f"Could not fetch geocode information for {address} because of {e}.")
     return lat,lon
 
+def convert_to_lat_lon(lonlat):
+    return lonlat[1], lonlat[0]  # Swap the order
+
 #geolocator = Nominatim(user_agent="http")
 #x = return_coordinates("Lehmweg 9 Hamburg")
 #print(x)

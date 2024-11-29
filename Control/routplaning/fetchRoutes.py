@@ -5,6 +5,9 @@ import igraph
 import math
 from geopy import distance
 from timeit import default_timer as timer
+from angle_at_intersection import is_left_turn_tolerance as leftTurn
+from angle_at_intersection import is_right_turn_tolerance as rightTurn
+from models import ORSNode
 
 def getDistanceBetweenPoints(ent:list,sr:list)->float:
     return distance.distance(ent,sr).km
@@ -18,8 +21,10 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
         minDistFirst,minDistLast = 1000,1000 #magic magic
         vs = graph.vs
         for i,vert in enumerate(vs): #138.40509840599952
-            distStart = math.sqrt((coordsStartEnd[0][1]-vert["lat"])**2+(coordsStartEnd[0][0]-vert["lon"])**2)
-            distEnd = math.sqrt((coordsStartEnd[1][1]-vert["lat"])**2+(coordsStartEnd[1][0]-vert["lon"])**2)
+            distStart = math.sqrt((coordsStartEnd[0][1]-vert["lat"])**2+
+                                  (coordsStartEnd[0][0]-vert["lon"])**2)
+            distEnd =   math.sqrt((coordsStartEnd[1][1]-vert["lat"])**2+
+                                  (coordsStartEnd[1][0]-vert["lon"])**2)
            
             if minDistFirst > distStart:
                 first = vert["nodeid"]
@@ -27,8 +32,6 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
             if minDistLast > distEnd:
                 last = vert["nodeid"]
                 minDistLast = distEnd
-            #print("{:.2f}".format(i/len(vs)*100),minDistFirst,minDistLast,distStart,distEnd) #viel zu langsam
-
             if minDistFirst < 0.0005 and minDistLast < 0.0005: #sollte ungefähr 100 meter sein
                 break
 
@@ -43,9 +46,25 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
         outRoute = []
         for i,route in enumerate(routeList):
             coordRoute = []
-            for node in route:
+            distancefromBefore = 0
+            for i,node in enumerate(route):
                 vekt = graph.vs.select(node)
-                coordRoute.append([vekt["lon"][0],vekt["lat"][0]])
+                if i != 0:
+                    print(i,int(pNode["id"][0]),int(vekt["id"][0]),type(pNode["id"]),type(int(vekt["id"][0])))
+                   
+                    edge = graph.es.select(_source=int(pNode["nodeid"][0]),_target=int(vekt["nodeid"][0]))
+                    distancefromBefore = edge["length"][0]
+                    maxSpeed = int(edge["maxspeed"][0]) if edge["maxspeed"][0] != "None" else 50 
+                    pNode = vekt
+                else:
+                    distancefromBefore = 0
+                    maxSpeed = 0
+                    pNode = vekt
+                coordRoute.append([vekt["lat"][0],
+                                   vekt["lon"][0],
+                                   node,
+                                   distancefromBefore,
+                                   maxSpeed])
 
             outRoute.append(coordRoute)
         return outRoute
@@ -61,48 +80,110 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
             minimum_node = node["nodeid"]
         return minimum_node
 
-    def generateGeoJsonFile(coordList:list)->dict:
-        
+    def generateGeoJsonFile(coordList:list,graph:igraph.Graph)->dict:
+        def generateDirection()->dict:
+            pass
+
+
         routelistJson = []
         latmaxList,latminList = [],[]
         logmaxList,logminList = [],[]
         for route in coordList:
-            lat,log = [coord[0] for coord in route ], [coord[1] for coord in route]
+            lat,log= [coord[0] for coord in route],[coord[1] for coord in route]
             latmaxList.append(max(lat))
             latminList.append(min(lat))
             logmaxList.append(max(log))
             logminList.append(min(log))
 
+           
+            directions = []
+            speeds = []
+            lastSpeed,lastSpeedChangeIdx = 0,0            
+            lastWayPoint = 0
+            for i,node in enumerate(route): #this generates the direction
+                                            #This should maybe be it`s own func
+                if i == len(route)-1: continue #Um Out of index zu umgehen
+                if lastSpeed == 0:
+                    lastSpeed = node[4]
+                    lastSpeedChangeIdx = 0
+                
+                if node[4] != lastSpeed or i == len(route)-2:
+                    speeds.append(
+                        {
+                            "maxspeed":lastSpeed,
+                            "way_points":[
+                                lastSpeedChangeIdx,
+                                i
+                            ]
+                        }
+                    )
+                    lastSpeed = node[4]
+                    lastSpeedChangeIdx = i
+
+                beforeORS = ORSNode(lat = route[i-1][0],lon = route[i-1][1],id = route[i-1][2])
+                thisORS = ORSNode(lat = node[0],lon = node[1],id = node[2])
+                nextORS = ORSNode(lat = route[i+1][0],lon = route[i+1][1],id = route[i+1][2])
+
+                leftBool:bool  =  leftTurn(beforeORS,thisORS,nextORS)
+                rightBool:bool = rightTurn(beforeORS,thisORS,nextORS)
+                if leftBool or rightBool:
+                    name = str(graph.es.select(_source=node[2],_target=route[i+1][2])["name"][0]) #maybe we need a search ahead to prevent a none value
+                    if leftBool and not rightBool:
+                        direc = "left"
+                    elif not leftBool and rightBool:
+                        direc = "right"
+                    else:
+                        direc = " Error This should not accor"
+                    print(i,node)
+                    directions.append(
+                        {
+                            "distance": sum([tNode[3] for tNode in route[lastWayPoint:i+1]]), #this could be reduced to a running value
+                            "duration": sum([tNode[3]/((5/18)*(tNode[4] if tNode[4] != 0 else 50)) for tNode in route[lastWayPoint:i+1]]), #same here if i have time i should change this
+                            "type": 0 if leftBool else 1,
+                            "instruction": f"Head {direc} on {name}",
+                            "name": name,
+                            "way_points": [
+                                lastWayPoint,
+                                i+1
+                            ]
+                        }
+                    )
+                    lastWayPoint = i+1 
+                else:
+                    pass
+
+
             routelistJson.append(
              {
                 "bbox":[
                     
-                        min(lat),
                         min(log),
-                        max(lat),
-                        max(log)
+                        min(lat),
+                        max(log),
+                        max(lat)
                     
                 ],
                 "type": "Feature",
                 "geometry": {
                     "type": "LineString",
-                    "coordinates": route
+                    "coordinates": [coords[0:2] for coords in route]
                 },
                 "properties": {
+                    "segments": directions,
+                    "speeds": speeds,
                     "name": "Example Route"
                 }
             }   
             )
 
-
         return {
             "type": "FeatureCollection",
             "bbox":[
                 [
-                    min(latminList),
                     min(logminList),
-                    max(latmaxList),
-                    max(logmaxList)
+                    min(latminList),
+                    max(logmaxList),
+                    max(latmaxList)
                 ]
             ],
             "features": routelistJson
@@ -110,23 +191,18 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
         
 
     
-    #start = timer()
     first,last = getFirstLast(coordsStartEnd,graph)
-    #print(timer()-start) #65.29947478900067
-    #print(first,last)
-    
     
     all_paths = graph.get_all_shortest_paths(first,to=last)
     
-    #start = timer()
     coordRoutes = convertToCoordinateRoute(all_paths,graph)
     
-    #print(timer()-start) #65.29947478900067
+    geoJsonRoutes = generateGeoJsonFile(coordRoutes,graph)
     
-    geoJsonRoutes = generateGeoJsonFile(coordRoutes)
-    
+
+
     with open("route.geojson","w") as file:
-        json.dump(geoJsonRoutes,file, indent=4)
+        json.dump(geoJsonRoutes,file, indent=4,ensure_ascii=False)
 
 def getRoute(coordsStartEnd:list)->dict:
 
@@ -165,7 +241,8 @@ def getMultipleRoutes(coordsStartEnd:list)->dict:
 
 def test():
     graph = igraph.load("../data/shHamburg.gml")
-    routes = getRouteFromGraph([[9.946091651916504,53.59207534790039 ],[10.0772705078125,53.61192321777344]],graph)
+    routes = getRouteFromGraph([[9.946091651916504,53.59207534790039 ],
+                                [10.0772705078125,53.61192321777344]],graph)
 
 if __name__ == "__main__":
     test()

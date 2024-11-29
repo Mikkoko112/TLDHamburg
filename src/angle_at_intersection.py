@@ -5,7 +5,7 @@ import math
 from models import ORSNode
 
 
-# 0.2 radians are approximately 40 degrees.
+# 0.7 radians are approximately 40 degrees.
 TOLERANCE: float = 0.7
 
 

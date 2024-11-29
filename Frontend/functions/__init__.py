@@ -1,4 +1,8 @@
-__all__ = ["geocoding_utils", "get_objects", "load_file", "open_browser", 
+__all__ = ["geocoding_utils", "get_objects", "open_browser", 
            "upload_file",
-            "Things"
+            "Things",
+            "get_route",
+            "position",
+            "trafficlights",
+            #"route"
             ]

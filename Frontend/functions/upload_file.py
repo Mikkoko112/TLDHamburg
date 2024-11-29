@@ -1,7 +1,7 @@
 import os
 import base64
 from urllib.parse import quote as urlquote
-import dash_html_components as html
+from dash import html
 import dash_bootstrap_components as dbc
 from pathlib import Path
 

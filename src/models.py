@@ -36,6 +36,15 @@ class ORSNode:
     lat: float
     lon: float
 
+    def __matmul__(self, other) -> float:
+        return self.lat * other.lat + self.lon * other.lon
+
+    def __sub__(self, other):
+        return ORSNode(id=-9999, lat=self.lat - other.lat, lon=self.lon - other.lon)
+
+    def __abs__(self):
+        return math.dist((0, 0), (self.lat, self.lon))
+
 
 @dataclass
 class OSMNode:
@@ -62,3 +71,12 @@ class OSMNode:
         xml_data = ET.fromstring(call.text)
 
         return minimum_distance_node(n_from, xml_data.iter("node"))
+
+    def __matmul__(self, other) -> float:
+        return self.lat * other.lat + self.lon * other.lon
+
+    def __sub__(self, other):
+        return OSMNode(id=-9999, lat=self.lat - other.lat, lon=self.lon - other.lon)
+
+    def __abs__(self):
+        return math.dist((0, 0), (self.lat, self.lon))

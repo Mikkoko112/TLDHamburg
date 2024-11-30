@@ -150,11 +150,6 @@ class DBMaintainer:
         Args:
             table (str, optional): The name of the table to retrieve data from.
                 Defaults to "Things".
-
-        Raises:
-            sqlite3.Error: If an error occurs while connecting to the database or executing the query.
-            ValueError: If the specified table does not exist in the database.
-
         """
         if table not in DBMaintainer.tables:
             raise ValueError(f"Table '{table}' was not found in the database.")

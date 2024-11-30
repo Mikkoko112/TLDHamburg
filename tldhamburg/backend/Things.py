@@ -20,7 +20,12 @@ class Things:
         self.acoustic_signal_endpoints_ids = dict()
         self.detector_car_endpoints_ids = dict()
         self.detector_cyclists_endpoints_ids = dict()
+        self.detector_pedestrian_endpoints_ids = dict()
+        self.bus_pre_request_endpoints_ids = dict()
+        self.bus_request_endpoints_ids = dict()
+        self.bus_checkout_endpoints_ids = dict()
         self.signal_program_endpoints_ids = dict()
+        self.cycle_second_endpoints_ids = dict()
         self.coordinates = dict()
 
     def _fetch_coordinates(self):
@@ -152,33 +157,124 @@ class Things:
                 )
 
     def _lookup_primary_signal_endpoint_ids(self):
+        """
+        Retrieves the primary signal datastream IDs for the given Thing IDs from the TLDHamburg
+        database and maps each Thing ID to the corresponding datastream ID.
+
+        The result is stored in a dictionary.
+        """
         self.primary_signal_endpoint_ids = DBMaintainer.read_datastreams_db(
             ids=self.ids, attribute="primary_signal"
         )
 
     def _lookup_secondary_signal_endpoint_ids(self):
+        """
+        Retrieves the secondary signal datastream IDs for the given Thing IDs from the TLDHamburg
+        database and maps each Thing ID to the corresponding datastream ID.
+
+        The result is stored in a dictionary.
+        """
         self.secondary_signal_endpoint_ids = DBMaintainer.read_datastreams_db(
             ids=self.ids, attribute="secondary_signal"
         )
 
     def _lookup_acoustic_signal_endpoint_ids(self):
+        """
+        Retrieves the acoustic signal datastream IDs for the given Thing IDs from the TLDHamburg
+        database and maps each Thing ID to the corresponding datastream ID.
+
+        The result is stored in a dictionary.
+        """
         self.acoustic_signal_endpoints_ids = DBMaintainer.read_datastreams_db(
             ids=self.ids, attribute="acoustic_signal"
         )
 
     def _lookup_detector_car_endpoint_ids(self):
+        """
+        Retrieves the car detector datastream IDs for the given Thing IDs from the TLDHamburg
+        database and maps each Thing ID to the corresponding datastream ID.
+
+        The result is stored in a dictionary.
+        """
         self.detector_car_endpoints_ids = DBMaintainer.read_datastreams_db(
             ids=self.ids, attribute="detector_car"
         )
 
     def _lookup_detector_cyclists_ids(self):
+        """
+        Retrieves the cyclists detector datastream IDs for the given Thing IDs from the TLDHamburg
+        database and maps each Thing ID to the corresponding datastream ID.
+
+        The result is stored in a dictionary.
+        """
         self.detector_cyclists_endpoints_ids = DBMaintainer.read_datastreams_db(
             ids=self.ids, attribute="detector_cyclists"
         )
 
+    def _lookup_detector_pedestrian_ids(self):
+        """
+        Retrieves the pedestrian detector datastream IDs for the given Thing IDs from the TLDHamburg
+        database and maps each Thing ID to the corresponding datastream ID.
+
+        The result is stored in a dictionary.
+        """
+        self.detector_pedestrian_endpoints_ids = DBMaintainer.read_datastreams_db(
+            ids=self.ids, attribute="detector_pedestrian"
+        )
+
+    def _lookup_bus_pre_request_ids(self):
+        """
+        Retrieves the bus pre-request datastream IDs for the given Thing IDs from the TLDHamburg
+        database and maps each Thing ID to the corresponding datastream ID.
+
+        The result is stored in a dictionary.
+        """
+        self.bus_pre_request_endpoints_ids = DBMaintainer.read_datastreams_db(
+            ids=self.ids, attribute="bus_pre_request_point"
+        )
+
+    def _lookup_bus_request_ids(self):
+        """
+        Retrieves the bus request datastream IDs for the given Thing IDs from the TLDHamburg
+        database and maps each Thing ID to the corresponding datastream ID.
+
+        The result is stored in a dictionary.
+        """
+        self.bus_request_endpoints_ids = DBMaintainer.read_datastreams_db(
+            ids=self.ids, attribute="bus_request_point"
+        )
+
+    def _lookup_bus_checkout_ids(self):
+        """
+        Retrieves the bus checkout datastream IDs for the given Thing IDs from the TLDHamburg
+        database and maps each Thing ID to the corresponding datastream ID.
+
+        The result is stored in a dictionary.
+        """
+        self.bus_checkout_endpoints_ids = DBMaintainer.read_datastreams_db(
+            ids=self.ids, attribute="bus_checkout"
+        )
+
     def _lookup_signal_program_endpoint_ids(self):
+        """
+        Retrieves the signal program datastream IDs for the given Thing IDs from the TLDHamburg
+        database and maps each Thing ID to the corresponding datastream ID.
+
+        The result is stored in a dictionary.
+        """
         self.signal_program_endpoints_ids = DBMaintainer.read_datastreams_db(
             ids=self.ids, attribute="signal_program"
+        )
+
+    def _lookup_cycle_second(self):
+        """
+        Retrieves the cycle second datastream IDs for the given Thing IDs from the TLDHamburg
+        database and maps each Thing ID to the corresponding datastream ID.
+
+        The result is stored in a dictionary.
+        """
+        self.cycle_second_endpoints_ids = DBMaintainer.read_datastreams_db(
+            ids=self.ids, attribute="cycle_second"
         )
 
     def _get_signal_observations(
@@ -197,7 +293,7 @@ class Things:
             4. Maps each Thing ID to its latest observation (and timestamp if requested).
 
         Args:
-            signal_type (str): The type of signal to fetch observations for. Must be either 'primary' or 'secondary'.
+            signal_type (str): The type of signal to fetch observations for.
             n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
             phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
 
@@ -230,12 +326,37 @@ class Things:
                 self._lookup_detector_cyclists_ids()
             endpoint_ids = self.detector_cyclists_endpoints_ids
 
+        elif signal_type == "detector_pedestrian":
+            if not self.detector_pedestrian_endpoints_ids:
+                self._lookup_detector_pedestrian_ids()
+            endpoint_ids = self.detector_pedestrian_endpoints_ids
+
+        elif signal_type == "bus_pre_request_point":
+            if not self.bus_pre_request_endpoints_ids:
+                self._lookup_bus_pre_request_ids()
+            endpoint_ids = self.bus_pre_request_endpoints_ids
+
+        elif signal_type == "bus_request_point":
+            if not self.bus_request_endpoints_ids:
+                self._lookup_bus_request_ids()
+            endpoint_ids = self.bus_request_endpoints_ids
+
+        elif signal_type == "bus_checkout":
+            if not self.bus_checkout_endpoints_ids:
+                self._lookup_bus_checkout_ids()
+            endpoint_ids = self.bus_checkout_endpoints_ids
+
         elif signal_type == "signal_program":
             if not self.signal_program_endpoints_ids:
                 self._lookup_signal_program_endpoint_ids()
             endpoint_ids = self.signal_program_endpoints_ids
+
+        elif signal_type == "cycle_second":
+            if not self.cycle_second_endpoints_ids:
+                self._lookup_cycle_second()
+            endpoint_ids = self.cycle_second_endpoints_ids
         else:
-            raise ValueError("signal_type must be either not supported.")
+            raise ValueError("signal type is not supported.")
 
         # Construct the filter query
         filter_conditions = []
@@ -425,6 +546,116 @@ class Things:
             signal_type="detector_cyclists", n_obsrvtns=n_obsrvtns, phnTime=phnTime
         )
 
+    def get_detector_pedestrian_observations(
+        self, n_obsrvtns: int = 1, phnTime: bool = False
+    ):
+        """
+        Fetches the latest observations for pedestrian detector datastreams of specified Thing IDs.
+
+        Args:
+            n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
+            phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
+
+        Returns:
+            dict: Maps each Thing ID to its latest observation result.
+                If `phnTime` is True, maps to a list of (timestamp, result) tuples.
+
+        Examples:
+            >>> things = Things([1310, 2826, 23514])
+            >>> observations = things.get_detector_pedestrian_observations(n_obsrvtns=2, phnTime=True)
+            >>> print(observations)
+            {
+                1310: [['2024-11-30T12:25:55Z', False], ['2024-11-30T12:25:53Z', True]],
+                2826: [['2024-11-29T23:21:49Z', False], ['2024-11-25T23:21:45Z', False]],
+                23514: [['2024-11-30T12:40:22Z', False], ['2024-11-30T12:40:21Z', True]]
+            }
+        """
+        return self._get_signal_observations(
+            signal_type="detector_pedestrian", n_obsrvtns=n_obsrvtns, phnTime=phnTime
+        )
+
+    def get_bus_pre_request_point_observations(
+        self, n_obsrvtns: int = 1, phnTime: bool = False
+    ):
+        """
+        Fetches the latest observations for bus pre request point datastreams of specified Thing IDs.
+
+        Args:
+            n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
+            phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
+
+        Returns:
+            dict: Maps each Thing ID to its latest observation result.
+                If `phnTime` is True, maps to a list of (timestamp, result) tuples.
+
+        Examples:
+            >>> things = Things([27,28,29])
+            >>> observations = things.get_bus_pre_request_point_observations(n_obsrvtns=2, phnTime=True)
+            >>> print(observations)
+            {
+                27: [['2024-11-30T12:41:49Z', 3], ['2024-11-30T12:38:56Z', 3]],
+                28: [['2024-11-30T12:41:49Z', 3], ['2024-11-30T12:38:56Z', 3]],
+                29: [['2024-11-28T21:43:12Z', 288], ['2024-11-28T20:43:03Z', 288]]
+            }
+        """
+        return self._get_signal_observations(
+            signal_type="bus_pre_request_point", n_obsrvtns=n_obsrvtns, phnTime=phnTime
+        )
+
+    def get_bus_request_point_observations(
+        self, n_obsrvtns: int = 1, phnTime: bool = False
+    ):
+        """
+        Fetches the latest observations for bus request point datastreams of specified Thing IDs.
+
+        Args:
+            n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
+            phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
+
+        Returns:
+            dict: Maps each Thing ID to its latest observation result.
+                If `phnTime` is True, maps to a list of (timestamp, result) tuples.
+
+        Examples:
+            >>> things = Things([27, 28, 29])
+            >>> observations = things.get_bus_request_point_observations(n_obsrvtns=2, phnTime=True)
+            >>> print(observations)
+            {
+                27: [['2024-11-30T12:53:25Z', 3], ['2024-11-30T12:52:26Z', 3]],
+                28: [['2024-11-30T12:53:25Z', 3], ['2024-11-30T12:52:26Z', 3]],
+                29: [['2024-11-30T12:54:24Z', 2], ['2024-11-30T12:54:24Z', 2]]
+            }
+        """
+        return self._get_signal_observations(
+            signal_type="bus_request_point", n_obsrvtns=n_obsrvtns, phnTime=phnTime
+        )
+
+    def get_bus_checkout_observations(self, n_obsrvtns: int = 1, phnTime: bool = False):
+        """
+        Fetches the latest observations for bus checkout datastreams of specified Thing IDs.
+
+        Args:
+            n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
+            phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
+
+        Returns:
+            dict: Maps each Thing ID to its latest observation result.
+                If `phnTime` is True, maps to a list of (timestamp, result) tuples.
+
+        Examples:
+            >>> things = Things([27, 28, 31])
+            >>> observations = things.get_bus_checkout_observations(n_obsrvtns=2, phnTime=True)
+            >>> print(observations)
+            {
+                27: [['2024-11-30T12:59:56Z', 3], ['2024-11-30T12:53:42Z', 3]],
+                28: [['2024-11-30T12:59:56Z', 3], ['2024-11-30T12:53:42Z', 3]],
+                30: [['2024-11-30T12:54:29Z', 2], ['2024-11-30T12:42:25Z', 2]]
+            }
+        """
+        return self._get_signal_observations(
+            signal_type="bus_checkout", n_obsrvtns=n_obsrvtns, phnTime=phnTime
+        )
+
     def get_signal_program_observations(
         self, n_obsrvtns: int = 1, phnTime: bool = False
     ):
@@ -451,4 +682,30 @@ class Things:
         """
         return self._get_signal_observations(
             signal_type="signal_program", n_obsrvtns=n_obsrvtns, phnTime=phnTime
+        )
+
+    def get_cycle_second_observations(self, n_obsrvtns: int = 1, phnTime: bool = False):
+        """
+        Fetches the latest observations for cycle second datastreams of specified Thing IDs.
+
+        Args:
+            n_obsrvtns (int, optional): Number of recent observations per datastream. Defaults to 1.
+            phnTime (bool, optional): Include phenomenon time with each observation. Defaults to False.
+
+        Returns:
+            dict: Maps each Thing ID to its latest observation result.
+                If `phnTime` is True, maps to a list of (timestamp, result) tuples.
+
+        Examples:
+            >>> things = Things([2, 3, 5])
+            >>> observations = things.get_cycle_second_observations(n_obsrvtns=3, phnTime=True)
+            >>> print(observations)
+            {
+                2: [['2024-11-30T22:59:59Z', 0], ['2024-11-30T13:01:30Z', 0], ['2024-11-30T13:00:00Z', 0]],
+                3: [['2024-11-30T22:59:59Z', 0], ['2024-11-30T13:01:30Z', 0], ['2024-11-30T13:00:00Z', 0]],
+                5: [['2024-11-30T22:59:59Z', 0], ['2024-11-30T13:01:30Z', 0], ['2024-11-30T13:00:00Z', 0]]
+            }
+        """
+        return self._get_signal_observations(
+            signal_type="cycle_second", n_obsrvtns=n_obsrvtns, phnTime=phnTime
         )

@@ -342,6 +342,76 @@ class TestFetchPrimarySignalEndpointIds(unittest.TestCase):
             )
 
 
+class TestLookUpPrimarySignalEndpointIds(unittest.TestCase):
+    def test_lookup_primary_signal_endpoint_ids_non_zero(self):
+        ids = [2, 3, 4, 8, 10, 18760]
+        things = Things(ids)
+        things._lookup_primary_signal_endpoint_ids()
+
+        result = things.primary_signal_endpoint_ids
+        expected_result = {2: 15, 3: 6, 4: 19, 8: 14, 10: 4492, 18760: 70773}
+
+        self.assertEqual(result, expected_result)
+
+    def test_lookup_primary_signal_endpoint_ids_zero(self):
+        ids = [170, 318, 2909, 2910, 3885, 23490, 23504]
+        things = Things(ids)
+        things._lookup_primary_signal_endpoint_ids()
+
+        result = things.primary_signal_endpoint_ids
+        expected_result = {
+            170: 0,
+            318: 0,
+            2909: 0,
+            2910: 0,
+            3885: 0,
+            23490: 0,
+            23504: 0,
+        }
+
+        self.assertEqual(result, expected_result)
+
+
+class TestLookUpSecondarySignalEndpointIds(unittest.TestCase):
+    def test_lookup_primary_signal_endpoint_ids_non_zero(self):
+        ids = [4, 7, 30, 42, 181, 6519, 8211, 8180]
+        things = Things(ids)
+        things._lookup_secondary_signal_endpoint_ids()
+
+        result = things.secondary_signal_endpoint_ids
+        expected_result = {
+            4: 26,
+            7: 28,
+            30: 4512,
+            42: 12430,
+            181: 87671,
+            6519: 73821,
+            8180: 35348,
+            8211: 32212,
+        }
+
+        self.assertEqual(result, expected_result)
+
+    def test_lookup_secondary_signal_endpoint_ids_zero(self):
+        ids = [3, 5, 8, 265, 1044, 1045, 8475, 8479, 18250]
+        things = Things(ids)
+        things._lookup_secondary_signal_endpoint_ids()
+
+        result = things.secondary_signal_endpoint_ids
+        expected_result = {
+            3: 0,
+            5: 0,
+            8: 0,
+            265: 0,
+            1044: 0,
+            1045: 0,
+            8475: 0,
+            8479: 0,
+            18250: 0,
+        }
+        self.assertEqual(result, expected_result)
+
+
 class TestGetTLObservations(unittest.TestCase):
     def test_get_tl_observations_valid_ids_phnTime_false(self):
         # Setup
@@ -380,10 +450,7 @@ class TestGetTLObservations(unittest.TestCase):
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
 
         # Call the method under test
-        result = things.get_primary_signal_observations(
-            ids, n_obsrvtns=1, phnTime=False
-        )
-
+        result = things.get_primary_signal_observations(n_obsrvtns=1, phnTime=False)
         # Expected result
         expected_result = {
             2: [[1]],
@@ -433,7 +500,7 @@ class TestGetTLObservations(unittest.TestCase):
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
 
         # Call the method under test
-        result = things.get_primary_signal_observations(ids, n_obsrvtns=2, phnTime=True)
+        result = things.get_primary_signal_observations(n_obsrvtns=2, phnTime=True)
 
         # Expected result
         expected_result = {
@@ -444,51 +511,6 @@ class TestGetTLObservations(unittest.TestCase):
 
         # Assert
         self.assertEqual(result, expected_result)
-
-    def test_get_tl_observations_with_missing_ids(self):
-        # Setup
-        ids = [2, 3, 18760, 999]
-        things = Things([2, 3])
-        things.primary_signal_endpoint_ids = {2: 15, 3: 6}
-
-        # Create a mock FETCHER
-        mock_fetcher = MagicMock()
-        things.FETCHER = mock_fetcher
-
-        def side_effect_fetch_data(endpoint, params):
-            mock_fetcher.data = [
-                {
-                    "@iot.id": 15,
-                    "Observations": [
-                        {"phenomenonTime": "2024-10-27T18:37:55Z", "result": 1}
-                    ],
-                },
-                {
-                    "@iot.id": 6,
-                    "Observations": [
-                        {"phenomenonTime": "2024-10-27T18:37:55Z", "result": 2}
-                    ],
-                },
-            ]
-
-        mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
-
-        with patch("logging.error") as mock_logging_error:
-            result = things.get_primary_signal_observations(
-                ids, n_obsrvtns=1, phnTime=False
-            )
-
-            expected_result = {
-                2: [[1]],
-                3: [[2]],
-            }
-
-            self.assertEqual(result, expected_result)
-
-            # Check that logging.error was called for the missing IDs
-            calls = [call[0][0] for call in mock_logging_error.call_args_list]
-            self.assertIn("Thing(18760) not found in currently observed Things.", calls)
-            self.assertIn("Thing(999) not found in currently observed Things.", calls)
 
     def test_get_tl_observations_no_observations(self):
         # Setup
@@ -509,9 +531,7 @@ class TestGetTLObservations(unittest.TestCase):
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
 
         with patch("logging.error") as mock_logging_error:
-            result = things.get_primary_signal_observations(
-                ids, n_obsrvtns=1, phnTime=False
-            )
+            result = things.get_primary_signal_observations(n_obsrvtns=1, phnTime=False)
 
             expected_result = {}
             self.assertEqual(result, expected_result)

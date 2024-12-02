@@ -1,11 +1,10 @@
 import json
 import time
-from functions import Things
+from tldhamburg.backend.Things import Things
 from pathlib import Path
 
 def get_trafficlights():
-    cwd = Path.cwd()
-    directory = f"{cwd}/schnittstelle"
+    directory = f"{Path.cwd()}/Frontend/schnittstelle"
     with open(f"{directory}/trafficlights.geojson", "r") as f:
         data = json.load(f)
     return data

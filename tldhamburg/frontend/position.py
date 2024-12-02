@@ -7,7 +7,7 @@ class Position:
     navigating = bool
     def __init__(self):
         self.navigating = False
-        directory = f"{Path.cwd()}/schnittstelle"
+        directory = f"{Path.cwd()}/Frontend/schnittstelle"
         with open(f"{directory}/position.geojson", "r") as f:
             _file = json.load(f)
             self._lat, self._lon = _file["coordinates"]

@@ -1,6 +1,7 @@
 import requests
 import json
 from pathlib import Path
+from PIL import Image
 
 class Route:
     _json = None
@@ -11,8 +12,7 @@ class Route:
             self._json = json.load(f)
     '''
     def __init__(self, api_key, start_coords, end_coords, profile='driving-car'):
-        cwd = Path.cwd()
-        UPLOAD_DIRECTORY = f"{cwd}/schnittstelle"
+        UPLOAD_DIRECTORY = f"{Path.cwd()}/Frontend/schnittstelle"
         url = f"https://api.openrouteservice.org/v2/directions/{profile}/geojson"
         headers = {
             "Authorization": api_key,
@@ -46,6 +46,7 @@ class Route:
         return self._json 
 
     def get_directions(self):
+        #path = f"{Path.cwd().parent}/assets/"
         # https://github.com/GIScience/openrouteservice-docs#instruction-types
         '''dictionary = {0: "Left", 1: "Right", 2: "Sharp left", 3: "Sharp right",
                     4: "Slight left", 5: "Slight right", 6: "Straigth",

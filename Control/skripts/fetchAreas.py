@@ -24,7 +24,7 @@ def fetchAreas(relevantAres:dict):
         
         coords = note[0]
         
-        if(name != "13937"):
+        if(name != "13937"): #oehm ok? 
             holeData[name] = getNotes(roundValues(coords,modif))
             print("{:.2f}% {} {} {}".format(idx/len(relevantAres)*100,name,len(holeData[name]),roundValues(coords,modif)))
             idx+=1
@@ -108,4 +108,3 @@ if __name__ == "__main__":
     #mapPaths()
     #singleCall()
     #correctTheHoleData()
-    checkLength()

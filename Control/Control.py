@@ -55,7 +55,7 @@ class RoutePlaner:
 
     def __init__(self,path:str):
         self.path = path
-        #self._initMapData()
+        self._initMapData()
         
 
 

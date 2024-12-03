@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import json
-import fetchAreas
-
+from fetchAreas import roundValues,getNotes
 
 def getWrongSquares(coords:dict,coordsBase:dict)->dict:
     out = dict()
@@ -15,9 +14,33 @@ def getWrongSquares(coords:dict,coordsBase:dict)->dict:
     return out
 
 def testRoundValue(options:dict):
+    print("Round test started.")
     modif = options["modif"]
-    input = [1/(modif+1),1/modif]
-    out   = [0,1/modif]
+    inp = [[1/(modif+1),1/modif],[1/(modif+1),1/modif]]
+    out   = [[0.0,1/modif],[1/modif,1/modif]]
+    values = roundValues(inp,modif)
+    if not all([True if ou == val else False for val,ou in zip(values,out)]):
+        print("The round function does not work as it should be.")
+        exit()
+    print("Round test finished")
+
+def testGetNotes(options:dict):
+    print("Fetchtest started.")
+    coords = [
+            [
+                9.9489717,
+                53.5462321
+            ],
+            [
+                9.9561542,
+                53.5588747
+            ]
+        ]
+    area = getNotes(coords)
+    if len(area) == 1:
+        print("Did not retreave the pulled Data.")
+        exit()
+    print("Fetchtest finished.")
 
 def checkLength(options:dict):
     
@@ -43,3 +66,5 @@ if __name__ == "__main__":
     with open("../optionsfile.json","r") as file:
         options = json.load(file)
     checkLength(options)
+    testRoundValue(options)
+    #testNode(options)

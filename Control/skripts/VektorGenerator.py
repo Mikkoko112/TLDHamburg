@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json
 from makeFetchSquares import findSmalestAndLagestCoord,getDistanceBetweenPoints
-from math import acos,cos,sqrt
+from math import acos,cos,sqrt,pi,degrees
 import sys
 if len(sys.argv) > 1: #this can maybe be changed to options
     nameOfThingsLocation = sys.argv[1]
@@ -65,6 +65,10 @@ def generateVektor(mainCoord:list,coordList:list): #Vektor zeigt zum point!
     #minCo,maxCo = findFurthestAndNearesCoord(mainCoord,coordList)
     meanCo = getZentroid(coordList)
     vec = [mainCoord[0]-meanCo[0],mainCoord[1]-meanCo[1]] #hier wird es jetzt auf das Centroid focosiert
+    scaleVec = sqrt(vec[0]**2+vec[1]**2)
+    if scaleVec == 0:
+        scaleVec = 1
+    vec = [vec[0]/scaleVec,vec[1]/scaleVec]
     #hier könnte noch der vektor normiert werden.
 
     return vec
@@ -92,12 +96,24 @@ def getDegree(vec:list)->float:
 
     return:float -> This will return the angle to the standart vector
     '''
-    standartVec = [0,1]
-    dot = sum([0*vec[0],1*vec[1]])
-    lengthVec = sqrt(vec[0]**2+vec[1]**2)
-    return acos(dot/lengthVec)
+    def dotProd (vec0,vec1):
+        return sum(v0*v1 for v0,v1 in zip(vec0,vec1))
 
-def genPerPrimarySignal(coords:dict)->dict:
+    def crossProd(vec0,vec1):
+        assert (len(vec0) == 2) and (len(vec1)==2)
+        return vec0[0]*vec1[1] - vec0[1]*vec1[0]
+    standartVec = [0,1]
+    dot = dotProd(standartVec,vec)
+
+    lengthVec = sqrt(dotProd(vec,vec)) #should be 1
+    lengthStd = sqrt(dotProd(standartVec,standartVec)) #this too
+    if crossProd(vec,standartVec) < 0:
+        return 2*pi-acos(dot/lengthVec)
+   
+    return acos(dot/lengthVec) 
+
+
+def genPerPrimarySignal(coords:dict,conjunctionDict:dict)->dict:
     '''
     coords:dict <- This is the dict with the things data
 
@@ -107,24 +123,40 @@ def genPerPrimarySignal(coords:dict)->dict:
 
     out = dict()
     for name,coords in coords.items():
-        if len(coords) > 1:
-            meanCoord = getZentroid(coords[1])  #this is maybe redundant
-            vec0,vec2 = list(),list()
-            if len(coords[0]) != 0:
-                vec0 = generateVektor(meanCoord,coords[0])
-                vec0.append(getDegree(vec0))
-            if len(coords) > 2:
-                vec2 = generateVektor(meanCoord,coords[2])
-                vec2 = [-x for x in vec2]
-                vec2.append(getDegree(vec2))
-            out[name] = [vec0,meanCoord,vec2]
+        for conjName,body in conjunctionDict.items():
+            
+            if (name in body["traficLights"] 
+                    and len(coords) == 3 
+                    and len(body["junctionNodes"]) > 0):
+                            #this asserts that the necessary data is present 
+                
+                meanCoord = getZentroid(coords[1])
+                
+                print(name,body["junctionNodes"])
+                imNodes = body["junctionNodes"]
+                meanCoord = findFurthestAndNearesCoord(meanCoord,imNodes)[0]
+                vec0,vec2 = list(),list()
+                if len(coords[0]) != 0:
+                    vec0 = generateVektor(meanCoord,coords[0])
+                    deg = getDegree(vec0)
+                    vec0.append(deg)
+                    vec0.append(degrees(deg))
+                if len(coords) > 2:
+                    vec2 = generateVektor(meanCoord,coords[2])
+                    deg = getDegree(vec2)
+                    vec2.append(deg)
+                    vec2.append(degrees(deg))
+                out[name] = [vec0,meanCoord,vec2]
     return out
 
 def startGenerator()->None:
     with open(nameOfThingsLocation,"r") as file:
         coords = json.load(file)
 
-    vektorData = genPerPrimarySignal(coords)
+    with open("../data/conjuctionDict.json","r") as file: 
+        conjDict = json.load(file)
+
+    vektorData = genPerPrimarySignal(coords,conjDict)
     
     with open("../data/vectorisation.json","w") as file:
         json.dump(vektorData, file, indent=4)

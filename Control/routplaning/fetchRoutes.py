@@ -45,13 +45,13 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
     def convertToCoordinateRoute(routeList:list,graph)->list:
         outRoute = []
         for i,route in enumerate(routeList):
+            
             coordRoute = []
             distancefromBefore = 0
             for i,node in enumerate(route):
                 vekt = graph.vs.select(node)
                 if i != 0:
-                    print(i,int(pNode["id"][0]),int(vekt["id"][0]),type(pNode["id"]),type(int(vekt["id"][0])))
-                   
+                    
                     edge = graph.es.select(_source=int(pNode["nodeid"][0]),_target=int(vekt["nodeid"][0]))
                     distancefromBefore = edge["length"][0]
                     maxSpeed = int(edge["maxspeed"][0]) if edge["maxspeed"][0] != "None" else 50 
@@ -60,8 +60,8 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                     distancefromBefore = 0
                     maxSpeed = 0
                     pNode = vekt
-                coordRoute.append([vekt["lat"][0],
-                                   vekt["lon"][0],
+                coordRoute.append([vekt["lon"][0],
+                                   vekt["lat"][0],
                                    node,
                                    distancefromBefore,
                                    maxSpeed])
@@ -89,7 +89,7 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
         latmaxList,latminList = [],[]
         logmaxList,logminList = [],[]
         for route in coordList:
-            lat,log= [coord[0] for coord in route],[coord[1] for coord in route]
+            lat,log= [coord[1] for coord in route],[coord[0] for coord in route]
             latmaxList.append(max(lat))
             latminList.append(min(lat))
             logmaxList.append(max(log))
@@ -120,9 +120,9 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                     lastSpeed = node[4]
                     lastSpeedChangeIdx = i
 
-                beforeORS = ORSNode(lat = route[i-1][0],lon = route[i-1][1],id = route[i-1][2])
-                thisORS = ORSNode(lat = node[0],lon = node[1],id = node[2])
-                nextORS = ORSNode(lat = route[i+1][0],lon = route[i+1][1],id = route[i+1][2])
+                beforeORS = ORSNode(lat = route[i-1][1],lon = route[i-1][0],id = route[i-1][2])
+                thisORS = ORSNode(lat = node[1],lon = node[0],id = node[2])
+                nextORS = ORSNode(lat = route[i+1][1],lon = route[i+1][0],id = route[i+1][2])
 
                 leftBool:bool  =  leftTurn(beforeORS,thisORS,nextORS)
                 rightBool:bool = rightTurn(beforeORS,thisORS,nextORS)
@@ -169,7 +169,11 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                     "coordinates": [coords[0:2] for coords in route]
                 },
                 "properties": {
-                    "segments": directions,
+                    "segments": {
+                      "distance":sum([dire["distance"] for dire in directions]),
+                      "duration":sum([dire["duration"] for dire in directions]),
+                      "stepts":directions
+                    },
                     "speeds": speeds,
                     "name": "Example Route"
                 }
@@ -199,10 +203,7 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
     
     geoJsonRoutes = generateGeoJsonFile(coordRoutes,graph)
     
-
-
-    with open("route.geojson","w") as file:
-        json.dump(geoJsonRoutes,file, indent=4,ensure_ascii=False)
+    return geoJsonRoutes
 
 def getRoute(coordsStartEnd:list)->dict:
 
@@ -243,6 +244,9 @@ def test():
     graph = igraph.load("../data/shHamburg.gml")
     routes = getRouteFromGraph([[9.946091651916504,53.59207534790039 ],
                                 [10.0772705078125,53.61192321777344]],graph)
+    
+    with open("route.geojson","w") as file:
+        json.dump(routes,file,indent=4)
 
 if __name__ == "__main__":
     test()

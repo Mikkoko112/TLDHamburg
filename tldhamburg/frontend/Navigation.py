@@ -1,11 +1,10 @@
 import requests
 import json
 from pathlib import Path
-import APIkeys
-from tldhamburg.frontend.APIkeys import APIkeys
+from tldhamburg.frontend.APIkeys import ORS_key
 from shapely.geometry import Point, LineString
 from shapely.ops import nearest_points
-import settings
+from tldhamburg.frontend.settings import route_deviation_tolerance
 
 class Navigation:
     departure = None
@@ -35,7 +34,7 @@ class Navigation:
         self.destination = destination
         self._profile = profile
         if self.route_type == "ORS":
-            api_key = APIkeys.ORS_key
+            api_key = ORS_key
             self.__get_ors_route(api_key, departure, destination)
         self.geojson = self.get_route_geojson()
         self.dir_pictures, self.directions = self.__get_directions()
@@ -177,7 +176,7 @@ class Navigation:
         route = LineString(way_points) # takes (lon, lat)
 
         distance = point.distance(route)
-        on_route = distance <= settings.route_deviation_tolerance
+        on_route = distance <= route_deviation_tolerance
         
         if on_route == False:
             self.create_route(current_position, self.destination)

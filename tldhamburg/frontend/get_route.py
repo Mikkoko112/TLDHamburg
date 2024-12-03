@@ -1,7 +1,9 @@
 import requests
 import json
 from pathlib import Path
-from PIL import Image
+#from PIL import Image
+
+# löschen!!!!
 
 class Route:
     _json = None

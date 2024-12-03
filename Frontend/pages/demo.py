@@ -376,8 +376,8 @@ layout = dbc.Container(children = [
     prevent_initial_call=True
 )
 def check_validity(starttext, endtext, n_clicks): 
-    marker = [{"id": "start", "lat": 53.5975929, "lon": 9.9318831},
-                  {"id": "end", "lat": 53.5524079, "lon": 10.0084222}]
+    marker = [{"id": "departure", "lat": 53.5975929, "lon": 9.9318831},
+                  {"id": "destination", "lat": 53.5524079, "lon": 10.0084222}]
     if n_clicks:
         if starttext or endtext: 
             is_valid_start = True

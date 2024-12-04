@@ -1,6 +1,6 @@
 import dash_leaflet as dl
 import base64
-from functions import Things
+from tldhamburg.backend.Things import Things
 
 # Function to generate Leaflet Markers based on the status of traffic lights
 def get_trafficlights(lights):
@@ -45,7 +45,7 @@ def get_marker(positions, image_url=None):
 
 def get_marker_id(ids_list):
     # {2: [[[9.9196439, 53.5638321], [9.9197085, 53.5637359], [9.9198219, 53.5635865], [9.9198451, 53.5635559], [9.9198231, 53.5634831], [9.9198481, 53.563453]], [[9.9197087, 53.563736], [9.9195566, 53.5639624], [9.9195566, 53.5639624], [9.919899, 53.5639529]], [[9.9197629, 53.5639568], [9.9198989, 53.5639531], [9.9200006, 53.5639497]]]}
-    things = Things.Things(ids_list)
+    things = Things(ids_list)
     observations = things.get_primary_signal_observations(ids_list, n_obsrvtns=1, phnTime=True)
     coordinations = things.get_coordinates()
     markers = []

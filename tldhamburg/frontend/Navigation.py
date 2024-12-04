@@ -2,6 +2,7 @@ import requests
 import json
 from pathlib import Path
 import APIkeys
+from tldhamburg.frontend.APIkeys import APIkeys
 from shapely.geometry import Point, LineString
 from shapely.ops import nearest_points
 import settings
@@ -54,8 +55,7 @@ class Navigation:
         return dir2wp_list, wp2dir_list
 
     def __get_ors_route(self, api_key, departure, destination, profile='driving-car'):
-        cwd = Path.cwd()
-        UPLOAD_DIRECTORY = f"{cwd}/schnittstelle"
+        UPLOAD_DIRECTORY = f"{Path.cwd().parent}/schnittstelle"
         print(UPLOAD_DIRECTORY)
         url = f"https://api.openrouteservice.org/v2/directions/{profile}/geojson"
         headers = {
@@ -87,8 +87,7 @@ class Navigation:
             return None
         
     def get_route_geojson(self):
-        cwd = Path.cwd()
-        directory = f"{cwd}/schnittstelle"
+        directory = f"{Path.cwd().parent}/schnittstelle"
         with open(f"{directory}/route.geojson", "r") as f:
             route_geojson = json.load(f)
         return route_geojson

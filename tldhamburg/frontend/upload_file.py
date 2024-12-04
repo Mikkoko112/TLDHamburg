@@ -5,9 +5,9 @@ from dash import html
 import dash_bootstrap_components as dbc
 from pathlib import Path
 
-cwd = Path.cwd() # current working directory
+#cwd = Path.cwd() # current working directory
 #parent = cwd.parent
-UPLOAD_DIRECTORY = f"{cwd}/app_uploaded_files"
+UPLOAD_DIRECTORY = f"{Path.cwd()}/Frontend/app_uploaded_files"
 
 #if not os.path.exists(UPLOAD_DIRECTORY):
 #    os.makedirs(UPLOAD_DIRECTORY)

@@ -97,7 +97,7 @@ def inDegreeOffset(inputDegree, offsetDegree):
 
     #this needs to be fixed. It does not accound to the overflow of an angle
     #lowerValue,upperValue = offsetDegree-0.6108652,offsetDegree+0.6108652 #das ist ein offset von 45
-    lowerValue,upperValue = offsetDegree-25,offsetDegree+25 #das ist ein offset von 25°
+    lowerValue,upperValue = offsetDegree-70,offsetDegree+70 #das ist ein offset von 25°
     
     theta = inputDegree % 360
     theta1 = lowerValue % 360
@@ -141,6 +141,7 @@ def getRouteTraficLights(route:list, conjFile:dict,conjList:list,vectorisation:d
         pointList    = [dat[1] for dat in data]
         pointIndex   = [dat[0] for dat in data]
         allposiblePrimarysignal = []
+        
         for primarySignalName in conjFile[name]['traficLights']:
             
             meanofPoints =  vectorisation[primarySignalName][1]
@@ -156,7 +157,19 @@ def getRouteTraficLights(route:list, conjFile:dict,conjList:list,vectorisation:d
             primarydegOut = vectorisation[primarySignalName][2][3]
 
             check = lanesOverlape(primarydegIn,primarydegOut,degIn,degOut)
-
+            if name == "6725":
+                print(route)
+                
+                print()
+                print()
+                print("vectors",vecIn,vecOut)
+                print("degrees",degIn,degOut)
+                print("primary degrees",primarydegIn,primarydegOut)
+                print("points",route[pointIndex[0]-1:pointIndex[-1]+1])
+                print()
+                print("pointlist",pointList,pointIndex)
+                print()
+                print("meanPoint",meanofPoints)
             if all([tr[0] for tr in check]):
 
                 allposiblePrimarysignal.append([primarySignalName,
@@ -231,7 +244,6 @@ def test():
                                 [10.0772705078125,53.61192321777344]],graph)
     pureRoute = pruifyRoute(routeHole)
     conjList = sortNodeToConjuction(pureRoute,conj)
-    print(conjList)
     traficLightsList = getRouteTraficLights(pureRoute,conj,conjList,vectorisation)
     
     dic = {"wayPoints":pureRoute,

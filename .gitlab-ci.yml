@@ -35,6 +35,4 @@ API_availability_job:
     - echo "Congratulations test_data_fetcher_real_api.py passed."
   allow_failure : true
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_PIPELINE_SOURCE == "schedule"'

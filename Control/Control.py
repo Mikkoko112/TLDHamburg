@@ -4,7 +4,10 @@ from evaluation  import evaluation
 from routplaning import routing 
 import igraph
 import json
-
+import time
+import datetime
+#from tldhamburg.backend.DataFetcher import DataFetcher
+#from tldhamburg.backend.Things import Things
 
 class RoutePlaner:
 
@@ -22,6 +25,19 @@ class RoutePlaner:
             
             return out
         elif isinstance(traficLightsId,str):
+            fetcher=DataFetcher()
+            fetcher.fetch_data(params={"$filter":f"@iot.id eq '{traficLightsId}'","$expand":"Thing"})
+            id=fetcher.get_data()[0]["Thing"]["@iot.id"]
+            thing=Things([id])
+            schaltungen=thing.get_primary_signal_observations(4,True)[id]
+            zyklusDaten=thing.get_cycle_second_observations(2,True)[id]
+            zyklusLänge=datetime.datetime.fromisoformat(zyklusDaten[0][0])-datetime.datetime.fromisoformat(zyklusDaten[1][0])
+            zeitAktuell=datetime.datetime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
+            zeitGrün=(zeitAktuell-[datetime.datetime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==3][0])%zyklusLänge
+            zeitRot=(zeitAktuell-[datetime.datetime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==1][0])%zyklusLänge
+            status="grün" if zeitGrün>zeitRot else "rot"
+            nextPhase="rot" if status=="grün" else "grün"
+            nextPhaseTime=min(zeitGrün,zeitRot)
             return (traficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
 
         elif isinstance(traficLightsId,int):

@@ -5,7 +5,7 @@ from dash.exceptions import PreventUpdate
 import dash_leaflet as dl
 import dash_bootstrap_components as dbc
 
-from .side_bar import sidebar
+from .components import sidebar
 
 from tldhamburg.frontend import APIkeys
 from tldhamburg.frontend import * # in __innit__.py __all__ = ["filename.py", "otherfile.py",...]

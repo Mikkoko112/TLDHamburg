@@ -18,3 +18,11 @@ def sidebar():
             className="bg-light",
         )
     )
+
+def headline():
+    return dbc.Row([
+        dbc.Col(html.H1("Real-Time Traffic Light Map"), className="text-center")
+        ],
+        style={"height": "6vh"}
+        )
+

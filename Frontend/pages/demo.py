@@ -9,10 +9,12 @@ from dash.exceptions import PreventUpdate
 import dash_leaflet as dl
 import dash_bootstrap_components as dbc
 
-from .side_bar import sidebar
-
 from tldhamburg.frontend import APIkeys
 from tldhamburg.frontend import * # in __innit__.py __all__ = ["filename.py", "otherfile.py",...]
+
+# import components of the page
+from .components import sidebar
+from .components import headline
 
 
 dash.register_page(__name__,
@@ -54,54 +56,6 @@ traffic_lights = [
 #marker_url = app.get_asset_url("location_on.png")
 # lat: latitude (Breite)
 # lon: longitude (Länge
-
-headline = dbc.Row([
-        dbc.Col(html.H1("Real-Time Traffic Light Map"), className="text-center")
-        ],
-        style={"height": "6vh"}
-        )
-
-upload = dcc.Upload(
-            id="upload-data",
-            children=html.Div(["Drag and drop or click to select a file to upload."]), 
-            style={
-                "width": "100%",
-                "height": "60px",
-                "lineHeight": "60px",
-                "borderWidth": "1px",
-                "borderStyle": "dashed",
-                "borderRadius": "5px",
-                "textAlign": "center",
-                "margin": "10px",
-            },
-            multiple=True,
-        ),
-
-modal_fileupload = dbc.Col(
-    [
-        dbc.Button("Laden", id="open-centered", className="mb-3", n_clicks=0),
-        dbc.Modal(
-            [
-                dbc.ModalHeader(dbc.ModalTitle("Laden: diese Funktion könnt ihr erstmal ignorieren. Man kann erstmal nur Sachen hochladen aber damit nichts anfangen."), close_button=True),
-                dbc.ModalBody([
-                    html.Div(upload),
-                    html.Div("Hochgeladene Dateien:"),
-                    html.Div(id="file-list")]),
-                dbc.ModalFooter(
-                    dbc.Button(
-                        "Fertig",
-                        id="close-centered",
-                        className="ms-auto",
-                        n_clicks=0,
-                    )
-                ),
-            ],
-            id="modal-centered",
-            centered=True,
-            is_open=False,
-        ),
-    ]
-)
 
 # the searchbar with the search field for the start and end location
 # and the button to start the search
@@ -154,8 +108,7 @@ searchbar = dbc.Row(
                         ),
                 width="auto"
                 ),
-                
-                modal_fileupload,
+
             ],  
             className="g-3 ms-auto flex-nowrap mt-3 mt-md-0", 
             align="center",
@@ -336,7 +289,7 @@ data = dbc.Row([
 # Main layout
 layout = dbc.Container(children = [
     sidebar(),
-    headline,
+    headline(),
     navbar,
     data
     ],
@@ -415,7 +368,7 @@ def check_validity(starttext, endtext, n_clicks):
                     #f"{end_lat}\t{end_lon}", 
                     get_objects.get_marker(marker), 
                     route.load_route(), 
-                    get_objects.get_trafficlights(traffic_light_response),  #get_objects.get_marker_id(traffic_light_response),
+                    get_objects.ficlights(traffic_light_response),  #get_objects.get_marker_id(traffic_light_response),
                     False)#, position.get_pos()
     return (False, False, False, False, 0, 
             #"", "", 
@@ -446,39 +399,6 @@ def toggle_navbar_collapse(n, is_open):
         return not is_open
     return is_open
 
-
-# opens the window for the upload 
-@callback(
-    Output("modal-centered", "is_open"),
-    [Input("open-centered", "n_clicks"), Input("close-centered", "n_clicks")],
-    [State("modal-centered", "is_open")],
-)
-def toggle_modal(n1, n2, is_open):
-    if n1 or n2:
-        return not is_open
-    return is_open
-
-
-# upload data and show which files you added
-@callback(
-    Output("file-list", "children"),
-    [Input("upload-data", "filename"), Input("upload-data", "contents")],
-)
-def update_output(uploaded_filenames, uploaded_file_contents):
-    """Save uploaded files and regenerate the file list."""
-
-    if uploaded_filenames is not None and uploaded_file_contents is not None:
-        for name, data in zip(uploaded_filenames, uploaded_file_contents):
-            upload_file.save_file(name, data)
-
-    files = upload_file.uploaded_files()
-    if len(files) == 0:
-        return [html.Li("No files yet!")]
-    else:
-        option = [{"label": f"{filename}", "value": i} for i,filename in enumerate(files)]
-        filelist = dbc.RadioItems(options= option, value=False, id="radioitems-input",)
-        return filelist
-    
 
 # this will show the Ids of the traffic lights and their current status in the map
 @callback(

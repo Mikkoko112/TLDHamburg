@@ -1,7 +1,9 @@
 import dash
-from dash import Dash, html, dcc 
+#from dash import Dash, html, dcc 
 import dash_bootstrap_components as dbc
+
 from .components import sidebar
+from .components import text
 
 dash.register_page(__name__,
                     path='/',
@@ -18,23 +20,12 @@ dash.register_page(__name__,
     ])
 ])
 '''
-text = ["Thema: Analyse von Ampelschaltungsdaten in Hamburg",
-        html.Br(), html.Br(),
-        "Ziel des Projektes ist es, die Daten des Transparenzportal Hamburgs zur Optimierung von Navigationen zu verwenden. ", 
-        "Dabei wird die Navigation von Autos betrachtet. ",
-        "Indem eine Vorhersage der Ampelschaltung ermittelt wird, wird eine Route berechnet, die eine optimale Strecke unter Berücksichtigung der Ampelschaltung ist. ",
-        "Als Ausgang werden die letzten aktuellen Daten der Ampeln verwendet und diese für die Berechnung der Vorhersage verwendet. ",
-        "Durch eine graphische App-Oberfläche ist eine geeignete Visualisierung vorhanden für den Benutzer.",
-        html.Br(),
-        "Außerdem wird der aktuelle Standort des Nutzers live angezeigt und bei Abwegen der Route, registriert das Programm dies und berechnet anhand der aktuellen Standortdaten eine neue Route. ",
-        "Zusätzliche Informationen, wie von anderen Navigationsanbieter bekannt, wie Geschwindigkeit, ungefähre Gesamtzeit der Strecke und Gesamtentfernung werden dem Nutzer angezeigt für die jeweilige Route."]
-
-            
+          
 
 def layout(**kwargs):
     return dbc.Container(children = [
     sidebar(),
-    html.Div(html.P(text)),
+    text(),
     ],
     fluid = True, # remove the margins
     style={'padding': 0,

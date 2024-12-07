@@ -50,7 +50,8 @@ necessary_speed = 29
 position = position.Position() # Create a position Object
 
 # Main layout
-layout = dbc.Container(children = [
+def layout(**kwargs): 
+    return dbc.Container(children = [
     navbar_demo(),
     data_demo(position,current_speed,necessary_speed)
     ],

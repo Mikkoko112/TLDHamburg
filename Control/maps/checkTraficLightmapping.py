@@ -58,9 +58,9 @@ for vecAreaName,area in data['conjList'].items():
         if len(vec[2][0:2]) != 2: vec[2][0:2] = vec[1][::-1]
 
         lines= [
-            [-x+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
+            [x/1000+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
             vec[1][0:2][::-1],
-            [x+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
+            [x/1000+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
         ]
         folium.PolyLine(
             lines,

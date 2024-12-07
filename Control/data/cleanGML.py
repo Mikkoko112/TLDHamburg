@@ -1,24 +1,21 @@
 import igraph
 
 remove = [
-"access", 
-"area" ,
-"bicycle" ,
-"bicycleroad" ,
-"bridge" ,
-"cycleway" ,
-"estwidth" ,
-"foot" ,
-"footway" ,
-"width" ,
-"surface",
-"smoothness" ,
-"sidewalk",
-"intref" ,
-"lit"
-]
-
-secondRemove = [
+    "access", 
+    "area" ,
+    "bicycle" ,
+    "bicycleroad" ,
+    "bridge" ,
+    "cycleway" ,
+    "estwidth" ,
+    "foot" ,
+    "footway" ,
+    "width" ,
+    "surface",
+    "smoothness" ,
+    "sidewalk",
+    "intref" ,
+    "lit",
     "segregated",
     "turn",
     "timestamp",
@@ -40,9 +37,10 @@ removeVs = [
 
 if __name__ == "__main__":
     graph = igraph.load("shortshortendHamburg.gml")
-    for rm in secondRemove:
-        print(graph.es.attributes())
+    for rm in remove:
         del graph.es[rm]
-        print(graph.es.attributes())
 
-    graph.write_gml("extrashortshortendHamburg.gml")
+    for rm in removeVs:
+        del graph.vs[rm]
+    
+    graph.write_gml("shHamburg.gml")

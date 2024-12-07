@@ -4,6 +4,8 @@ import requests
 from math import floor,ceil,dist
 from geopy import distance
 
+#this is opselit. This was the first test of direct mapping
+
 
 modif = 1000
 

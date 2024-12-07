@@ -75,14 +75,11 @@ def run():
         
             for nodeInArea in area[1]:                  #Geht über jede Ampel im Area
                 if (not (areaName in missingAreas) ) and  nodeInArea[0] == conjunctionName:    #Wenn die Conjunction in der Area ist
-                    #print(areaName,nodeInArea[0],conjunctionName)
                     conjCOunt+=1
                     traficList =  conjunction[1]
                     relevantORSNotes = notes[areaName]
                     traficConjunctionList.append(TraficConjunction(conjunctionName,traficList,relevantORSNotes))
                     
-    
-    #print(len(traficConjunctionList))
     
     
     for conjunctionObject in traficConjunctionList:

@@ -7,7 +7,6 @@ import sys
 
 seachTrafic,searchArea = 0.01,1.5
 
-if
 
 nameOfProcessedThing,nameOfOutputfile="../data/cleanedCoorsAverage.json","../data/conjunctionsMeanSmall.json"
 '''

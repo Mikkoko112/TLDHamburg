@@ -1,0 +1,132 @@
+{
+    "type": "FeatureCollection",
+    "bbox": [
+        9.988385,
+        53.566125,
+        9.988832,
+        53.570095
+    ],
+    "features": [
+        {
+            "bbox": [
+                9.988385,
+                53.566125,
+                9.988832,
+                53.570095
+            ],
+            "type": "Feature",
+            "properties": {
+                "segments": [
+                    {
+                        "distance": 444.3,
+                        "duration": 50.0,
+                        "steps": [
+                            {
+                                "distance": 444.3,
+                                "duration": 50.0,
+                                "type": 11,
+                                "instruction": "Head south on Rothenbaumchaussee",
+                                "name": "Rothenbaumchaussee",
+                                "way_points": [
+                                    0,
+                                    8
+                                ]
+                            },
+                            {
+                                "distance": 0.0,
+                                "duration": 0.0,
+                                "type": 10,
+                                "instruction": "Arrive at Rothenbaumchaussee, straight ahead",
+                                "name": "-",
+                                "way_points": [
+                                    8,
+                                    8
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "way_points": [
+                    0,
+                    8
+                ],
+                "summary": {
+                    "distance": 444.3,
+                    "duration": 50.0
+                },
+                "traficlights": {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        9.9885,
+                        53.570095
+                    ],
+                    [
+                        9.988443,
+                        53.568837
+                    ],
+                    [
+                        9.988413,
+                        53.568344
+                    ],
+                    [
+                        9.988389,
+                        53.56795
+                    ],
+                    [
+                        9.988385,
+                        53.567581
+                    ],
+                    [
+                        9.988491,
+                        53.567167
+                    ],
+                    [
+                        9.988598,
+                        53.566864
+                    ],
+                    [
+                        9.988777,
+                        53.566329
+                    ],
+                    [
+                        9.988832,
+                        53.566125
+                    ]
+                ],
+                "type": "LineString"
+            }
+        }
+    ],
+    "metadata": {
+        "attribution": "openrouteservice.org | OpenStreetMap contributors",
+        "service": "routing",
+        "timestamp": 1732088270451,
+        "query": {
+            "coordinates": [
+                [
+                    9.988484,
+                    53.570095
+                ],
+                [
+                    9.988844,
+                    53.566126
+                ]
+            ],
+            "profile": "driving-car",
+            "format": "geojson",
+            "alternative_routes": {
+                "target_count": 3
+            }
+        },
+        "engine": {
+            "version": "8.2.0",
+            "build_date": "2024-10-09T09:23:42Z",
+            "graph_date": "2024-09-23T14:39:49Z"
+        }
+    }
+}

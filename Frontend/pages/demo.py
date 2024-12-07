@@ -67,18 +67,16 @@ def layout(**kwargs):
 # it will give back the coordinates and shows them in the map as a marker
 # it also generates a route and show it in the map
 @callback(
-    Output(component_id="startpunkt", component_property="valid"), 
-    Output("startpunkt", "invalid"),
-    Output(component_id="endpunkt", component_property="valid"), 
-    Output("endpunkt", "invalid"),
-    Output("route_button", "n_clicks"),
-    #Output("coordinates_start", "children"),
-    #Output("coordinates_end", "children"),
-    Output("start-end-layer", "children"),
-    Output("route-layer", "data"),
-    Output("tf-route-layer", "children"),
-    Output("start_next_button", "disabled"),
-    #Output("position", "center"),
+    Output("startpunkt", "valid"),          # True: shows if the input (departure) is valid (green)
+    Output("startpunkt", "invalid"),        # True: shows if the input (departure) is invalid (red)
+    Output("endpunkt", "valid"),            # True: shows if the input (destination) is valid (green) 
+    Output("endpunkt", "invalid"),          # True: shows if the input (destination) is invalid (red)
+    Output("route_button", "n_clicks"),     # set n_clicks to 0 
+    Output("start-end-layer", "children"),  # load star and end point into the map
+    Output("route-layer", "data"),          # load route (geojson) into the map
+    #Output("tl-route-layer", "children"),   # load traffic lights into the map
+    Output("start_next_button", "disabled"),# True: disables the start/next button if no route is given
+    #Output("position", "center"),          # shows the live position
     [State("startpunkt","value"),
      State("endpunkt","value"),
      Input("route_button", "n_clicks"),
@@ -95,8 +93,10 @@ def check_validity(starttext, endtext, n_clicks):
         if starttext or endtext: 
             is_valid_start = True
             is_valid_end = True
+            # get the coordinates for the departure and destination
             start_lat, start_lon = geocoding_utils.return_coordinates(starttext)
             end_lat, end_lon = geocoding_utils.return_coordinates(endtext)
+            # if no address under this name is found, set valid False
             if start_lat == None:
                 is_valid_start = False
             else:
@@ -105,32 +105,49 @@ def check_validity(starttext, endtext, n_clicks):
                 is_valid_end = False
             else:
                 marker[1].update({"lat": end_lat, "lon": end_lon})
-            #get route
+            
+            if not is_valid_start or not is_valid_end :
+                return (is_valid_start, 
+                    not is_valid_start, 
+                    is_valid_end, 
+                    not is_valid_end, 
+                    0, 
+                    no_update, 
+                    no_update, 
+                    #get_objects.get_trafficlights(traffic_light_response),  #get_objects.get_marker_id(traffic_light_response),
+                    no_update)#, position.get_pos()
+            
+            #get route from ORS 
             route = get_route.Route(ORS_key, [start_lon,start_lat], [end_lon, end_lat])
             position.set_pos(lat=start_lat, lon=start_lon)
 
             #global variables for instructions and waypoints
-            global route_pictures, route_instructions, waypoints, step_waypoints 
-            route_pictures, route_instructions = route.get_directions()
+            global route_pictures, route_instructions, route_distances, route_durations, waypoints, step_waypoints
+            route_pictures, route_instructions, route_distances, route_durations = route.get_directions()
             waypoints = route.get_waypoints()
             #get traffic lights and step waypoints
             step_waypoints = route.get_step_waypoints()
-            traffic_light_response = route.get_traffic_lights() #traffic_light_response = route.get_trafficlight_ids() 
+            # change to new function for tl from geojson #traffic_light_response = route.get_trafficlight_ids() 
+            #traffic_light_response = route.get_traffic_lights() 
             return (is_valid_start, 
                     not is_valid_start, 
                     is_valid_end, 
                     not is_valid_end, 
                     0, 
-                    #f"{start_lat}\t{start_lon}", 
-                    #f"{end_lat}\t{end_lon}", 
                     get_objects.get_marker(marker), 
                     route.load_route(), 
-                    get_objects.get_trafficlights(traffic_light_response),  #get_objects.get_marker_id(traffic_light_response),
+                    #get_objects.get_trafficlights(traffic_light_response),  #get_objects.get_marker_id(traffic_light_response),
                     False)#, position.get_pos()
-    return (False, False, False, False, 0, 
-            #"", "", 
-            no_update, no_update, no_update, no_update)#, no_update #no input yet
-    #raise dash.exceptions.PreventUpdate
+    return (False, 
+            False, 
+            False, 
+            False, 
+            0, 
+            no_update, 
+            no_update, 
+            #no_update, 
+            no_update)#, no_update #no input yet
+
 
 # stores the data of the View for the whole route 
 # (important for the button "restart")
@@ -149,15 +166,15 @@ def store_map_view(data, zoom, center):
 # go through the steps of the route with the start/next button
 # progress shows in the progressbar
 @callback(
-    Output("start_next_button", "n_clicks"),
-    Output("start_next_button", "children"),
-    Output("route_picture", "src"),
-    Output("route_instruction", "children"),
-    Output('map', 'viewport'),
-    Output("prev_button", "disabled"),
-    Output("restart_button", "disabled"),
-    Output("progress", "value"),
-    Output("prev_button", "n_clicks"),
+    Output("start_next_button", "n_clicks"),    # 
+    Output("start_next_button", "children"),    # change text from start to next after going one step
+    Output("route_picture", "src"),             # change picture for instruction
+    Output("route_instruction", "children"),    # change text for instruction
+    Output('map', 'viewport'),                  # change view of the map
+    Output("prev_button", "disabled"),          # True: disables the prev button
+    Output("restart_button", "disabled"),       # True: disables the restart button
+    Output("progress", "value"),                # change progress value 
+    Output("prev_button", "n_clicks"),          # 
 
     Input("start_next_button", "n_clicks"),
     Input("prev_button", "n_clicks"),
@@ -171,12 +188,15 @@ def store_map_view(data, zoom, center):
 )
 def show_instructions(n_clicks, prev, restart, store):
     button_id = ctx.triggered_id
+    # restart the route instructions and picture
     if button_id == "restart_button":
         return (0, "Start",
                 "", 
                 "",
                 store,
                 True, True, 0, 0)
+    
+    # go one step back
     elif button_id == "prev_button":
         if prev == 1:
             global step_waypoints_rev 
@@ -187,47 +207,60 @@ def show_instructions(n_clicks, prev, restart, store):
             index = step_waypoints_rev.index(n_clicks-1)  
             return (n_clicks, "Next",
                     dash.get_relative_path(f"/assets/{route_pictures[index-1]}"),
-                    #app.app_get_asset_url(f"{Path.cwd().parent}/assets", route_pictures[index-1]), 
-                    route_instructions[index-1],
+                    f"In {route_distances[index-2]}m: {route_instructions[index-1]}",
                     dict(center=geocoding_utils.convert_to_lat_lon(waypoints[n_clicks-1]), zoom=18),
                     False, False, value, no_update
                     #position.get_pos()
                     )
+    
+    # calculate overall progress -> change later to progress to the next trafficlight
     value = (n_clicks/len(waypoints))*100
+
+    # go one step further
     if n_clicks and route_pictures != []:
+        # first step: change button Start to Next
         if n_clicks == 1:
             return (n_clicks, "Next", 
                         dash.get_relative_path(f"/assets/{route_pictures[0]}"),
-                        #app.app_get_asset_url(f"{Path.cwd().parent}/assets", route_pictures[0]), 
-                        route_instructions[0],
+                        f"{route_instructions[0]}",
                         dict(center=geocoding_utils.convert_to_lat_lon(waypoints[0]), zoom=18, transition = "setView"), #flyTo 
                         True,False, value, no_update
                         #position.get_pos()
                         ) 
         
+        elif n_clicks == 2:
+            return (n_clicks, "Next", 
+                        dash.get_relative_path(f"/assets/{route_pictures[1]}"),
+                        f"In {route_distances[0]}m: {route_instructions[1]}",
+                        dict(center=geocoding_utils.convert_to_lat_lon(waypoints[1]), zoom=18, transition = "setView"), #flyTo 
+                        True,False, value, no_update
+                        #position.get_pos()
+                        ) 
+        
+        # after last step, restart automatically
         elif n_clicks == len(waypoints):
             #print(f"if nclicks == len: {waypoints[n_clicks-1]}")
             return (0, "Start", 
                     dash.get_relative_path(f"/assets/{route_pictures[-1]}"),
-                    #app.app_get_asset_url(f"{Path.cwd().parent}/assets", route_pictures[-1]), 
-                    route_instructions[-1], 
+                    f"{route_instructions[-1]}", 
                     dict(center=geocoding_utils.convert_to_lat_lon(waypoints[-1]), zoom=18),
                     False, False, value, no_update
                     #position.get_pos()
                     )
         
+        # if number of clicks is one of the next steps change instruction and picture
         elif n_clicks-1 in step_waypoints:
             #print(f"if nclicks in stepway: {waypoints[n_clicks-1]}")
             index = step_waypoints.index(n_clicks-1)  
             return (n_clicks, "Next", 
-                    dash.get_relative_path(f"/assets/{route_pictures[index]}"),
-                    #app.app_get_asset_url(f"{Path.cwd().parent}/assets", route_pictures[index]), 
-                    route_instructions[index],
+                    dash.get_relative_path(f"/assets/{route_pictures[index+1]}"),
+                    f"In {route_distances[index]}m: {route_instructions[index+1]}",
                     dict(center=geocoding_utils.convert_to_lat_lon(waypoints[n_clicks-1]), zoom=18),
                     False, False, value, no_update
                     #position.get_pos()
                     )
         
+        # normal step further
         #print(f"if nclicks not in stepway: {waypoints[n_clicks-1]}")
         return (n_clicks, "Next", 
                 no_update, 
@@ -236,14 +269,16 @@ def show_instructions(n_clicks, prev, restart, store):
                 False, False, value, no_update
                 #position.get_pos()
                 )
-
+    # no buttons were clicked
     return 0, "Start", "", "", dict(center=no_update, zoom=no_update), True, True, 0#, None
 
+
+# change trafficlight picture
 @callback(
-    Output("tf_picture","src"),
-    Input("tf_picture","src")
+    Output("tl_picture","src"),
+    Input("tl_picture","src")
 )
-def tf_pic(src):
+def tl_pic(src):
     if src == "":
         return dash.get_relative_path(f"/assets/tf_off.png")
     return no_update

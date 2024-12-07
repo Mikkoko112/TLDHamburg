@@ -66,6 +66,8 @@ class Route:
                         3: "roundabout_left.png"}
         route_pictures = []
         route_instructions = []
+        route_distances = [] 
+        route_durations = []
 
         steps = self._json["features"][0]["properties"]["segments"][0]["steps"]
         for step in steps:
@@ -74,7 +76,9 @@ class Route:
                 val = dic_roundabouts[step["exit_number"]]
             route_pictures.append(val)
             route_instructions.append(step["instruction"])
-        return route_pictures, route_instructions
+            route_distances.append(step["distance"])
+            route_durations.append(step["duration"])
+        return route_pictures, route_instructions, route_distances, route_durations
     
     def get_waypoints(self):
         waypoints = self._json["features"][0]["geometry"]["coordinates"]

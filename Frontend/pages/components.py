@@ -213,9 +213,9 @@ def control_live(current_speed):
 # picture of a traffic light 
 # standard: off
 # can be changed to green, yellow and red
-def tf_picture():
+def tl_picture():
     return html.Div([
-                html.Img(id = "tf_picture",
+                html.Img(id = "tl_picture",
                          src="", 
                          style={"display": "flex",
                                 "alignItems": "left", 
@@ -248,7 +248,7 @@ def speed_recommendation(necessary_speed):
                                     } 
                     ),width="auto", align="center",
                 ),
-            dbc.Col(tf_picture(), width="auto", align='center',
+            dbc.Col(tl_picture(), width="auto", align='center',
                     style={         "display": "flex", 
                                     "alignItems": "center", 
                                     "marginBottom": "8px", 
@@ -285,9 +285,9 @@ def data_demo(position, current_speed,necessary_speed):
                         dl.TileLayer(),
                         dl.GeoJSON(id="route-layer", data=None, options={"color": "blue"}, zoomToBounds=True),
                         #dl.Circle(id="position", center=position.get_pos(), radius=20),
-                        dl.LayerGroup(id="tl-id-layer"),  # This is where markers will be added
+                        #dl.LayerGroup(id="tl-id-layer"),  # This is where markers will be added
                         dl.LayerGroup(id="start-end-layer"),
-                        dl.LayerGroup(id="tf-route-layer"),
+                        dl.LayerGroup(id="tl-route-layer"),
                         dl.LocateControl(locateOptions={'enableHighAccuracy': True, 
                                 "setView": False, 
                                 "watch": True, 
@@ -325,9 +325,9 @@ def data_live(position):
                         dl.TileLayer(),
                         dl.GeoJSON(id="route-layer", data=None, options={"color": "blue"}, zoomToBounds=True),
                         #dl.Circle(id="position", center=position.get_pos(), radius=20),
-                        dl.LayerGroup(id="tl-id-layer"),  # This is where markers will be added
+                        #dl.LayerGroup(id="tl-id-layer"),  # This is where markers will be added
                         dl.LayerGroup(id="start-end-layer"),
-                        dl.LayerGroup(id="tf-route-layer"),
+                        dl.LayerGroup(id="tl-route-layer"),
                         dl.LocateControl(locateOptions={'enableHighAccuracy': True, 
                                 "setView": False, 
                                 "watch": True, 

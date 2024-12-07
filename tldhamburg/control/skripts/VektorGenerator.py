@@ -126,7 +126,6 @@ def genPerPrimarySignal(coords:dict,conjunctionDict:dict)->dict:
         for conjName,body in conjunctionDict.items():
             
             if (name in body["traficLights"] 
-                    and len(coords) == 3 
                     and len(body["junctionNodes"]) > 0):
                             #this asserts that the necessary data is present 
                 

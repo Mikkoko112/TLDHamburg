@@ -56,34 +56,39 @@ class TraficConjunction:
 
 
 def run():
-    with open("refetchData.json","r") as file:
+    with open("combinedHoleData.json","r") as file:
         notes = json.load(file)
     with open("../data/conjunctionsJoint.json","r") as file:
         conj = json.load(file)
     with open("../data/fetchAreasFullData.json","r") as file:
         fetchAreas = json.load(file)
     
-    with open("missingData.json","r") as file:
-        missingAreas = json.load(file)
+    # with open("missingData.json","r") as file:
+    #     missingAreas = json.load(file)
 
+    missingAreas = {}
     traficConjunctionList = []
     outDict = {}
     conjCOunt = 0
     for conjunctionName,conjunction in conj.items():    #Geht über die Conjunctions
         
         for areaName,area in fetchAreas.items():        #Geht über alle relevanten Bereiche
-        
+            if(conjunctionName == "21851" and (areaName in missingAreas) ):
+                        print("part of missing data")
             for nodeInArea in area[1]:                  #Geht über jede Ampel im Area
-                if (not (areaName in missingAreas) ) and  nodeInArea[0] == conjunctionName:    #Wenn die Conjunction in der Area ist
+                if areaName != "13937" and  nodeInArea[0] == conjunctionName:    #Wenn die Conjunction in der Area ist
+                    if(conjunctionName == "21851"):
+                        print(conjunctionName,nodeInArea[0])
                     conjCOunt+=1
                     traficList =  conjunction[1]
                     relevantORSNotes = notes[areaName]
                     traficConjunctionList.append(TraficConjunction(conjunctionName,traficList,relevantORSNotes))
-                    
-    
+
     
     for conjunctionObject in traficConjunctionList:
         name,junctionNodes,traficLights,bound = conjunctionObject.returnValue()
+        if(name == "21851"):
+            print(name,traficLights,bound)
         outDict[name] = {"bound"        :bound,
                          "junctionNodes":junctionNodes,
                          "traficLights" :traficLights}

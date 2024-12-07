@@ -77,8 +77,8 @@ def testTarficlightMapping6275():
 
     return None 
 
-def testTarficlightMapping6275():
-    
+def testTarficlightMapping():
+    pass
 
 if __name__ == "__main__":
     #testInbound()

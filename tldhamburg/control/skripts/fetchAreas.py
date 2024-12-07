@@ -68,12 +68,12 @@ def singleCall():
     with open("holeDataTest.json","w") as file:
         json.dump(areas, file, indent=4)
 def mapPaths():
-    with open("../data/fetchAreasFullData.json","r") as file:
+    with open("missingData.json","r") as file:
         coords = json.load(file)
 
     areas = fetchAreas(coords)
     
-    with open("holeData.json","w") as file:
+    with open("holeDataMissingData.json","w") as file:
         json.dump(areas, file, indent=4)
 
 
@@ -98,6 +98,18 @@ def correctTheHoleData():
     with open("refetchData.json","w") as file:
         json.dump(areas, file, indent=4)
 
+def combineDict():
+    with open("holeData.json","r") as file:
+        holeData = json.load(file)
+
+    with open("holeDataMissingData.json","r") as file:
+        missingData = json.load(file)
+
+    for name,data in missingData.items():
+        holeData[name] =data
+
+    with open("combinedHoleData.json","w") as file:
+        json.dump(holeData,file,indent=4)
 
 if __name__ == "__main__":
     with open("../optionsfile.json","r") as file:
@@ -108,3 +120,4 @@ if __name__ == "__main__":
     #mapPaths()
     #singleCall()
     #correctTheHoleData()
+    combineDict()

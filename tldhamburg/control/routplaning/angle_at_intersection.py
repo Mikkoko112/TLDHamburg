@@ -18,8 +18,13 @@ def is_left_turn(a: ORSNode, b: ORSNode, c: ORSNode) -> bool:
 
 def angle_inbetween(a: ORSNode, b: ORSNode, c: ORSNode) -> float:
     """Determines the angle one turns at point b to reach c from a over b"""
-    return math.acos(((b - a) @ (c - b)) / (abs(b - a) * abs(c - b)))
-
+    
+    try:
+        calculation =  math.acos(((b - a) @ (c - b)) / (abs(b - a) * abs(c - b)))
+        return calculation
+    except ValueError as e:
+        return 0
+    
 
 def is_left_turn_tolerance(a: ORSNode, b: ORSNode, c: ORSNode) -> bool:
     """Determines whether th path from a over b to c is a left-turn.

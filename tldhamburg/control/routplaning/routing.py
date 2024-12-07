@@ -23,11 +23,17 @@ def getRoute(coordsStartEnd:list)->dict:
 
     return json.loads(call.text)
 def inbound(bound,coord:list)->bool: #vllt schneller, wenn Gegensatzt getestet
-        assert (len(bound) == 2 and len(coord) == 2 
-                                and all([len(b) == 2 for b in bound]))
-        out = ((bound[0][0] <= coord[0]) and (coord[0]<=bound[1][0]) and
-               (bound[0][1] <= coord[1]) and (coord[1]<=bound[1][1]))
-        return out
+    assert (len(bound) == 2 and len(coord) == 2 
+                            and all([len(b) == 2 for b in bound]))
+    
+
+    xMin = min(bound[0][0], bound[1][0]) 
+    xMax = max(bound[0][0], bound[1][0])
+    yMin = min(bound[0][1], bound[1][1])
+    yMax = max(bound[0][1], bound[1][1])
+
+
+    return xMin <= coord[0] <= xMax and yMin <= coord[1] <= yMax
 
 def getNearestNode(mainNode:list,nodeList:list)->list:
     nearestDist  = inf
@@ -44,11 +50,18 @@ def sortNodeToConjuction(pureRoute:list,conjuctionDict)->dict:
     out = {}
     for i,wayPoint in enumerate(pureRoute):
         for name,data in conjuctionDict.items():
-            if len(data) ==3 and inbound(data['bound'],wayPoint):
+            if (name == "22004"):
+                print(name,data['bound'],wayPoint)
+            if inbound(data['bound'],wayPoint):
+                if (name == "22004"):
+                    print("hit",wayPoint)
+            
                 if not name in out:
                     out[name] = []
-                out[name].append([i,wayPoint])
 
+                out[name].append([i,wayPoint])
+                if(name == "22004"):
+                    print(out[name])
     return out
 
 def generateVektorPoint(pointOut:list,pointIn:list): #Vektor zeigt zum point!
@@ -157,7 +170,7 @@ def getRouteTraficLights(route:list, conjFile:dict,conjList:list,vectorisation:d
             primarydegOut = vectorisation[primarySignalName][2][3]
 
             check = lanesOverlape(primarydegIn,primarydegOut,degIn,degOut)
-            if name == "6725":
+            if name == "22007":
                 print(route)
                 
                 print()
@@ -240,8 +253,14 @@ def test():
         vectorisation = json.load(file)
 
     graph = igraph.load("../data/shHamburg.gml")
-    routeHole = getRouteFromGraph([[9.946091651916504,53.59207534790039 ],
-                                [10.0772705078125,53.61192321777344]],graph)
+    #testRoute1
+    # routeHole = getRouteFromGraph([[9.946091651916504,53.59207534790039 ],
+    #                             [10.0772705078125,53.61192321777344]],graph)
+    #testRoute2
+    routeHole = getRouteFromGraph([[10.015552520751953,53.64086151123047 ],
+                                [10.075848579406738,53.65281677246094]],graph)
+    
+    
     pureRoute = pruifyRoute(routeHole)
     conjList = sortNodeToConjuction(pureRoute,conj)
     traficLightsList = getRouteTraficLights(pureRoute,conj,conjList,vectorisation)
@@ -249,7 +268,7 @@ def test():
     dic = {"wayPoints":pureRoute,
            "conjList":conjList,
            "traficLights":traficLightsList}
-    with open("testRoute.json","w") as file:
+    with open("testRoute07-12.json","w") as file:
         json.dump(dic,file,indent=4)
 
 if __name__ == "__main__":

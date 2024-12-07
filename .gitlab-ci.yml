@@ -19,8 +19,20 @@ unit-test-job:
   script:
     - python test/test_things.py
     - echo "Congratulations test_things.py passed."
-    - python test/test_data_fetcher.py
-    - echo "Congratulations test_data_fetcher.py passed."
+    - python test/test_data_fetcher_mock_api.py
+    - echo "Congratulations test_data_fetcher_mock_api.py passed."
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+API_availability_job:
+  stage: backend
+  cache:
+    paths:
+      - .cache/pip 
+  script:
+    - python test/test_data_fetcher_real_api.py
+    - echo "Congratulations test_data_fetcher_real_api.py passed."
+  allow_failure : true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'

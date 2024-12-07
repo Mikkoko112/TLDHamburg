@@ -19,4 +19,14 @@ dependencies = [
     "pandas",
     "requests",
     "shapely",
+    "flask",
+    "dash",
+    "dash_leaflet",
+    "dash_bootstrap_components",
+    "dash_core_components",
+    "dash_html_components",
+    "geopy",
+    "loguru",
+    "requests",
+    "pathlib"
 ]

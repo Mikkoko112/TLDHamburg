@@ -1,0 +1,13 @@
+{
+    "modif":1000,
+    "importantData":{
+        "meanValueData":"/data/cleanedCoorsAverage.json",
+        "thingsLoc":"/data/thingsLoc.json",
+        "vectorData":"/data/vectorisation.json",
+        "conjunctionData":"/data/conjunctionsMean.json",
+        "cleanedConjunctionData":"/data/conjunctionsJoint.json",
+        "allFetchAreas":"/data/fetchAreasFullData.json",
+        "GraphData":"/data/shHamburg.gml",
+        "holeData":"/data/holeData.json"
+    }
+}

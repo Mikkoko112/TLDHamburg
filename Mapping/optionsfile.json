@@ -1,0 +1,10 @@
+{
+    "modif":1000,
+    "importantData":{
+        "meanValueData":"/data/cleanedCoorsAverage.json",
+        "thingsLoc":"/data/thingsLoc.json",
+        "vectorData":"/data/vectorisation.json",
+        "conjunctionData":"/data/conjunctionsMeanSmall.json",
+        "cleanedConjunctionData":"/data/conjunctionsJoint.json"
+    }
+}

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import json
-from fetchAreas import roundValues,getNotes
+from tldhamburg.control.skripts.fetchAreas import roundValues,getNotes
 
 def getWrongSquares(coords:dict,coordsBase:dict)->dict:
     out = dict()

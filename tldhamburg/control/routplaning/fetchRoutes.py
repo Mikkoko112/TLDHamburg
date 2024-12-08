@@ -5,8 +5,8 @@ import igraph
 import math
 from geopy import distance
 from timeit import default_timer as timer
-from angle_at_intersection import is_left_turn_tolerance as leftTurn
-from angle_at_intersection import is_right_turn_tolerance as rightTurn
+from tldhamburg.control.routplaning.angle_at_intersection import is_left_turn_tolerance as leftTurn
+from tldhamburg.control.routplaning.angle_at_intersection import is_right_turn_tolerance as rightTurn
 from models import ORSNode
 
 def getDistanceBetweenPoints(ent:list,sr:list)->float:

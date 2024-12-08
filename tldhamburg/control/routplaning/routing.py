@@ -3,7 +3,7 @@ import requests
 import json
 import igraph
 from math import sqrt,acos,inf,degrees,pi
-from fetchRoutes import getRouteFromGraph
+from tldhamburg.control.fetchRoutes import getRouteFromGraph
 modif = 1000
 
 def getRoute(coordsStartEnd:list)->dict:

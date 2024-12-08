@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from makeFetchSquares import findSmalestAndLagestCoord
+from tldhamburg.control.skripts.makeFetchSquares import findSmalestAndLagestCoord
 import json
 from shapely.geometry import box
 

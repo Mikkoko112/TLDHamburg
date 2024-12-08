@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-from routplaning import fetchRoutes as fetcher
-from evaluation  import evaluation
-from routplaning import routing 
+from tldhamburg.control.routplaning import fetchRoutes as fetcher
+from tldhamburg.control.evaluation  import evaluation
+from tldhamburg.control.routplaning import routing 
 import igraph
 import json
 import time

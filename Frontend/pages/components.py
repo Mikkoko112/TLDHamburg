@@ -9,7 +9,7 @@ import dash_leaflet as dl
 # on the right of the navbar
 def dropdown():
     return dbc.DropdownMenu(
-        label="Menu",
+        label="Menü",
         color="secondary",
         align_end=True,
         children=[
@@ -274,9 +274,21 @@ def progress():
                     ) 
 
 
+def overview():
+    return dbc.Col(children=
+            [
+                #html.Img(src="", id="picture-overview"),
+                html.Div("Hallo", id="instruction-overview")
+            ],
+            style={"width": "100%", 
+                        "height": "84vh", 
+                        "padding": 0,
+                        })
+   
+
 
 # the map on the left side and on the right side the route instructions
-def data_demo(position, current_speed,necessary_speed):
+def data_demo(position):
     return dbc.Row([
                 dbc.Col([
                     dcc.Store(id='map-store', data={"center": None, "zoom": None}),  # Store to keep the map zoom level
@@ -299,18 +311,30 @@ def data_demo(position, current_speed,necessary_speed):
                         ], 
                     style={'width': '100%', 'height': '84vh'}),
                     ]),
-                
-                dbc.Col(children= [#html.Div("Übersicht: "), html.Div(id="coordinates_start", children = ""), 
-                           #html.Div(id="coordinates_end", children=""),
-                           next_turn(),
-                           control_demo(current_speed),
-                           speed_recommendation(necessary_speed),
-                           progress()],
-                    style={"width": "100%", 
-                           "height": "84vh", 
-                           "padding": 0,
-                           }
-                    ),
+
+                   dbc.Col(dbc.Tabs(
+                        [
+                            dbc.Tab(
+                            dbc.Col(children= 
+                                [
+                                next_turn(),
+                                control_demo("-"),
+                                speed_recommendation("-"),
+                                progress()
+                                ],
+                                style={"width": "100%", 
+                                        "height": "84vh", 
+                                        "padding": 0,
+                                        }
+                            ), 
+                            label="Instruktion",tab_id="tab-1-demo",
+                            ),
+                            dbc.Tab(overview(), 
+                                    label="Übersicht", 
+                                    disabled=True,
+                                    id="tab-2")
+                        ], active_tab="tab-1-demo",
+                    ))       
             ],
            # className="g-1", #change Row gutter (distance between the Columns)
            style={"width": "100%"}
@@ -339,21 +363,35 @@ def data_live(position):
                         ], 
                     style={'width': '100%', 'height': '84vh'}),
                     ]),
-                
-                dbc.Col(children= [
-                           next_turn(),
-                           control_live("-"),
-                           speed_recommendation("-"),
-                           progress()],
-                    style={"width": "100%", 
-                           "height": "84vh", 
-                           "padding": 0,
-                           }
-                    ),
+
+                    dbc.Col(dbc.Tabs(
+                        [
+                            dbc.Tab(
+                            dbc.Col(children= 
+                                [
+                                next_turn(),
+                                control_live("-"),
+                                speed_recommendation("-"),
+                                progress()
+                                ],
+                                style={"width": "100%", 
+                                        "height": "84vh", 
+                                        "padding": 0,
+                                        }
+                            ), 
+                            label="Instruktion", tab_id="tab-1-live", 
+                            ),
+                            dbc.Tab(overview(), 
+                                    label="Übersicht", 
+                                    disabled=True,
+                                    id="tab-2")
+                        ], active_tab="tab-1-live",
+                    ))              
             ],
            # className="g-1", #change Row gutter (distance between the Columns)
            style={"width": "100%"}
         )
+
 
 # components only for start site ----------------------------------------------
 

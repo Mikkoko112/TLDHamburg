@@ -8,6 +8,8 @@ from dash.exceptions import PreventUpdate
 import dash_leaflet as dl
 import dash_bootstrap_components as dbc
 
+import pandas as pd
+
 from tldhamburg.frontend import APIkeys
 from tldhamburg.frontend import * # in __innit__.py __all__ = ["filename.py", "otherfile.py",...]
 
@@ -53,7 +55,7 @@ position = position.Position() # Create a position Object
 def layout(**kwargs): 
     return dbc.Container(children = [
     navbar_demo(),
-    data_demo(position,current_speed,necessary_speed)
+    data_demo(position)
     ],
     fluid = True, # remove the margins
     style={"padding": 0,
@@ -74,9 +76,11 @@ def layout(**kwargs):
     Output("route_button", "n_clicks"),     # set n_clicks to 0 
     Output("start-end-layer", "children"),  # load star and end point into the map
     Output("route-layer", "data"),          # load route (geojson) into the map
-    #Output("tl-route-layer", "children"),   # load traffic lights into the map
+    #Output("tl-route-layer", "children"),  # load traffic lights into the map
     Output("start_next_button", "disabled"),# True: disables the start/next button if no route is given
     #Output("position", "center"),          # shows the live position
+    Output("tab-2","disabled"),             # enables the Overview tab
+
     [State("startpunkt","value"),
      State("endpunkt","value"),
      Input("route_button", "n_clicks"),
@@ -115,6 +119,7 @@ def check_validity(starttext, endtext, n_clicks):
                     no_update, 
                     no_update, 
                     #get_objects.get_trafficlights(traffic_light_response),  #get_objects.get_marker_id(traffic_light_response),
+                    no_update,
                     no_update)#, position.get_pos()
             
             #get route from ORS 
@@ -137,6 +142,7 @@ def check_validity(starttext, endtext, n_clicks):
                     get_objects.get_marker(marker), 
                     route.load_route(), 
                     #get_objects.get_trafficlights(traffic_light_response),  #get_objects.get_marker_id(traffic_light_response),
+                    False,
                     False)#, position.get_pos()
     return (False, 
             False, 
@@ -146,6 +152,7 @@ def check_validity(starttext, endtext, n_clicks):
             no_update, 
             no_update, 
             #no_update, 
+            no_update,
             no_update)#, no_update #no input yet
 
 
@@ -176,6 +183,9 @@ def store_map_view(data, zoom, center):
     Output("progress", "value"),                # change progress value 
     Output("prev_button", "n_clicks"),          # 
 
+    Output("instruction-overview","children"),  # list all instruction still left
+    #Output("picture-overview", "src"),         # list all pictures for the instructions
+
     Input("start_next_button", "n_clicks"),
     Input("prev_button", "n_clicks"),
     Input("restart_button", "n_clicks"),
@@ -188,13 +198,22 @@ def store_map_view(data, zoom, center):
 )
 def show_instructions(n_clicks, prev, restart, store):
     button_id = ctx.triggered_id
+    l = [0]
+    l.extend(route_distances[:-1])
     # restart the route instructions and picture
     if button_id == "restart_button":
         return (0, "Start",
                 "", 
                 "",
                 store,
-                True, True, 0, 0)
+                True, True, 0, 0,
+                (dbc.Table.from_dataframe(pd.DataFrame(
+                    {
+                        "in meters": l,
+                        "Instruction": route_instructions,
+                    }), striped=True, bordered=True, hover=True)),
+                #""
+                )
     
     # go one step back
     elif button_id == "prev_button":
@@ -209,7 +228,13 @@ def show_instructions(n_clicks, prev, restart, store):
                     dash.get_relative_path(f"/assets/{route_pictures[index-1]}"),
                     f"In {route_distances[index-2]}m: {route_instructions[index-1]}",
                     dict(center=geocoding_utils.convert_to_lat_lon(waypoints[n_clicks-1]), zoom=18),
-                    False, False, value, no_update
+                    False, False, value, no_update,
+                    (dbc.Table.from_dataframe(pd.DataFrame(
+                    {
+                        "in meters": l[index-2:],
+                        "Instruction": route_instructions[index-2:],
+                    }), striped=True, bordered=True, hover=True))
+                    #""
                     #position.get_pos()
                     )
     
@@ -224,7 +249,13 @@ def show_instructions(n_clicks, prev, restart, store):
                         dash.get_relative_path(f"/assets/{route_pictures[0]}"),
                         f"{route_instructions[0]}",
                         dict(center=geocoding_utils.convert_to_lat_lon(waypoints[0]), zoom=18, transition = "setView"), #flyTo 
-                        True,False, value, no_update
+                        True,False, value, no_update,
+                        (dbc.Table.from_dataframe(pd.DataFrame(
+                            {
+                                "in meters": l,
+                                "Instruction": route_instructions,
+                            }), striped=True, bordered=True, hover=True)),
+                        #""
                         #position.get_pos()
                         ) 
         
@@ -233,7 +264,13 @@ def show_instructions(n_clicks, prev, restart, store):
                         dash.get_relative_path(f"/assets/{route_pictures[1]}"),
                         f"In {route_distances[0]}m: {route_instructions[1]}",
                         dict(center=geocoding_utils.convert_to_lat_lon(waypoints[1]), zoom=18, transition = "setView"), #flyTo 
-                        True,False, value, no_update
+                        True,False, value, no_update,
+                        (dbc.Table.from_dataframe(pd.DataFrame(
+                            {
+                                "in meters": l[0:],
+                                "Instruction": route_instructions[0:],
+                            }), striped=True, bordered=True, hover=True)),
+                       # ""
                         #position.get_pos()
                         ) 
         
@@ -244,7 +281,13 @@ def show_instructions(n_clicks, prev, restart, store):
                     dash.get_relative_path(f"/assets/{route_pictures[-1]}"),
                     f"{route_instructions[-1]}", 
                     dict(center=geocoding_utils.convert_to_lat_lon(waypoints[-1]), zoom=18),
-                    False, False, value, no_update
+                    False, False, value, no_update,
+                    (dbc.Table.from_dataframe(pd.DataFrame(
+                            {
+                                "in meters": l[:1],
+                                "Instruction": route_instructions[-1:],
+                            }), striped=True, bordered=True, hover=True)),
+                    #""
                     #position.get_pos()
                     )
         
@@ -256,7 +299,13 @@ def show_instructions(n_clicks, prev, restart, store):
                     dash.get_relative_path(f"/assets/{route_pictures[index+1]}"),
                     f"In {route_distances[index]}m: {route_instructions[index+1]}",
                     dict(center=geocoding_utils.convert_to_lat_lon(waypoints[n_clicks-1]), zoom=18),
-                    False, False, value, no_update
+                    False, False, value, no_update,
+                    (dbc.Table.from_dataframe(pd.DataFrame(
+                            {
+                                "in meters": l[index:],
+                                "Instruction": route_instructions[index:],
+                            }), striped=True, bordered=True, hover=True)),
+                    #""
                     #position.get_pos()
                     )
         
@@ -266,11 +315,13 @@ def show_instructions(n_clicks, prev, restart, store):
                 no_update, 
                 no_update, 
                 dict(center=geocoding_utils.convert_to_lat_lon(waypoints[n_clicks-1]), zoom=18),
-                False, False, value, no_update
+                False, False, value, no_update,
+                no_update,
+                #""
                 #position.get_pos()
                 )
     # no buttons were clicked
-    return 0, "Start", "", "", dict(center=no_update, zoom=no_update), True, True, 0#, None
+    return (0, "Start", "", "", dict(center=no_update, zoom=no_update), True, True, 0, "")#, "" #, None
 
 
 # change trafficlight picture

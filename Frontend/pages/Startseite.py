@@ -1,34 +1,66 @@
 import dash
-from dash import Dash, html, dcc 
+from dash import html, no_update, dcc, callback, ctx
+from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-from .side_bar import sidebar
+
+from .components import headline
+from .components import info
+from .components import cards
+from .components import contributors
 
 dash.register_page(__name__,
                     path='/',
                     title='Startseite',
                     name='Startseite')
 
+#external CSS stylesheets
+external_stylesheets = [
+    dbc.themes.BOOTSTRAP,
+]
 
-'''layout = html.Div([
-    html.H1('Multi-page app with Dash Pages'),
-    html.Div([
-        html.Div(
-            dcc.Link(f"{page['name']} - {page['path']}", href=page["relative_path"])
-        ) for page in dash.page_registry.values()
-    ])
-])
-'''
-
-
+# Layout definition
 def layout(**kwargs):
-    return dbc.Container(children = [
-    sidebar(),
-    html.Div("Startseite"),
+   return dbc.Container(children = [
+    dcc.Location(id='url', refresh=True),  
+    headline(), # Include the headline
+    dbc.Row(children=[
+       dbc.Col(info()), #Include inofrmation text 
+    dbc.Col(contributors()),
+    ], style={"padding": 0,
+              "margin": 0,
+              "width": "100%"}, # removes ALL the margins
+    ),
+    cards(), # Include the cards
     ],
     fluid = True, # remove the margins
-    style={'padding': 0,
+    style={"padding": 0,
            "height": "98vh",
            "width": "100%"}, # removes ALL the margins
     className="bg-light", # background color
 )
 
+# Decide to navigate to page demo or live
+@callback(
+    Output("url", "pathname"),
+    Output("img-right-card","style"),
+    Output("img-left-card", "style"),
+    Output("link-right-card","n_clicks"),
+    Output("link-left-card","n_clicks"),
+    Input("link-right-card","n_clicks"),
+    Input("link-left-card","n_clicks"),
+   prevent_initial_call=True
+)
+def url_live(n_clicks_right,n_clicks_left):
+    link_id = ctx.triggered_id
+    if link_id == "link-right-card":
+        if n_clicks_right>1:
+            return "/live",no_update,no_update,no_update,no_update
+        elif n_clicks_right:  
+            return no_update,{"opacity": "0.4"},{"opacity": "1"},no_update,0
+    elif link_id == "link-left-card":
+        if n_clicks_left>1:
+            return "/demo",no_update,no_update,no_update,no_update
+        elif n_clicks_left:  
+            return no_update,{"opacity": "1"},{"opacity": "0.4"},0,no_update    
+    return no_update,no_update,no_update,no_update,no_update
+   

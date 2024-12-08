@@ -5,11 +5,12 @@ from dash.exceptions import PreventUpdate
 import dash_leaflet as dl
 import dash_bootstrap_components as dbc
 
-from .side_bar import sidebar
-
 from tldhamburg.frontend import APIkeys
 from tldhamburg.frontend import * # in __innit__.py __all__ = ["filename.py", "otherfile.py",...]
 
+# import components of the page
+from .components import navbar_live
+from .components import data_live
 
 dash.register_page(__name__,
                     path='/live',
@@ -21,13 +22,16 @@ external_stylesheets = [
     dbc.themes.BOOTSTRAP,
 ]
 
-def layout(**kwargs):
+position = position.Position() # Create a position Object
+
+# Main layout
+def layout(**kwargs): 
     return dbc.Container(children = [
-    sidebar(),
-    html.Div("Live"),
+    navbar_live(),
+    data_live(position)
     ],
     fluid = True, # remove the margins
-    style={'padding': 0,
+    style={"padding": 0,
            "height": "98vh",
            "width": "100%"}, # removes ALL the margins
     className="bg-light", # background color

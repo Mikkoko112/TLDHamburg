@@ -24,25 +24,28 @@ def get_trafficlights(lights):
     return markers
 '''
 
-def get_marker(positions, image_url=None):
-    # Custom icon as per official docs https://leafletjs.com/examples/custom-icons/
-    custom_icon = dict(
-        iconUrl=image_url,
-        iconSize=[38, 50], # size of the icon
-       # iconAnchor=[22, 94], # point of the icon which will correspond to marker's location 
-       # popupAnchor=[-3, -76] # point from which the popup should open relative to the iconAnchor
-        )
+def get_marker(dep_dest):
+    """
+    Sets navigation departure and destination marker
+
+    Parameters:
+    list(dep_dest{'id': str, 'lat': float, 'lon': float}): list of start and end coordinates    
     
+    Returns: Dash-Leaflet marker
+
+    Example Input
+    positions = [{"id": "start", "lat": 53.5975929, "lon": 9.9318831},
+               {"id": "end", "lat": 53.5524079, "lon": 10.0084222}]
+    """    
     out = []
-    for pos in positions:
+    for pos in dep_dest:
         marker = dl.Marker(position=[pos['lat'], pos['lon']],
-                          # icon = custom_icon,
                 children=[
-                    dl.Tooltip(f"{pos['id']}: {pos['lat']} {pos['lon']}"),
+                    dl.Tooltip(f"{pos['id']}"),
                 ])
         out.append(marker)
     return out
-
+'''
 def get_marker_id(ids_list):
     # {2: [[[9.9196439, 53.5638321], [9.9197085, 53.5637359], [9.9198219, 53.5635865], [9.9198451, 53.5635559], [9.9198231, 53.5634831], [9.9198481, 53.563453]], [[9.9197087, 53.563736], [9.9195566, 53.5639624], [9.9195566, 53.5639624], [9.919899, 53.5639529]], [[9.9197629, 53.5639568], [9.9198989, 53.5639531], [9.9200006, 53.5639497]]]}
     things = Things(ids_list)
@@ -62,3 +65,4 @@ def get_marker_id(ids_list):
                                     )
                 markers.append(marker)
     return markers
+'''

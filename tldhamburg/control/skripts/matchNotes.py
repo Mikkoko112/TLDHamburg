@@ -4,7 +4,7 @@ import os
 import math
 import requests
 
-from tldhamburg.control.skripts.models import ORSNode, OSMNode
+from models import ORSNode, OSMNode
 
 body = {"bbox": [[9.98, 53.54], [10.0, 53.56]]}
 

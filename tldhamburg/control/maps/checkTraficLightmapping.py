@@ -12,7 +12,7 @@ with open(filePath,"r") as file:
 with open("../data/conjunctionsJoint.json","r") as file:
     conj = json.load(file)
 
-with open("../data/vectorisation.json","r") as file:
+with open("../data/vectorisationOnMeanPoint.json","r") as file:
     vect = json.load(file)
 
 
@@ -51,27 +51,28 @@ for name,dat in conj.items():
     
     
 for vecAreaName,area in data['conjList'].items():
-    for primary in conj[vecAreaName][1]:
-        vec = vect[primary[0]]
-        print(primary[0])
-        if len(vec[0][0:2]) != 2: vec[0][0:2] = vec[1][::-1]
-        if len(vec[2][0:2]) != 2: vec[2][0:2] = vec[1][::-1]
+    for i,primary in enumerate(conj[vecAreaName][1]):
+        if i < 3 or True:
+            vec = vect[primary[0]]
+            print(primary[0])
+            if len(vec[0][0:2]) != 2: vec[0][0:2] = vec[1][::-1]
+            if len(vec[2][0:2]) != 2: vec[2][0:2] = vec[1][::-1]
 
-        lines= [
-            [x/1000+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
-            vec[1][0:2][::-1],
-            [x/1000+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
-        ]
-        folium.PolyLine(
-            lines,
-            color='orange',
-            weight=2
-        ).add_to(m)
-        for i,note in enumerate(primary[1][0:3]):
-            folium.Marker(
-                location=note[::-1],
-                icon=folium.Icon(color=colours[i])
+            lines= [
+                [x/1000+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
+                vec[1][0:2][::-1],
+                [x/1000+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
+            ]
+            folium.PolyLine(
+                lines,
+                color='orange',
+                weight=2
             ).add_to(m)
+            for i,note in enumerate(primary[1][0:3]):
+                folium.Marker(
+                    location=note[::-1],
+                    icon=folium.Icon(color=colours[i])
+                ).add_to(m)
 
 for nameVec in data["traficLights"]:
     vec = vect[nameVec]
@@ -79,9 +80,9 @@ for nameVec in data["traficLights"]:
     if len(vec[2][0:2]) != 2: vec[2][0:2] = vec[1][::-1]
 
     lines= [
-        [-x+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
+        [x/500+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
         vec[1][0:2][::-1],
-        [x+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
+        [x/500+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
     ]
     folium.PolyLine(
         lines,

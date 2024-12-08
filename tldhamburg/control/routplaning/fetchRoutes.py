@@ -5,8 +5,8 @@ import igraph
 import math
 from geopy import distance
 from timeit import default_timer as timer
-from tldhamburg.control.routplaning.angle_at_intersection import is_left_turn_tolerance as leftTurn
-from tldhamburg.control.routplaning.angle_at_intersection import is_right_turn_tolerance as rightTurn
+from angle_at_intersection import is_left_turn_tolerance as leftTurn
+from angle_at_intersection import is_right_turn_tolerance as rightTurn
 from models import ORSNode
 
 def getDistanceBetweenPoints(ent:list,sr:list)->float:
@@ -134,7 +134,6 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                         direc = "right"
                     else:
                         direc = " Error This should not accor"
-                    print(i,node)
                     directions.append(
                         {
                             "distance": sum([tNode[3] for tNode in route[lastWayPoint:i+1]]), #this could be reduced to a running value

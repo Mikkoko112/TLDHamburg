@@ -129,19 +129,20 @@ def genPerPrimarySignal(coords:dict,conjunctionDict:dict)->dict:
                     and len(body["junctionNodes"]) > 0):
                             #this asserts that the necessary data is present 
                 
-                meanCoord = getZentroid(coords[1])
+                meanCoordCalc = getZentroid(coords[1])
                 
                 print(name,body["junctionNodes"])
                 imNodes = body["junctionNodes"]
-                meanCoord = findFurthestAndNearesCoord(meanCoord,imNodes)[0]
+                meanCoord = findFurthestAndNearesCoord(meanCoordCalc,imNodes)[0]
+                
                 vec0,vec2 = list(),list()
                 if len(coords[0]) != 0:
-                    vec0 = generateVektor(meanCoord,coords[0])
+                    vec0 = generateVektor(meanCoordCalc,coords[0])
                     deg = getDegree(vec0)
                     vec0.append(deg)
                     vec0.append(degrees(deg))
                 if len(coords) > 2:
-                    vec2 = generateVektor(meanCoord,coords[2])
+                    vec2 = generateVektor(meanCoordCalc,coords[2])
                     deg = getDegree(vec2)
                     vec2.append(deg)
                     vec2.append(degrees(deg))
@@ -157,7 +158,7 @@ def startGenerator()->None:
 
     vektorData = genPerPrimarySignal(coords,conjDict)
     
-    with open("../data/vectorisation.json","w") as file:
+    with open("../data/vectorisationOnMeanPoint.json","w") as file:
         json.dump(vektorData, file, indent=4)
 
 if __name__ == "__main__":

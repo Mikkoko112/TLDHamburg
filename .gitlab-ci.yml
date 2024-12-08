@@ -5,7 +5,8 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"  
 
 before_script:
-  - apk add --no-cache python3 py3-pip make gcc musl-dev geos-dev python3-dev
+  - apt-get update && apt-get install -y build-essential libgeos-dev
+  # - apk add --no-cache python3 py3-pip make gcc musl-dev geos-dev python3-dev
   - python -m venv venv
   - source venv/bin/activate
   - pip install --upgrade pip setuptools wheel
@@ -14,7 +15,7 @@ before_script:
 
 unit-test-job:
   stage: backend
-  image: alpine:latest
+  image: python:3.12-slim
   cache:
     paths:
       - .cache/pip 
@@ -30,7 +31,7 @@ unit-test-job:
 
 API_availability_job:
   stage: backend
-  image: alpine:latest
+  image: python:3.12-slim
   cache:
     paths:
       - .cache/pip 

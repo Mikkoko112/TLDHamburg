@@ -3,7 +3,8 @@ import time
 from tldhamburg.backend.Things import Things
 from pathlib import Path
 
-def get_trafficlights():
+
+def get_trafficlights(): # Nike ausbauen
     directory = f"{Path.cwd()}/Frontend/schnittstelle"
     with open(f"{directory}/trafficlights.geojson", "r") as f:
         data = json.load(f)

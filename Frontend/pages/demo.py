@@ -80,6 +80,7 @@ def layout(**kwargs):
     Output("start_next_button", "disabled"),# True: disables the start/next button if no route is given
     #Output("position", "center"),          # shows the live position
     Output("tab-2","disabled"),             # enables the Overview tab
+    Output("instruction-overview","children",allow_duplicate=True),  # list all instruction 
 
     [State("startpunkt","value"),
      State("endpunkt","value"),
@@ -120,6 +121,7 @@ def check_validity(starttext, endtext, n_clicks):
                     no_update, 
                     #get_objects.get_trafficlights(traffic_light_response),  #get_objects.get_marker_id(traffic_light_response),
                     no_update,
+                    no_update,
                     no_update)#, position.get_pos()
             
             #get route from ORS 
@@ -133,7 +135,9 @@ def check_validity(starttext, endtext, n_clicks):
             #get traffic lights and step waypoints
             step_waypoints = route.get_step_waypoints()
             # change to new function for tl from geojson #traffic_light_response = route.get_trafficlight_ids() 
-            #traffic_light_response = route.get_traffic_lights() 
+            #traffic_light_response = route.get_traffic_lights()
+            l = [0]
+            l.extend(route_distances[:-1]) 
             return (is_valid_start, 
                     not is_valid_start, 
                     is_valid_end, 
@@ -143,7 +147,12 @@ def check_validity(starttext, endtext, n_clicks):
                     route.load_route(), 
                     #get_objects.get_trafficlights(traffic_light_response),  #get_objects.get_marker_id(traffic_light_response),
                     False,
-                    False)#, position.get_pos()
+                    False,
+                    (dbc.Table.from_dataframe(pd.DataFrame(
+                            {
+                                "in ... metern": l,
+                                "Anweisung": route_instructions,
+                            }), striped=True, bordered=True, hover=True)),)#, position.get_pos()
     return (False, 
             False, 
             False, 
@@ -152,6 +161,7 @@ def check_validity(starttext, endtext, n_clicks):
             no_update, 
             no_update, 
             #no_update, 
+            no_update,
             no_update,
             no_update)#, no_update #no input yet
 
@@ -209,8 +219,8 @@ def show_instructions(n_clicks, prev, restart, store):
                 True, True, 0, 0,
                 (dbc.Table.from_dataframe(pd.DataFrame(
                     {
-                        "in meters": l,
-                        "Instruction": route_instructions,
+                        "in ... metern": l,
+                        "Anweisung": route_instructions,
                     }), striped=True, bordered=True, hover=True)),
                 #""
                 )
@@ -231,8 +241,8 @@ def show_instructions(n_clicks, prev, restart, store):
                     False, False, value, no_update,
                     (dbc.Table.from_dataframe(pd.DataFrame(
                     {
-                        "in meters": l[index-2:],
-                        "Instruction": route_instructions[index-2:],
+                        "in ... metern": l[index-2:],
+                        "Anweisung": route_instructions[index-2:],
                     }), striped=True, bordered=True, hover=True))
                     #""
                     #position.get_pos()
@@ -252,8 +262,8 @@ def show_instructions(n_clicks, prev, restart, store):
                         True,False, value, no_update,
                         (dbc.Table.from_dataframe(pd.DataFrame(
                             {
-                                "in meters": l,
-                                "Instruction": route_instructions,
+                                "in ... metern": l,
+                                "Anweisung": route_instructions,
                             }), striped=True, bordered=True, hover=True)),
                         #""
                         #position.get_pos()
@@ -267,8 +277,8 @@ def show_instructions(n_clicks, prev, restart, store):
                         True,False, value, no_update,
                         (dbc.Table.from_dataframe(pd.DataFrame(
                             {
-                                "in meters": l[0:],
-                                "Instruction": route_instructions[0:],
+                                "in ... metern": l[0:],
+                                "Anweisung": route_instructions[0:],
                             }), striped=True, bordered=True, hover=True)),
                        # ""
                         #position.get_pos()
@@ -284,8 +294,8 @@ def show_instructions(n_clicks, prev, restart, store):
                     False, False, value, no_update,
                     (dbc.Table.from_dataframe(pd.DataFrame(
                             {
-                                "in meters": l[:1],
-                                "Instruction": route_instructions[-1:],
+                                "in ... metern": l[:1],
+                                "Anweisung": route_instructions[-1:],
                             }), striped=True, bordered=True, hover=True)),
                     #""
                     #position.get_pos()
@@ -302,8 +312,8 @@ def show_instructions(n_clicks, prev, restart, store):
                     False, False, value, no_update,
                     (dbc.Table.from_dataframe(pd.DataFrame(
                             {
-                                "in meters": l[index:],
-                                "Instruction": route_instructions[index:],
+                                "in ... metern": l[index:],
+                                "Anweisung": route_instructions[index:],
                             }), striped=True, bordered=True, hover=True)),
                     #""
                     #position.get_pos()

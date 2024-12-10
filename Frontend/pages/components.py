@@ -283,6 +283,7 @@ def overview():
             style={"width": "100%", 
                         "height": "84vh", 
                         "padding": 0,
+                        "overflow": "scroll"
                         })
    
 

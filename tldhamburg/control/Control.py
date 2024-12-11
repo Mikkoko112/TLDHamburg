@@ -6,8 +6,8 @@ import igraph
 import json
 import time
 import datetime
-#from tldhamburg.backend.DataFetcher import DataFetcher
-#from tldhamburg.backend.Things import Things
+from tldhamburg.backend.DataFetcher import DataFetcher
+from tldhamburg.backend.Things import Things
 
 class RoutePlaner:
 

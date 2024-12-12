@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from tldhamburg.control.skripts.makeFetchSquares import findSmalestAndLagestCoord
+from tldhamburg.control.scripts.makeFetchSquares import findSmallestAndLargestCoord
 import json
 from shapely.geometry import box
 
@@ -20,7 +20,7 @@ def combineAreas(areas:dict)->dict:
                         
                         values2.append(True)
                         listOfName += values2[1]
-            coordMinMax = findSmalestAndLagestCoord(listOfName)
+            coordMinMax = findSmallestAndLargestCoord(listOfName)
             out[name] = [coordMinMax,listOfName]
     return out
 

@@ -36,7 +36,7 @@ removeVs = [
 ]
 
 if __name__ == "__main__":
-    graph = igraph.load("shortshortendHamburg.gml")
+    graph = igraph.load("hamburg.gml")
     for rm in remove:
         del graph.es[rm]
 

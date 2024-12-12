@@ -27,5 +27,5 @@ with open("ors_graph.json", "w", encoding="utf-8") as fp:
 
 
 
-def matchNotes(ORSNotes,traficLights)->list:
+def matchNotes(ORSNotes,trafficLights)->list:
     pass

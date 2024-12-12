@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import json
-from tldhamburg.control.skripts.fetchAreas import roundValues,getNotes
+from tldhamburg.control.scripts.fetchAreas import roundValues,getNotes
 
 def getWrongSquares(coords:dict,coordsBase:dict)->dict:
     out = dict()
@@ -38,7 +38,7 @@ def testGetNotes(options:dict):
         ]
     area = getNotes(coords)
     if len(area) == 1:
-        print("Did not retreave the pulled Data.")
+        print("Did not retreat the pulled Data.")
         exit()
     print("Fetchtest finished.")
 
@@ -57,7 +57,7 @@ def checkLength(options:dict):
     with open("missingData.json","w") as file:
         json.dump(out,file,indent=4)
     if (len(out)) > 0: 
-        print(f"Test failed there are {len(out)} missing or corruptet squares.")
+        print(f"Test failed there are {len(out)} missing or corrupted squares.")
         exit(1)
     print("Area data is complete")
 

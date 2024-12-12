@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import json
 import sys
-class TraficConjunction:
+class TrafficConjunction:
     offset = 0.0003 #i am magic puff ★now you are impressed★ puff "0.0003" klappt gut
-    traficLights:list = list()
+    trafficLights:list = list()
     
     def getMinMaxLocation(self,coords)->list: 
         sm,la = [100,100],[0,0]
@@ -41,9 +41,9 @@ class TraficConjunction:
         
         return out
 
-    def __init__(self,name:str,traficList:list,relevantORSNotes:dict):
-        self.traficLights = [name[0] for name in traficList]
-        self.bound = self.setOffset(self.getMinMaxLocation(traficList))
+    def __init__(self,name:str,trafficList:list,relevantORSNotes:dict):
+        self.trafficLights = [name[0] for name in trafficList]
+        self.bound = self.setOffset(self.getMinMaxLocation(trafficList))
         self.junctionNodes = self.checkIfInBound(relevantORSNotes)
         self.name = name
     
@@ -52,7 +52,7 @@ class TraficConjunction:
         if len(sys.argv) == 1:
             node = [name["location"]for name in self.junctionNodes]
         
-        return (self.name,node,list(set(self.traficLights)),self.bound)
+        return (self.name,node,list(set(self.trafficLights)),self.bound)
 
 
 def run():
@@ -67,7 +67,7 @@ def run():
     #     missingAreas = json.load(file)
 
     missingAreas = {}
-    traficConjunctionList = []
+    trafficConjunctionList = []
     outDict = {}
     conjCOunt = 0
     for conjunctionName,conjunction in conj.items():    #Geht über die Conjunctions
@@ -80,21 +80,21 @@ def run():
                     if(conjunctionName == "21851"):
                         print(conjunctionName,nodeInArea[0])
                     conjCOunt+=1
-                    traficList =  conjunction[1]
+                    trafficList =  conjunction[1]
                     relevantORSNotes = notes[areaName]
-                    traficConjunctionList.append(TraficConjunction(conjunctionName,traficList,relevantORSNotes))
+                    trafficConjunctionList.append(TrafficConjunction(conjunctionName,trafficList,relevantORSNotes))
 
     
-    for conjunctionObject in traficConjunctionList:
-        name,junctionNodes,traficLights,bound = conjunctionObject.returnValue()
+    for conjunctionObject in trafficConjunctionList:
+        name,junctionNodes,trafficLights,bound = conjunctionObject.returnValue()
         if(name == "21851"):
-            print(name,traficLights,bound)
+            print(name,trafficLights,bound)
         outDict[name] = {"bound"        :bound,
                          "junctionNodes":junctionNodes,
-                         "traficLights" :traficLights}
+                         "trafficLights" :trafficLights}
     
     #print(conjCOunt,len(conj))
-    with open("../data/conjuctionDict.json","w") as file:
+    with open("../data/conjunctionDict.json","w") as file:
         json.dump(outDict, file, indent=4)    
 
 if __name__ == "__main__":

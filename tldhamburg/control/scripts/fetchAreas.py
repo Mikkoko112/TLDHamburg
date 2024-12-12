@@ -78,7 +78,7 @@ def mapPaths():
 
 
     
-def correctTheHoleData():
+def correctTheHoleData(): #does not work any more
     with open("../data/fetchAreasFullData.json","r") as file:
         coordsBase = json.load(file)
 
@@ -87,10 +87,10 @@ def correctTheHoleData():
     
     print(len(coords),len(coordsBase),len(coordsBase)-len(coords))
 
-    refatchedData = getWrongSquares(coords,coordsBase)
-    areas = fetchAreas(refatchedData)
+    refetchData = getWrongSquares(coords,coordsBase)
+    areas = fetchAreas(refetchData)
     
-    print(len(refatchedData))
+    print(len(refetchData))
 
     for name,coord in areas.items():
         coords[name] = coord

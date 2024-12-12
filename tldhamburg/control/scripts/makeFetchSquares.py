@@ -5,7 +5,7 @@ from math import floor,ceil,dist
 from geopy import distance
 import sys
 
-seachTrafic,searchArea = 0.01,1.5
+searchTraffic,searchArea = 0.01,1.5
 
 
 nameOfProcessedThing,nameOfOutputfile="../data/cleanedCoorsAverage.json","../data/conjunctionsMeanSmall.json"
@@ -16,7 +16,7 @@ def getDistanceBetweenPoints(ent:list,sr:list)->float:
     return distance.distance(ent,sr).km
 
 
-def findSmalestAndLagestCoord(coords)->list:
+def findSmallestAndLargestCoord(coords)->list:
     sm,la = [100,100],[0,0]
     for name,coord in coords:
         for j,c in enumerate(coord):
@@ -28,9 +28,9 @@ def findSmalestAndLagestCoord(coords)->list:
                         la[i] = ax
     return [[sm[0],sm[1]],[la[0],la[1]]]
 
-def getCallingAreas(traficLights:dict)->list:
+def getCallingAreas(trafficLights:dict)->list:
     def isInRange(ent:list,sr:list)->bool:
-        minDistance = seachTrafic if len(sys.argv) > 1 and sys.argv[1] == "1" else searchArea
+        minDistance = searchTraffic if len(sys.argv) > 1 and sys.argv[1] == "1" else searchArea
         
         distance = getDistanceBetweenPoints(ent,sr)
 
@@ -43,26 +43,26 @@ def getCallingAreas(traficLights:dict)->list:
         return len(ent)==4
 
     outPutAreas = {}
-    dictLen,ind,ismarked,summarked = len(traficLights),0,0,0
-    print(len(traficLights))
-    for name,ent in traficLights.items(): #geht ueber alle Items
+    dictLen,ind,ismarked,summarked = len(trafficLights),0,0,0
+    print(len(trafficLights))
+    for name,ent in trafficLights.items(): #geht ueber alle Items
         
         if(not isMarked(ent)): #guckt ob das naechste Item bearbeitet wurde
-            coordMinMax,traficLightsPerArea = [],[[name,ent]]
-            traficLights[name].append([True])
+            coordMinMax,trafficLightsPerArea = [],[[name,ent]]
+            trafficLights[name].append([True])
             ismarked+=1
-            for nameSr,sr in traficLights.items():
+            for nameSr,sr in trafficLights.items():
                 if(not isMarked(sr)):
                     if(isInRange(ent[1],sr[1])):
-                        traficLightsPerArea.append([nameSr,sr])
-                        traficLights[nameSr].append([True])
+                        trafficLightsPerArea.append([nameSr,sr])
+                        trafficLights[nameSr].append([True])
                         ismarked+=1
-            coordMinMax = findSmalestAndLagestCoord(traficLightsPerArea)
-            outPutAreas[name] = [coordMinMax,traficLightsPerArea]
-            summarked += len(traficLightsPerArea)
+            coordMinMax = findSmallestAndLargestCoord(trafficLightsPerArea)
+            outPutAreas[name] = [coordMinMax,trafficLightsPerArea]
+            summarked += len(trafficLightsPerArea)
             print("{:.2f}% {} {}/{} {}".format(ismarked/dictLen*100
-                                     ,len(traficLightsPerArea)
-                                     ,summarked,len(traficLights)
+                                     ,len(trafficLightsPerArea)
+                                     ,summarked,len(trafficLights)
                                      ,[[coordMinMax[0][0]<coordMinMax[1][0]],[coordMinMax[0][1]<coordMinMax[1][1]]]))
         ind+=1
     return outPutAreas
@@ -73,7 +73,7 @@ def generateAreas():
 
     with open("../data/cleanedCoorsAverage.json","r") as file:
         coords = json.load(file)
-    print("minDistance ist:{}".format( seachTrafic if len(sys.argv) > 1 and sys.argv[1] == "1" else searchArea))
+    print("minDistance ist:{}".format( searchTraffic if len(sys.argv) > 1 and sys.argv[1] == "1" else searchArea))
     areas = getCallingAreas(coords)
     print(len(areas))
     with open("../data/conjunctionsMeanSmall.json","w") as file:

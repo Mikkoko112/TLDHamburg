@@ -12,7 +12,7 @@ with open(filePath,"r") as file:
 with open("../data/conjunctionsJoint.json","r") as file:
     conj = json.load(file)
 
-with open("../data/vectorisationOnMeanPoint.json","r") as file:
+with open("../data/vectorizationOnMeanPoint.json","r") as file:
     vect = json.load(file)
 
 
@@ -74,7 +74,7 @@ for vecAreaName,area in data['conjList'].items():
                     icon=folium.Icon(color=colours[i])
                 ).add_to(m)
 
-for nameVec in data["traficLights"]:
+for nameVec in data["trafficLights"]:
     vec = vect[nameVec]
     if len(vec[0][0:2]) != 2: vec[0][0:2] = vec[1][::-1]
     if len(vec[2][0:2]) != 2: vec[2][0:2] = vec[1][::-1]

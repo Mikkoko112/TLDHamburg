@@ -4,12 +4,12 @@ import requests
 from math import floor,ceil,dist
 from geopy import distance
 
-#this is opselit. This was the first test of direct mapping
+#this is opposite. This was the first test of direct mapping
 
 
 modif = 1000
 
-def findSmalestAndLagestCoord(coords)->list:
+def findSmallestAndLargestCoord(coords)->list:
     sm,la = [100,100],[0,0]
     for name,coord in coords:
         for j,c in enumerate(coord):
@@ -59,22 +59,7 @@ def mapCoordsToArea(lightsInArea,areaCords):
         lightDict[name] = pointIds
     return lightDict
             
-def getSingleNoteInfoTest():
-    coord = [
-            [
-                9.947890533333332,
-                53.559770762499994
-            ],
-            [
-                9.956933744444443,
-                53.54600926249999
-            ]
-        ]
-    changedPos = [[coord[0][0],coord[1][1]],[coord[1][0],coord[0][1]]]
-    data = getNotes(roundValues(changedPos))
 
-    with open("../data/testData.json","w") as file:
-        json.dump(data, file, indent=4)
 
 
 

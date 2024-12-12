@@ -46,10 +46,10 @@ def getNearestNode(mainNode:list,nodeList:list)->list:
     
     return nearestNode
 
-def sortNodeToConjuction(pureRoute:list,conjuctionDict)->dict:
+def sortNodeToConjunction(pureRoute:list,conjunctionDict)->dict:
     out = {}
     for i,wayPoint in enumerate(pureRoute):
-        for name,data in conjuctionDict.items():
+        for name,data in conjunctionDict.items():
             if inbound(data['bound'],wayPoint):
                 
             
@@ -59,14 +59,14 @@ def sortNodeToConjuction(pureRoute:list,conjuctionDict)->dict:
                 out[name].append([i,wayPoint])
     return out
 
-def generateVektorPoint(pointOut:list,pointIn:list): #Vektor zeigt zum point!
+def generateVectorPoint(pointOut:list,pointIn:list): #Vektor zeigt zum point!
     vec = [pointIn[0]-pointOut[0],pointIn[1]-pointOut[1]]
     scaleVec = sqrt(vec[0]**2+vec[1]**2)
     if scaleVec == 0:
         scaleVec = 1
     return [vec[0]/scaleVec,vec[1]/scaleVec]
 
-def getZentroid(coordList:list)->list:
+def getCentroid(coordList:list)->list:
     xmean,ymean = 0,0
     for item in coordList:
         xmean += item[0]
@@ -83,12 +83,12 @@ def getDegree(vec:list)->float:
     def crossProd(vec0,vec1):
         assert (len(vec0) == 2) and (len(vec1)==2)
         return vec0[0]*vec1[1] - vec0[1]*vec1[0]
-    standartVec = [0,1]
-    dot = dotProd(standartVec,vec)
+    standardVec = [0,1]
+    dot = dotProd(standardVec,vec)
 
     lengthVec = sqrt(dotProd(vec,vec)) #should be 1
-    lengthStd = sqrt(dotProd(standartVec,standartVec)) #this too
-    if crossProd(vec,standartVec) < 0:
+    lengthStd = sqrt(dotProd(standardVec,standardVec)) #this too
+    if crossProd(vec,standardVec) < 0:
         return 2*pi-acos(dot/lengthVec)
    
     return acos(dot/lengthVec) 
@@ -104,7 +104,7 @@ def inDegreeOffset(inputDegree, offsetDegree):
         return min(diff, 360 - diff)
     
 
-    #this needs to be fixed. It does not accound to the overflow of an angle
+    #this needs to be fixed. It does not account to the overflow of an angle
     lowerValue,upperValue = offsetDegree-50,offsetDegree+50 #das ist ein offset von 25°
     
     theta = inputDegree % 360
@@ -129,7 +129,7 @@ def inDegreeOffset(inputDegree, offsetDegree):
 def roundValues(value:float)->list: #bad naming in relation to other functions
     return (round(value*modif)/modif)
 
-def lanesOverlape(primarydegIn,primarydegOut,inDeg,outDeg)->bool:
+def lanesOverlap(primarydegIn,primarydegOut,inDeg,outDeg)->bool:
     return [inDegreeOffset(roundValues(inDeg) ,primarydegIn ),
             inDegreeOffset(roundValues(outDeg),primarydegOut)]
 
@@ -148,32 +148,32 @@ def getBestPrimarySignal(possibleSignals)->str:
 
     return outPrimarySignal
 
-def getRouteTraficLights(route:list, conjFile:dict,conjList:list,vectorisation:dict)->dict:
-    traficLights,debugVector = dict(),[]
+def getRouteTrafficLights(route:list, conjFile:dict,conjList:list,vectorization:dict)->dict:
+    trafficLights,debugVector = dict(),[]
     for name,data in conjList.items():
         pointList    = [dat[1] for dat in data]
         pointIndex   = [dat[0] for dat in data]
-        allposiblePrimarysignal = []
+        allPossiblePrimarysignal = []
         for primarySignalName in conjFile[name]['traficLights']:
             
-            meanofPoints =  vectorisation[primarySignalName][1]
+            meanofPoints =  vectorization[primarySignalName][1]
 
-            vecIn  = generateVektorPoint(meanofPoints,route[pointIndex[ 0]-1])
-            vecOut = generateVektorPoint(meanofPoints,route[pointIndex[-1]+1])
+            vecIn  = generateVectorPoint(meanofPoints,route[pointIndex[ 0]-1])
+            vecOut = generateVectorPoint(meanofPoints,route[pointIndex[-1]+1])
 
             degIn  = degrees(getDegree(vecIn))
             degOut = degrees(getDegree(vecOut))
 
-            primarydegIn  = vectorisation[primarySignalName][0][3]
-            primarydegOut = vectorisation[primarySignalName][2][3]
+            primarydegIn  = vectorization[primarySignalName][0][3]
+            primarydegOut = vectorization[primarySignalName][2][3]
 
 
             #please change this back at a later stage
-            primarydegIn  = vectorisation[primarySignalName][2][3]
-            primarydegOut = vectorisation[primarySignalName][0][3]
+            primarydegIn  = vectorization[primarySignalName][2][3]
+            primarydegOut = vectorization[primarySignalName][0][3]
 
 
-            check = lanesOverlape(primarydegIn,primarydegOut,degIn,degOut)
+            check = lanesOverlap(primarydegIn,primarydegOut,degIn,degOut)
             
             if all([tr[0] for tr in check]):
 
@@ -183,17 +183,17 @@ def getRouteTraficLights(route:list, conjFile:dict,conjList:list,vectorisation:d
                     print("degrees",degIn,degOut)
                     print("primary degrees",primarydegIn,primarydegOut)
 
-                allposiblePrimarysignal.append([primarySignalName,
+                allPossiblePrimarysignal.append([primarySignalName,
                                                 check[0][1],
                                                 check[1][1]])
                 #break
-        if len(allposiblePrimarysignal) > 0:
+        if len(allPossiblePrimarysignal) > 0:
             print(name)
-            traficLights[name] = getBestPrimarySignal(allposiblePrimarysignal)
+            trafficLights[name] = getBestPrimarySignal(allPossiblePrimarysignal)
                 
-    return traficLights
+    return trafficLights
 
-def generateGeoJsonData(traficLights:dict,conjList:dict)->dict:
+def generateGeoJsonData(trafficLights:dict,conjList:dict)->dict:
     def getPointData(conjNodes:list)->list: #needs Change
         return conjNodes[0]
 
@@ -202,7 +202,7 @@ def generateGeoJsonData(traficLights:dict,conjList:dict)->dict:
     }
     features = []
     i=1
-    for conj,trafic in traficLights.items():
+    for conj,traffic in trafficLights.items():
         element =         {
             "type": "Feature",
             "geometry": {
@@ -221,52 +221,54 @@ def generateGeoJsonData(traficLights:dict,conjList:dict)->dict:
     out["features"] = features
     return out
 
-def pruifyRoute(route:dict,index:int=0)->list:
+def purifyRoute(route:dict,index:int=0)->list:
     return list(route['features'][index]['geometry']['coordinates'])
 
-def getTraficLightsperRoute(routeList:dict)->dict:
-    with open("data/conjuctionDict.json","r") as file:
+def getTrafficLightsRoute(routeList:dict)->dict:
+    with open("data/conjunctionDict.json","r") as file:
         conjDict = json.load(file)
     
-    with open("data/vectorisationOnMeanPoint.json","r") as file:
-        vectorisation = json.load(file)
+    with open("data/vectorizationOnMeanPoint.json","r") as file:
+        vectorization = json.load(file)
 
     for i in range(len(routeList['features'])):
-        pureRoute = pruifyRoute(routeList,index=i)
+        pureRoute = purifyRoute(routeList,index=i)
         
-        conjList = sortNodeToConjuction(pureRoute,conjDict)
+        conjList = sortNodeToConjunction(pureRoute,conjDict)
         print(conjList)
-        traficLightsList = getRouteTraficLights(pureRoute,conjDict,conjList,vectorisation)
-        jsonData = generateGeoJsonData(traficLightsList,conjList)
-        routeList["features"][i]["properties"]["traficlights"] = jsonData
+        trafficLightsList = getRouteTrafficLights(pureRoute,conjDict,conjList,vectorization)
+        jsonData = generateGeoJsonData(trafficLightsList,conjList)
+        routeList["features"][i]["properties"]["trafficlights"] = jsonData
         
     return routeList
 
 
 def test():
-    with open("../data/conjuctionDict.json","r") as file:
+    with open("../data/conjunctionDict.json","r") as file:
         conj = json.load(file)
     
-    with open("../data/vectorisationOnMeanPoint.json","r") as file:
-        vectorisation = json.load(file)
+    with open("../data/vectorizationOnMeanPoint.json","r") as file:
+        vectorization = json.load(file)
 
     graph = igraph.load("../data/shHamburg.gml")
     #testRoute1
-    routeHole = getRouteFromGraph([[9.946091651916504,53.59207534790039 ],
-                                [10.0772705078125,53.61192321777344]],graph)
+    # routeHole = getRouteFromGraph([[9.946091651916504,53.59207534790039 ],
+    #                             [10.0772705078125,53.61192321777344]],graph)
     #testRoute2
-    # routeHole = getRouteFromGraph([[10.015552520751953,53.64086151123047 ],
-    #                             [10.075848579406738,53.65281677246094]],graph)
+    routeHole = getRouteFromGraph([[10.015552520751953,53.64086151123047 ],
+                                [10.075848579406738,53.65281677246094]],graph)
+    #ohlsdorf route
+    # routeHole = getRouteFromGraph([[10.059387,53.6235983 ],
+    #                              [10.061087,53.624418]],graph)
     
-    
-    pureRoute = pruifyRoute(routeHole)
-    conjList = sortNodeToConjuction(pureRoute,conj)
-    traficLightsList = getRouteTraficLights(pureRoute,conj,conjList,vectorisation)
+    pureRoute = purifyRoute(routeHole)
+    conjList = sortNodeToConjunction(pureRoute,conj)
+    trafficLightsList = getRouteTrafficLights(pureRoute,conj,conjList,vectorization)
     
     dic = {"wayPoints":pureRoute,
            "conjList":conjList,
-           "traficLights":traficLightsList}
-    with open("testRoute08-12-2-meanPoints.json","w") as file:
+           "trafficLights":trafficLightsList}
+    with open("ohlsdorfRoute.json","w") as file:
         json.dump(dic,file,indent=4)
 
 if __name__ == "__main__":

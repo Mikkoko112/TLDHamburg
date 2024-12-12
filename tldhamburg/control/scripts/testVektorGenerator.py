@@ -1,42 +1,42 @@
 #!/usr/bin/env python3
 
-from VektorGenerator import generateVektor,getZentroid,getDegree
+from vectorGenerator import generateVector,getCentroid,getDegree
 from math import radians,sin,cos,degrees,sqrt
 
-def testVetorGeneration(): #i need to implement way more test cases here
-    print("Vektorgenerator test started")
-    print("-test normation")
+def testVectorGeneration(): #i need to implement way more test cases here
+    print("Vectorgenerator test started")
+    print("-test norming")
     main = [0,0]
     centroid = [[8,
             9]]
-    vec = generateVektor(main,centroid)
+    vec = generateVector(main,centroid)
     length = vec[0]**2+vec[1]**2
     if length >= 1+0.01 or  length <= 1-0.01:
-        print("Normalisation did not work.")
+        print("Normalization did not work.")
         exit(1)
     print("-passed normation test")
     main = [0.0,100.0]
     centroid = [[0.0,1.0]]
     out = [0,1]
-    vec = generateVektor(main,centroid)
+    vec = generateVector(main,centroid)
     if not all(ve == ou for ve,ou in zip(vec,out)):
-        print("There is something wrong with the vekt Generator")
+        print("There is something wrong with the vectorGenerator")
         exit(1)
-    print("Vektorgenerator test passed")
+    print("Vector generator test passed")
 
-def testZentroid():
+def testCentroid():
     testcases = [
         [[[0,1],[0,1]] , [0,1]],
         [[[2,0],[0,2]] , [1,1]]
     ]
 
     for inp,out in testcases:
-        if not all([ou == test for ou,test in zip(out,getZentroid(inp))]):
-            print("There is something wrong with the Zentroid generator.")
+        if not all([ou == test for ou,test in zip(out,getCentroid(inp))]):
+            print("There is something wrong with the centroid generator.")
             print(f"Divergent values at: input {inp} and out {out}")
             exit(1)
 
-    print("Zentroid test passed.")
+    print("Centroid test passed.")
     
 def testDegree():
     print("Degree test started")
@@ -52,6 +52,6 @@ def testDegree():
 
 
 if __name__ == "__main__":
-    testVetorGeneration()
-    testZentroid()
+    testVectorGeneration()
+    testCentroid()
     testDegree()

@@ -49,19 +49,19 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
             coordRoute = []
             distancefromBefore = 0
             for i,node in enumerate(route):
-                vekt = graph.vs.select(node)
+                vector = graph.vs.select(node)
                 if i != 0:
                     
-                    edge = graph.es.select(_source=int(pNode["nodeid"][0]),_target=int(vekt["nodeid"][0]))
+                    edge = graph.es.select(_source=int(pNode["nodeid"][0]),_target=int(vector["nodeid"][0]))
                     distancefromBefore = edge["length"][0]
                     maxSpeed = int(edge["maxspeed"][0]) if edge["maxspeed"][0] != "None" else 50 
-                    pNode = vekt
+                    pNode = vector
                 else:
                     distancefromBefore = 0
                     maxSpeed = 0
-                    pNode = vekt
-                coordRoute.append([vekt["lon"][0],
-                                   vekt["lat"][0],
+                    pNode = vector
+                coordRoute.append([vector["lon"][0],
+                                   vector["lat"][0],
                                    node,
                                    distancefromBefore,
                                    maxSpeed])
@@ -133,7 +133,7 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                     elif not leftBool and rightBool:
                         direc = "right"
                     else:
-                        direc = " Error This should not accor"
+                        direc = " Error This should not occur"
                     directions.append(
                         {
                             "distance": sum([tNode[3] for tNode in route[lastWayPoint:i+1]]), #this could be reduced to a running value

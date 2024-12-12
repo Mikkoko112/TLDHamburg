@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import json
-from makeFetchSquares import findSmalestAndLagestCoord,getDistanceBetweenPoints
+from makeFetchSquares import findSmallestAndLargestCoord,getDistanceBetweenPoints
 from math import acos,cos,sqrt,pi,degrees
 import sys
 if len(sys.argv) > 1: #this can maybe be changed to options
@@ -11,30 +11,30 @@ else:
 if len(sys.argv) > 2:
     nameOfOutputfile = sys.argv[2]
 else:
-    nameOfOutputfile = "../data/vectorisation.json"
+    nameOfOutputfile = "../data/vectorization.json"
 '''
 nameOfThingsLocation <- This needs to be set to your ThingsLocation,
                         Default = "../data/thingsLoc.json"
-                        Can be set with your 1. arguement
+                        Can be set with your 1. argument
                         
                         This should maybe be changed in code the processes Thingsdata
                         to reduce the points in which the things location lists 
                         are reduced to a single point.
 nameOfPutputfile     <- This needs tp be set to your outputfile name
-                        Default = "../data/vectorisation
-                        Can be set with your 2. arguement
+                        Default = "../data/vectorization
+                        Can be set with your 2. argument
 
 
 
 output:json ->          This returns a things json file that contain 
 '''
 
-def findFurthestAndNearesCoord(mainCoord:list,coordList:list):
+def findFurthestAndNearestCoord(mainCoord:list,coordList:list):
     '''
     mainCoord:list <- This is the first item in coordinates. ent is the primary stationary Element
-    coordList: list <- This is the second item in lists of coordiantes. stList contain the differend the street element 
+    coordList: list <- This is the second item in lists of coordinates. stList contain the different the street element 
     
-    This function does not exclue that a coord is a minimal and maximal distance. This is important.
+    This function does not exclude that a coord is a minimal and maximal distance. This is important.
 
     return:list -> this returns the coordinate that is the minimal and maximal distance from the mainCoord 
     '''
@@ -51,19 +51,19 @@ def findFurthestAndNearesCoord(mainCoord:list,coordList:list):
             furthest = coord
     return (nearest,furthest)
 
-def generateVektor(mainCoord:list,coordList:list): #Vektor zeigt zum point!
+def generateVector(mainCoord:list,coordList:list): #Vektor zeigt zum point!
     '''
-    mainCoord:list <- This is the main coord one wants to use the vektor as 
+    mainCoord:list <- This is the main coord one wants to use the vector as 
     coordList:list <- This is the list of coords one wants to translate into a vector
 
-    The point is computed in to differend ways. The active version now is the mean value of the Path
-    The nearest point version can be activated but is not recommendet. This will results in points
-    that lay directly beside the zentroid and dicretion information is lost.
+    The point is computed in to different ways. The active version now is the mean value of the Path
+    The nearest point version can be activated but is not recommended. This will results in points
+    that lay directly beside the centroid and discretion information is lost.
 
     return:list    -> This returns a vector pointing form the computed point to the mainCoord
     '''
-    #minCo,maxCo = findFurthestAndNearesCoord(mainCoord,coordList)
-    meanCo = getZentroid(coordList)
+    #minCo,maxCo = findFurthestAndNearestCoord(mainCoord,coordList)
+    meanCo = getCentroid(coordList)
     vec = [mainCoord[0]-meanCo[0],mainCoord[1]-meanCo[1]] #hier wird es jetzt auf das Centroid focosiert
     scaleVec = sqrt(vec[0]**2+vec[1]**2)
     if scaleVec == 0:
@@ -73,9 +73,9 @@ def generateVektor(mainCoord:list,coordList:list): #Vektor zeigt zum point!
 
     return vec
 
-def getZentroid(coordList:list)->list:
+def getCentroid(coordList:list)->list:
     '''
-    This is dublicate and will be removed soon in place of an univeral comutation file
+    This is duplicate and will be removed soon in place of an universal commutation file
     '''
     xmean,ymean = 0,0
     for item in coordList:
@@ -89,12 +89,12 @@ def getZentroid(coordList:list)->list:
 
 def getDegree(vec:list)->float:
     '''
-    vec:list <- This is a vector calculated in the generateVektor methode
+    vec:list <- This is a vector calculated in the generateVector method
 
-    We use a standart vector here and not the angle between the ingress and exgress to
-    provent dublicate degrees. 
+    We use a standard vector here and not the angle between the ingress and egress to
+    prevent duplicate degrees. 
 
-    return:float -> This will return the angle to the standart vector
+    return:float -> This will return the angle to the standard vector
     '''
     def dotProd (vec0,vec1):
         return sum(v0*v1 for v0,v1 in zip(vec0,vec1))
@@ -102,12 +102,12 @@ def getDegree(vec:list)->float:
     def crossProd(vec0,vec1):
         assert (len(vec0) == 2) and (len(vec1)==2)
         return vec0[0]*vec1[1] - vec0[1]*vec1[0]
-    standartVec = [0,1]
-    dot = dotProd(standartVec,vec)
+    standardVec = [0,1]
+    dot = dotProd(standardVec,vec)
 
     lengthVec = sqrt(dotProd(vec,vec)) #should be 1
-    lengthStd = sqrt(dotProd(standartVec,standartVec)) #this too
-    if crossProd(vec,standartVec) < 0:
+    lengthStd = sqrt(dotProd(standardVec,standardVec)) #this too
+    if crossProd(vec,standardVec) < 0:
         return 2*pi-acos(dot/lengthVec)
    
     return acos(dot/lengthVec) 
@@ -118,31 +118,31 @@ def genPerPrimarySignal(coords:dict,conjunctionDict:dict)->dict:
     coords:dict <- This is the dict with the things data
 
     return:dict -> A dict with every primary signal with its dedicated vector and degree
-                   of ingress and exgress lane. The point in the middel is the mean Value
+                   of ingress and egress lane. The point in the middle is the mean Value
     '''
 
     out = dict()
     for name,coords in coords.items():
         for conjName,body in conjunctionDict.items():
             
-            if (name in body["traficLights"] 
+            if (name in body["trafficLights"] 
                     and len(body["junctionNodes"]) > 0):
                             #this asserts that the necessary data is present 
                 
-                meanCoordCalc = getZentroid(coords[1])
+                meanCoordCalc = getCentroid(coords[1])
                 
                 print(name,body["junctionNodes"])
                 imNodes = body["junctionNodes"]
-                meanCoord = findFurthestAndNearesCoord(meanCoordCalc,imNodes)[0]
+                meanCoord = findFurthestAndNearestCoord(meanCoordCalc,imNodes)[0]
                 
                 vec0,vec2 = list(),list()
                 if len(coords[0]) != 0:
-                    vec0 = generateVektor(meanCoordCalc,coords[0])
+                    vec0 = generateVector(meanCoordCalc,coords[0])
                     deg = getDegree(vec0)
                     vec0.append(deg)
                     vec0.append(degrees(deg))
                 if len(coords) > 2:
-                    vec2 = generateVektor(meanCoordCalc,coords[2])
+                    vec2 = generateVector(meanCoordCalc,coords[2])
                     deg = getDegree(vec2)
                     vec2.append(deg)
                     vec2.append(degrees(deg))
@@ -153,13 +153,13 @@ def startGenerator()->None:
     with open(nameOfThingsLocation,"r") as file:
         coords = json.load(file)
 
-    with open("../data/conjuctionDict.json","r") as file: 
+    with open("../data/conjunctionDict.json","r") as file: 
         conjDict = json.load(file)
 
-    vektorData = genPerPrimarySignal(coords,conjDict)
+    vectorData = genPerPrimarySignal(coords,conjDict)
     
-    with open("../data/vectorisationOnMeanPoint.json","w") as file:
-        json.dump(vektorData, file, indent=4)
+    with open("../data/vectorizationOnMeanPoint.json","w") as file:
+        json.dump(vectorData, file, indent=4)
 
 if __name__ == "__main__":
     startGenerator()

@@ -18,11 +18,11 @@
             "properties": {
                 "segments": [
                     {
-                        "distance": 7413.7,
+                        "distance": 7413.5,
                         "duration": 946.5,
                         "steps": [
                             {
-                                "distance": 38.4,
+                                "distance": 38.2,
                                 "duration": 9.2,
                                 "type": 11,
                                 "instruction": "Head north on Brennhauskoppel",
@@ -150,7 +150,7 @@
                     189
                 ],
                 "summary": {
-                    "distance": 7413.7,
+                    "distance": 7413.5,
                     "duration": 946.5
                 },
                 "trafficlights": {
@@ -267,8 +267,8 @@
             "geometry": {
                 "coordinates": [
                     [
-                        10.015555,
-                        53.640861
+                        10.015556,
+                        53.640863
                     ],
                     [
                         10.015596,
@@ -1034,11 +1034,11 @@
     "metadata": {
         "attribution": "openrouteservice.org | OpenStreetMap contributors",
         "service": "routing",
-        "timestamp": 1734176404913,
+        "timestamp": 1734176744414,
         "query": {
             "coordinates": [
                 [
-                    10.015552520751953,
+                    10.0156,
                     53.64086151123047
                 ],
                 [

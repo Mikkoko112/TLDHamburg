@@ -52,7 +52,7 @@ class RoutePlanner:
 
     def _getBestRoute(self,routeList:dict):
         route = routeList.copy()
-        value = evaluation.getMinTraficLights(routeList)
+        value = evaluation.getMinTrafficLights(routeList)
         route["features"] = [routeList["features"][value]]
         return route
 
@@ -63,10 +63,10 @@ class RoutePlanner:
         self.safeRoute()
     
     def _initMapData(self):
-        with open("optionsfile.json","r") as file:
+        with open("tldhamburg/control/optionsfile.json","r") as file:
             options = json.load(file)
     
-        self.graph = igraph.load(".{}".format(options["importantData"]["GraphData"]))
+        self.graph = igraph.load("tldhamburg/control/{}".format(options["importantData"]["GraphData"]))
 
 
     def __init__(self,path:str):
@@ -77,8 +77,8 @@ class RoutePlanner:
 
 def test():
     testDict = {
-        "coordinates":[[9.988484,53.570095 ]
-                      ,[9.988844,53.566126]]
+        "coordinates":[[10.015552520751953,53.64086151123047],
+                       [10.075848579406738,53.65281677246094]]
     }
     routeObj = RoutePlanner(".")
     routeObj.generateRoute(testDict)

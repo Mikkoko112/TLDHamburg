@@ -3,7 +3,7 @@ import requests
 import json
 import igraph
 from math import sqrt,acos,inf,degrees,pi
-from fetchRoutes import getRouteFromGraph
+from tldhamburg.control.routeplanning.fetchRoutes import getRouteFromGraph
 modif = 1000
 
 def getRoute(coordsStartEnd:list)->dict:
@@ -225,10 +225,10 @@ def purifyRoute(route:dict,index:int=0)->list:
     return list(route['features'][index]['geometry']['coordinates'])
 
 def getTrafficLightsRoute(routeList:dict)->dict:
-    with open("data/conjunctionDict.json","r") as file:
+    with open("tldhamburg/control/data/conjunctionDict.json","r") as file:
         conjDict = json.load(file)
     
-    with open("data/vectorizationOnMeanPoint.json","r") as file:
+    with open("tldhamburg/control/data/vectorizationOnMeanPoint.json","r") as file:
         vectorization = json.load(file)
 
     for i in range(len(routeList['features'])):

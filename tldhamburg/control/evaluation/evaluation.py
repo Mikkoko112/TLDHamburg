@@ -3,15 +3,15 @@
 to define a new function, follow the template.
 '''
 
-def getMinTraficLights(routeListDict:dict)->int:
+def getMinTrafficLights(routeListDict:dict)->int:
     routeList = routeListDict["features"]
     minCount,idx = 0,0
     for i,route in enumerate(routeList):
-        traficLights = route["properties"]["traficlights"]["features"]
+        trafficLights = route["properties"]["trafficlights"]["features"]
         if minCount == 0:
-            minCount = len(traficLights)
+            minCount = len(trafficLights)
             idx = i
-        if minCount < len(traficLights):
-            minCount = len(traficLights)
+        if minCount < len(trafficLights):
+            minCount = len(trafficLights)
             idx = i
     return idx

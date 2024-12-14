@@ -1,12 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-node
-  [
-    id 764928490
-    lat 53.6208000183105
-    lon 10.0613279342651
-    nodeid 116437
-  ]
+
 degin = 268.5348039106532
 degOut = 88.77493001030624
 priIn = 214.07015603762616

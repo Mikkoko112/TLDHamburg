@@ -2,7 +2,7 @@
 """A module which calculates the angles in paths"""
 
 import math
-from models import ORSNode
+from tldhamburg.control.routeplanning.models import ORSNode
 
 
 # 0.7 radians are approximately 40 degrees.

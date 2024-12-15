@@ -218,7 +218,7 @@ def generateGeoJsonData(trafficLights:dict,conjList:dict)->dict:
 def purifyRoute(route:dict,index:int=0)->list:
     return list(route['features'][index]['geometry']['coordinates'])
 
-def getTrafficLightsRoute(routeList:dict,test:bool=True)->dict:
+def getTrafficLightsRoute(routeList:dict,test:bool=False)->dict:
     with open("tldhamburg/control/data/conjunctionDict.json","r") as file:
         conjDict = json.load(file)
     

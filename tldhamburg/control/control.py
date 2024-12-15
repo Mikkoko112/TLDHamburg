@@ -11,7 +11,24 @@ from tldhamburg.backend.Things import Things
 
 class RoutePlanner:
 
-    def getUpdateOnTrafficLight(self,trafficLightsId):
+
+    def _casperEval(trafficLightsId):
+        fetcher=DataFetcher()
+        fetcher.fetch_data(params={"$filter":f"@iot.id eq '{trafficLightsId}'","$expand":"Thing"})
+        id=fetcher.get_data()[0]["Thing"]["@iot.id"]
+        thing=Things([id])
+        schaltungen=thing.get_primary_signal_observations(4,True)[id]
+        zyklusDaten=thing.get_cycle_second_observations(2,True)[id]
+        zyklusLänge=datetime.datetime.fromisoformat(zyklusDaten[0][0])-datetime.datetime.fromisoformat(zyklusDaten[1][0])
+        zeitAktuell=datetime.datetime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
+        zeitGrün=(zeitAktuell-[datetime.datetime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==3][0])%zyklusLänge
+        zeitRot=(zeitAktuell-[datetime.datetime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==1][0])%zyklusLänge
+        status="grün" if zeitGrün>zeitRot else "rot"
+        nextPhase="rot" if status=="grün" else "grün"
+        nextPhaseTime=min(zeitGrün,zeitRot)
+        return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
+
+    def getUpdateOnTrafficLight(self,trafficLightsId,curredPositionID:int): #we need to add this
         status,nextPhase,nextPhaseTime,rapidUpdate = 0,0,0,False
         
         if isinstance(trafficLightsId, list):
@@ -48,7 +65,7 @@ class RoutePlanner:
             json.dump(self.routeData,file,indent=4)
 
     def _getData(self,coords:list)->dict:
-        return fetcher.getMultipleRoutes(coords)
+        return fetcher.getRouteFromGraph(coords,self.graph)
 
     def _getBestRoute(self,routeList:dict):
         route = routeList.copy()

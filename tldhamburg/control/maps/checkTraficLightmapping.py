@@ -12,7 +12,7 @@ with open(filePath,"r") as file:
 with open("../data/conjunctionsJoint.json","r") as file:
     conj = json.load(file)
 
-with open("../data/vectorizationOnMeanPoint.json","r") as file:
+with open("../data/vectorizationOnMeanPointInvert.json","r") as file:
     vect = json.load(file)
 
 
@@ -54,14 +54,13 @@ for vecAreaName,area in data['conjList'].items():
     for i,primary in enumerate(conj[vecAreaName][1]):
         if i < 3 or True:
             vec = vect[primary[0]]
-            print(primary[0])
             if len(vec[0][0:2]) != 2: vec[0][0:2] = vec[1][::-1]
             if len(vec[2][0:2]) != 2: vec[2][0:2] = vec[1][::-1]
 
             lines= [
-                [x/1000+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
+                [-x/1000+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
                 vec[1][0:2][::-1],
-                [x/1000+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
+                [-x/1000+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
             ]
             folium.PolyLine(
                 lines,
@@ -74,15 +73,18 @@ for vecAreaName,area in data['conjList'].items():
                     icon=folium.Icon(color=colours[i])
                 ).add_to(m)
 
-for nameVec in data["trafficLights"]:
+print(data["trafficLights"])
+for conj,nameVec in data["trafficLights"].items():
+    print(nameVec)
     vec = vect[nameVec]
     if len(vec[0][0:2]) != 2: vec[0][0:2] = vec[1][::-1]
     if len(vec[2][0:2]) != 2: vec[2][0:2] = vec[1][::-1]
-
+    if nameVec == "22024":
+        print("in",)
     lines= [
-        [x/500+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
+        [-x/500+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
         vec[1][0:2][::-1],
-        [x/500+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
+        [-x/500+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
     ]
     folium.PolyLine(
         lines,

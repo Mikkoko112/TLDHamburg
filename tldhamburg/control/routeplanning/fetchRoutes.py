@@ -81,10 +81,7 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
         return minimum_node
 
     def generateGeoJsonFile(coordList:list,graph:igraph.Graph)->dict:
-        def generateDirection()->dict:
-            pass
-
-
+        
         routelistJson = []
         latmaxList,latminList = [],[]
         logmaxList,logminList = [],[]

@@ -1,11 +1,30 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+dic = {
+"7038": [
+        [
+            0.9604373087002828,
+            0.278496276557798,
+            1.288568239167253,
+            73.82952171888766
+        ],
+        [
+            10.02994,
+            53.606837
+        ],
+        [
+            -0.9694705364119203,
+            -0.24520782823797302,
+            4.464654920732215,
+            255.80588394027103
+        ]
+    ]
+}
 degin = 268.5348039106532
 degOut = 88.77493001030624
-priIn = 214.07015603762616
-priOut= 82.56176244531581
+priIn = 268.6313657883484
+priOut= 88.65764043824751 
 # Parameter degin,degout,priIn,priOut
 gradzahlen = [degin, degOut, priIn-60,priIn+60,priOut-60,priOut+60]  # Grad in Winkel
 color = ["red","orange","blue","blue","black","black"]
@@ -31,6 +50,15 @@ for grad,c in zip(gradzahlen,color):
     vektor = np.array([np.sin(rad), np.cos(rad)])  # Vektor berechnen
     plt.quiver(*origin, vektor[0], vektor[1], angles="xy", scale_units="xy", scale=1, color=c, alpha=0.7, label=f"Vektor {grad}°" if grad == gradzahlen[0] else "")
 
+
+plt.quiver(*origin,-0.9997147150427084*10,
+            -0.02388490165515265*10,color="purple")
+
+plt.quiver(*origin,0.9997255630428168*10,
+            0.023426450834969435*10,color="pink")
+
+
+
 # Achsen und Anzeigeoptionen
 plt.axhline(0, color='black', linewidth=0.5, linestyle='--')
 plt.axvline(0, color='black', linewidth=0.5, linestyle='--')
@@ -41,4 +69,4 @@ plt.title("Vektoren um einen Kreis")
 plt.xlabel("X")
 plt.ylabel("Y")
 plt.grid(alpha=0.3)
-plt.savefig("16963-2.pdf")
+plt.savefig("16963.pdf")

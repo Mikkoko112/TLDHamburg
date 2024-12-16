@@ -35,6 +35,10 @@ removeVs = [
     "timestamp"
 ]
 
+removeNodeIds = [
+    0
+]
+
 if __name__ == "__main__":
     graph = igraph.load("hamburg.gml")
     for rm in remove:

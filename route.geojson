@@ -2217,6 +2217,21 @@
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": [
+                                    9.96651744842529,
+                                    53.5941047668457
+                                ]
+                            },
+                            "properties": {
+                                "id": "6725",
+                                "object": "primary_signal",
+                                "way-point": 68
+                            }
+                        },
+                        {
+                            "type": "Feature",
+                            "geometry": {
+                                "type": "Point",
+                                "coordinates": [
                                     10.0132350921631,
                                     53.5998001098633
                                 ]

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from tldhamburg.control.routeplanning import fetchRoutes as fetcher
 from tldhamburg.control.evaluation  import evaluation
+from tldhamburg.control.evaluation  import trafficlightapprox as tlapp
 from tldhamburg.control.routeplanning import routing 
 import igraph
 import json
@@ -11,44 +12,59 @@ from tldhamburg.backend.Things import Things
 
 class RoutePlanner:
 
-    def getUpdateOnTrafficLight(self,trafficLightsId):
+
+    def _casperEval(self,trafficLightsId:str):
         status,nextPhase,nextPhaseTime,rapidUpdate = 0,0,0,False
+        fetcher=DataFetcher()
+        fetcher.fetch_data(params={"$filter":f"@iot.id eq '{trafficLightsId}'","$expand":"Thing"})
+        id=fetcher.get_data()[0]["Thing"]["@iot.id"]
+        thing=Things([id])
+        schaltungen=thing.get_primary_signal_observations(4,True)[id]
+        zyklusDaten=thing.get_cycle_second_observations(2,True)[id]
+        zyklusLänge=datetime.datetime.fromisoformat(zyklusDaten[0][0])-datetime.datetime.fromisoformat(zyklusDaten[1][0])
+        zeitAktuell=datetime.datetime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
+        zeitGrün=(zeitAktuell-[datetime.datetime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==3][0])%zyklusLänge
+        zeitRot=(zeitAktuell-[datetime.datetime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==1][0])%zyklusLänge
+        status="grün" if zeitGrün>zeitRot else "rot"
+        nextPhase="rot" if status=="grün" else "grün"
+        nextPhaseTime=min(zeitGrün,zeitRot)
+        return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
+
+    def _calcSpeedNextRoute(self,trafficLightsId:str):
+        pass
+
+    def getUpdateOnTrafficLight(self,trafficLightsId,curredPositionID:int = -1): #we need to add this
+        status,nextPhase,nextPhaseTime,rapidUpdate,speed = 0,0,0,False,-1
         
         if isinstance(trafficLightsId, list):
             out = []
             for elem in trafficLightsId:
                 if not isinstance(elem,list):
-                    out.append(self.getUpdateOnTrafficLight(elem))  
+                    out.append(self.getUpdateOnTrafficLight(elem,curredPositionID))  
                 else:
                     print("Wrong format. Input should be a list of strings")
                     exit(1)
             
             return out
         elif isinstance(trafficLightsId,str):
-            fetcher=DataFetcher()
-            fetcher.fetch_data(params={"$filter":f"@iot.id eq '{trafficLightsId}'","$expand":"Thing"})
-            id=fetcher.get_data()[0]["Thing"]["@iot.id"]
-            thing=Things([id])
-            schaltungen=thing.get_primary_signal_observations(4,True)[id]
-            zyklusDaten=thing.get_cycle_second_observations(2,True)[id]
-            zyklusLänge=datetime.datetime.fromisoformat(zyklusDaten[0][0])-datetime.datetime.fromisoformat(zyklusDaten[1][0])
-            zeitAktuell=datetime.datetime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
-            zeitGrün=(zeitAktuell-[datetime.datetime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==3][0])%zyklusLänge
-            zeitRot=(zeitAktuell-[datetime.datetime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==1][0])%zyklusLänge
-            status="grün" if zeitGrün>zeitRot else "rot"
-            nextPhase="rot" if status=="grün" else "grün"
-            nextPhaseTime=min(zeitGrün,zeitRot)
-            return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
+            status,nextPhase,nextPhaseTime,rapidUpdate = self._casperEval(trafficLightsId)
+
+            if curredPositionID == -1:
+                return status,nextPhase,nextPhaseTime,rapidUpdate
+            else:
+                return status,nextPhase,nextPhaseTime,rapidUpdate,speed
+            #return self._casperEval(trafficLightsId)
+            #return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
 
         elif isinstance(trafficLightsId,int):
-            return self.getUpdateOnTrafficLight(str(trafficLightsId))
+            return self.getUpdateOnTrafficLight(str(trafficLightsId),curredPositionID)
 
     def safeRoute(self)->None:
         with open("{}/route.geojson".format(self.path),"w") as file:
             json.dump(self.routeData,file,indent=4)
 
     def _getData(self,coords:list)->dict:
-        return fetcher.getMultipleRoutes(coords)
+        return fetcher.getRouteFromGraph(coords,self.graph)
 
     def _getBestRoute(self,routeList:dict):
         route = routeList.copy()

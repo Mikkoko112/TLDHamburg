@@ -5,23 +5,8 @@ import igraph
 from math import sqrt,acos,inf,degrees,pi
 from tldhamburg.control.routeplanning.fetchRoutes import getRouteFromGraph
 modif = 1000
+testName = "16963"
 
-def getRoute(coordsStartEnd:list)->dict:
-
-    body = {"coordinates": coordsStartEnd}
-    headers = {
-        "Accept": "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8",
-        "Authorization": "5b3ce3597851110001cf624884e5ad2d208a4ef2abb164f9f203b5b5",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-    call = requests.post(
-        "https://api.openrouteservice.org/v2/directions/driving-car/geojson",
-        json=body,
-        headers=headers,
-        timeout=5,
-    )
-
-    return json.loads(call.text)
 def inbound(bound,coord:list)->bool: #vllt schneller, wenn Gegensatzt getestet
     assert (len(bound) == 2 and len(coord) == 2 
                             and all([len(b) == 2 for b in bound]))
@@ -105,7 +90,7 @@ def inDegreeOffset(inputDegree, offsetDegree):
     
 
     #this needs to be fixed. It does not account to the overflow of an angle
-    lowerValue,upperValue = offsetDegree-50,offsetDegree+50 #das ist ein offset von 25°
+    lowerValue,upperValue = offsetDegree-60,offsetDegree+60 #das ist ein offset von 25°
     
     theta = inputDegree % 360
     theta1 = lowerValue % 360
@@ -133,18 +118,22 @@ def lanesOverlap(primarydegIn,primarydegOut,inDeg,outDeg)->bool:
     return [inDegreeOffset(roundValues(inDeg) ,primarydegIn ),
             inDegreeOffset(roundValues(outDeg),primarydegOut)]
 
-def getBestPrimarySignal(possibleSignals)->str:
-    smallestError = inf
+def getBestPrimarySignal(possibleSignals,conjId:str="0")->str:
+    smallestError = 0
     outPrimarySignal = ""
     
-    print(len(possibleSignals))
+    
     for i,item in enumerate(possibleSignals):
+        
         values = item[1]+item[2]
-        if values < smallestError:
+        if conjId == testName:
+            print(item[0],values)
+        if values > smallestError:
             outPrimarySignal = item[0]
             smallestError = values
-        print(values,smallestError)
-    print(smallestError)
+    
+    if conjId == testName:
+        print(outPrimarySignal,smallestError)
 
     return outPrimarySignal
 
@@ -158,8 +147,8 @@ def getRouteTrafficLights(route:list, conjFile:dict,conjList:list,vectorization:
             
             meanofPoints =  vectorization[primarySignalName][1]
 
-            vecIn  = generateVectorPoint(meanofPoints,route[pointIndex[ 0]-1])
-            vecOut = generateVectorPoint(meanofPoints,route[pointIndex[-1]+1])
+            vecIn  = generateVectorPoint(meanofPoints,route[pointIndex[ 0]-1]) 
+            vecOut = generateVectorPoint(meanofPoints,route[pointIndex[-1]+1]) 
 
             degIn  = degrees(getDegree(vecIn))
             degOut = degrees(getDegree(vecOut))
@@ -168,28 +157,33 @@ def getRouteTrafficLights(route:list, conjFile:dict,conjList:list,vectorization:
             primarydegOut = vectorization[primarySignalName][2][3]
 
 
-            #please change this back at a later stage
-            primarydegIn  = vectorization[primarySignalName][2][3]
-            primarydegOut = vectorization[primarySignalName][0][3]
+            # # #please change this back at a later stage
+            # primarydegIn  = vectorization[primarySignalName][2][3]
+            # primarydegOut = vectorization[primarySignalName][0][3]
 
+            
 
             check = lanesOverlap(primarydegIn,primarydegOut,degIn,degOut)
-            
+                        
+            if name == testName:
+                print(primarySignalName)
+                print("Incoord",route[pointIndex[ 0]-1])
+                print("Outcoord",route[pointIndex[-1]+1])
+                print("vectors",vecIn,vecOut)
+                print("degrees",degIn,degOut)
+                print("primary degrees",primarydegIn,primarydegOut)
+
             if all([tr[0] for tr in check]):
 
-                if name == "16963":
-                    print(primarySignalName)
-                    print("vectors",vecIn,vecOut)
-                    print("degrees",degIn,degOut)
-                    print("primary degrees",primarydegIn,primarydegOut)
+                
+    
 
                 allPossiblePrimarysignal.append([primarySignalName,
                                                 check[0][1],
                                                 check[1][1]])
                 #break
         if len(allPossiblePrimarysignal) > 0:
-            print(name)
-            trafficLights[name] = getBestPrimarySignal(allPossiblePrimarysignal)
+            trafficLights[name] = getBestPrimarySignal(allPossiblePrimarysignal,name)
                 
     return trafficLights
 
@@ -224,20 +218,27 @@ def generateGeoJsonData(trafficLights:dict,conjList:dict)->dict:
 def purifyRoute(route:dict,index:int=0)->list:
     return list(route['features'][index]['geometry']['coordinates'])
 
-def getTrafficLightsRoute(routeList:dict)->dict:
+def getTrafficLightsRoute(routeList:dict,test:bool=False)->dict:
     with open("tldhamburg/control/data/conjunctionDict.json","r") as file:
         conjDict = json.load(file)
     
-    with open("tldhamburg/control/data/vectorizationOnMeanPoint.json","r") as file:
+    with open("tldhamburg/control/data/vectorizationOnMeanPointInvert.json","r") as file:
         vectorization = json.load(file)
 
     for i in range(len(routeList['features'])):
         pureRoute = purifyRoute(routeList,index=i)
         
         conjList = sortNodeToConjunction(pureRoute,conjDict)
-        print(conjList)
         trafficLightsList = getRouteTrafficLights(pureRoute,conjDict,conjList,vectorization)
+        if test:
+            dic = {"wayPoints":pureRoute,
+           "conjList":conjList,
+           "trafficLights":trafficLightsList}
+            with open("tldhamburg/control/maps/mappingTest.json","w") as file:
+                json.dump(dic,file,indent=4)
+            exit(1)
         jsonData = generateGeoJsonData(trafficLightsList,conjList)
+        
         routeList["features"][i]["properties"]["trafficlights"] = jsonData
         
     return routeList
@@ -252,13 +253,13 @@ def test():
 
     graph = igraph.load("../data/shHamburg.gml")
     #testRoute1
-    # routeHole = getRouteFromGraph([[9.946091651916504,53.59207534790039 ],
-    #                             [10.0772705078125,53.61192321777344]],graph)
-    #testRoute2
-    routeHole = getRouteFromGraph([[10.015552520751953,53.64086151123047 ],
-                                [10.075848579406738,53.65281677246094]],graph)
+    routeHole = getRouteFromGraph([[9.946091651916504,53.59207534790039 ],
+                                [10.0772705078125,53.61192321777344]],graph)
+   # testRoute2,gen popenbüttel
+    # routeHole = getRouteFromGraph([[10.015552520751953,53.64086151123047 ], 
+    #                             [10.075848579406738,53.65281677246094]],graph)
     #ohlsdorf route
-    # routeHole = getRouteFromGraph([[10.059387,53.6235983 ],
+    # routeHole = getRouteFromGraph([[10.059387,53.6235983 ], #ohlsdorf
     #                              [10.061087,53.624418]],graph)
     
     pureRoute = purifyRoute(routeHole)

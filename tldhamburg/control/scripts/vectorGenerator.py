@@ -64,7 +64,9 @@ def generateVector(mainCoord:list,coordList:list): #Vektor zeigt zum point!
     '''
     #minCo,maxCo = findFurthestAndNearestCoord(mainCoord,coordList)
     meanCo = getCentroid(coordList)
-    vec = [mainCoord[0]-meanCo[0],mainCoord[1]-meanCo[1]] #hier wird es jetzt auf das Centroid focosiert
+    #vec = [mainCoord[0]-meanCo[0],mainCoord[1]-meanCo[1]] #hier wird es jetzt auf das Centroid focosiert
+    vec = [-1*(mainCoord[0]-meanCo[0]),-1*(mainCoord[1]-meanCo[1])] #hier wird es jetzt auf das Centroid focosiert
+    
     scaleVec = sqrt(vec[0]**2+vec[1]**2)
     if scaleVec == 0:
         scaleVec = 1
@@ -125,7 +127,7 @@ def genPerPrimarySignal(coords:dict,conjunctionDict:dict)->dict:
     for name,coords in coords.items():
         for conjName,body in conjunctionDict.items():
             
-            if (name in body["trafficLights"] 
+            if (name in body["traficLights"] 
                     and len(body["junctionNodes"]) > 0):
                             #this asserts that the necessary data is present 
                 
@@ -158,7 +160,7 @@ def startGenerator()->None:
 
     vectorData = genPerPrimarySignal(coords,conjDict)
     
-    with open("../data/vectorizationOnMeanPoint.json","w") as file:
+    with open("../data/vectorizationOnMeanPointInvert.json","w") as file:
         json.dump(vectorData, file, indent=4)
 
 if __name__ == "__main__":

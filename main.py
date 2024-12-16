@@ -2,8 +2,8 @@ from tldhamburg.control.control import RoutePlanner
 
 
 testDict = {
-    "coordinates":[[10.013066,53.62795],
-                    [10.075848579406738,53.65281677246094]]
+    "coordinates":[[9.946091651916504,53.59207534790039 ],
+                                [10.0772705078125,53.61192321777344]]
 }
 routeObj = RoutePlanner(".")
 routeObj.generateRoute(testDict)

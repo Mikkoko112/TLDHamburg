@@ -8,10 +8,14 @@ from dash.exceptions import PreventUpdate
 import dash_leaflet as dl
 import dash_bootstrap_components as dbc
 
+
 import pandas as pd
 
 from tldhamburg.frontend import APIkeys
 from tldhamburg.frontend import * # in __innit__.py __all__ = ["filename.py", "otherfile.py",...]
+
+from tldhamburg.frontend.Navigation import Navigation
+from tldhamburg.frontend.position import Position
 
 # import components of the page
 from .components import navbar_demo
@@ -30,32 +34,18 @@ external_stylesheets = [
 
 ORS_key = APIkeys.ORS_key 
 
-# Initial markers locations and statuses
-#marker_1 = [{"id": "start", "lat": 53.5533, "lon": 10}, {"id": "end", "lat": 53.5, "lon": 10}]
- 
-#current_pos = [{"id": "current_pos", "lat": None, "lon": None}]
-
-#traffic_lights = [
-#     {"id": 1, "lat": None, "lon": None, "status": "red"},
-#     {"id": 2, "lat": None, "lon": None, "status": "green"}
-#     ]
-
-#marker_url = app.get_asset_url("location_on.png")
-# lat: latitude (Breite)
-# lon: longitude (Länge
-
 current_speed = "-"
 necessary_speed = 29
 
 # it will show the map with the markers and the Overview
-#geojson = 1
-position = position.Position() # Create a position Object
+pos = Position() # Create a Position object
+navigate = Navigation() # Create a Navigation object
 
 # Main layout
 def layout(**kwargs): 
     return dbc.Container(children = [
     navbar_demo(),
-    data_demo(position)
+    data_demo(pos)
     ],
     fluid = True, # remove the margins
     style={"padding": 0,
@@ -125,33 +115,35 @@ def check_validity(starttext, endtext, n_clicks):
                     no_update)#, position.get_pos()
             
             #get route from ORS 
-            route = get_route.Route(ORS_key, [start_lon,start_lat], [end_lon, end_lat])
-            position.set_pos(lat=start_lat, lon=start_lon)
+            navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
+            pos.set_pos(lat=start_lat, lon=start_lon)
 
             #global variables for instructions and waypoints
-            global route_pictures, route_instructions, route_distances, route_durations, waypoints, step_waypoints
+            """global route_pictures, route_instructions, route_distances, route_durations, waypoints, step_waypoints
             route_pictures, route_instructions, route_distances, route_durations = route.get_directions()
+
             waypoints = route.get_waypoints()
             #get traffic lights and step waypoints
             step_waypoints = route.get_step_waypoints()
             # change to new function for tl from geojson #traffic_light_response = route.get_trafficlight_ids() 
             #traffic_light_response = route.get_traffic_lights()
             l = [0]
-            l.extend(route_distances[:-1]) 
+            l.extend(route_distances[:-1]) """
             return (is_valid_start, 
                     not is_valid_start, 
                     is_valid_end, 
                     not is_valid_end, 
                     0, 
                     get_objects.get_marker(marker), 
-                    route.load_route(), 
+                    navigate.geojson, 
                     #get_objects.get_trafficlights(traffic_light_response),  #get_objects.get_marker_id(traffic_light_response),
                     False,
                     False,
                     (dbc.Table.from_dataframe(pd.DataFrame(
+                        # TODO build lists...
                             {
-                                "in ... metern": l,
-                                "Anweisung": route_instructions,
+                                "in ... metern": navigate.remaining_nav_instr_distances,
+                                "Anweisung": navigate.remaining_nav_instr_texts,
                             }), striped=True, bordered=True, hover=True)),)#, position.get_pos()
     return (False, 
             False, 
@@ -208,62 +200,73 @@ def store_map_view(data, zoom, center):
 )
 def show_instructions(n_clicks, prev, restart, store):
     button_id = ctx.triggered_id
-    l = [0]
-    l.extend(route_distances[:-1])
+    
+    # return values
+    button_text = "Start"
+    picture = ""
+    text = ""
+    # store = dict(center=no_update, zoom=no_update)
+    toggle_prev_button = True
+    toggle_next_button = True
+    progress_val = 0
+    prev_nclicks = 0
+    remaining_instructions = ""
+
     # restart the route instructions and picture
     if button_id == "restart_button":
-        return (0, "Start",
-                "", 
-                "",
-                store,
-                True, True, 0, 0,
-                (dbc.Table.from_dataframe(pd.DataFrame(
+        n_clicks = 0
+        pos.set_pos(navigate.demo_n_clicks(n_clicks))
+        remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
+                    # TODO see above
                     {
-                        "in ... metern": l,
-                        "Anweisung": route_instructions,
-                    }), striped=True, bordered=True, hover=True)),
-                #""
-                )
+                        "in ... metern": navigate.remaining_nav_instr_distances,
+                        "Anweisung": navigate.remaining_nav_instr_texts,
+                    }), striped=True, bordered=True, hover=True))
     
     # go one step back
     elif button_id == "prev_button":
-        if prev == 1:
-            global step_waypoints_rev 
-            step_waypoints_rev = [x - 1 for x in step_waypoints]
-        n_clicks = n_clicks-1
-        if n_clicks-1 in step_waypoints_rev:
-            value = (n_clicks/len(waypoints))*100
-            index = step_waypoints_rev.index(n_clicks-1)  
-            return (n_clicks, "Next",
-                    dash.get_relative_path(f"/assets/{route_pictures[index-1]}"),
-                    f"In {route_distances[index-2]}m: {route_instructions[index-1]}",
-                    dict(center=geocoding_utils.convert_to_lat_lon(waypoints[n_clicks-1]), zoom=18),
-                    False, False, value, no_update,
-                    (dbc.Table.from_dataframe(pd.DataFrame(
-                    {
-                        "in ... metern": l[index-2:],
-                        "Anweisung": route_instructions[index-2:],
-                    }), striped=True, bordered=True, hover=True))
+        n_clicks = n_clicks - 1
+    pos.set_pos(navigate.demo_n_clicks(n_clicks))
+
+
+    
+
+        # if n_clicks-1 in step_waypoints_rev:
+        #     value = navigate.current_progress_next_tl
+            # index = step_waypoints_rev.index(n_clicks-1)  
+            # return (n_clicks, "Next",
+            #         dash.get_relative_path(f"/assets/{navigate.current_nav_instr_picture}"),
+            #         f"In {route_distances[index-2]}m: {route_instructions[index-1]}",
+            #         dict(center=geocoding_utils.convert_to_lat_lon(waypoints[n_clicks-1]), zoom=18),
+            #         False, False, value, no_update,
+            #         (dbc.Table.from_dataframe(pd.DataFrame(
+            #         {
+            #             "in ... metern": l[index-2:],
+            #             "Anweisung": route_instructions[index-2:],
+            #         }), striped=True, bordered=True, hover=True))
                     #""
                     #position.get_pos()
-                    )
+                    # )
     
     # calculate overall progress -> change later to progress to the next trafficlight
-    value = (n_clicks/len(waypoints))*100
+    value = navigate.current_progress_next_tl*100
+
+    
+
 
     # go one step further
-    if n_clicks and route_pictures != []:
+    if n_clicks and navigate.navigation_instructions != {}:
         # first step: change button Start to Next
         if n_clicks == 1:
             return (n_clicks, "Next", 
-                        dash.get_relative_path(f"/assets/{route_pictures[0]}"),
-                        f"{route_instructions[0]}",
-                        dict(center=geocoding_utils.convert_to_lat_lon(waypoints[0]), zoom=18, transition = "setView"), #flyTo 
+                        dash.get_relative_path(f"/assets/{navigate.current_nav_instr_picture}"),
+                        f"{navigate.current_nav_instr_text}",
+                        dict(center=geocoding_utils.convert_to_lat_lon(navigate.way_points[navigate.current_way_point_index]), zoom=18, transition = "setView"), #flyTo 
                         True,False, value, no_update,
                         (dbc.Table.from_dataframe(pd.DataFrame(
                             {
-                                "in ... metern": l,
-                                "Anweisung": route_instructions,
+                                "in ... metern": navigate.remaining_nav_instr_distances,
+                                "Anweisung": navigate.remaining_nav_instr_texts,
                             }), striped=True, bordered=True, hover=True)),
                         #""
                         #position.get_pos()
@@ -272,7 +275,7 @@ def show_instructions(n_clicks, prev, restart, store):
         elif n_clicks == 2:
             return (n_clicks, "Next", 
                         dash.get_relative_path(f"/assets/{route_pictures[1]}"),
-                        f"In {route_distances[0]}m: {route_instructions[1]}",
+                        f"In {navigate.remaining_distance}m: {navigate.current_nav_instr_text}",
                         dict(center=geocoding_utils.convert_to_lat_lon(waypoints[1]), zoom=18, transition = "setView"), #flyTo 
                         True,False, value, no_update,
                         (dbc.Table.from_dataframe(pd.DataFrame(

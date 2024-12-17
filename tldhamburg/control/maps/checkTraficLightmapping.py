@@ -49,29 +49,31 @@ for name,dat in conj.items():
         ).add_to(m)
     
     
-    
-for vecAreaName,area in data['conjList'].items():
-    for i,primary in enumerate(conj[vecAreaName][1]):
-        if i < 3 or True:
-            vec = vect[primary[0]]
-            if len(vec[0][0:2]) != 2: vec[0][0:2] = vec[1][::-1]
-            if len(vec[2][0:2]) != 2: vec[2][0:2] = vec[1][::-1]
+scalefactor = 500
+showAllPrim = False
+if showAllPrim: 
+    for vecAreaName,area in data['conjList'].items():
+        for i,primary in enumerate(conj[vecAreaName][1]):
+            if i < 3 or True:
+                vec = vect[primary[0]]
+                if len(vec[0][0:2]) != 2: vec[0][0:2] = vec[1][::-1]
+                if len(vec[2][0:2]) != 2: vec[2][0:2] = vec[1][::-1]
 
-            lines= [
-                [-x/1000+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
-                vec[1][0:2][::-1],
-                [-x/1000+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
-            ]
-            folium.PolyLine(
-                lines,
-                color='orange',
-                weight=2
-            ).add_to(m)
-            for i,note in enumerate(primary[1][0:3]):
-                folium.Marker(
-                    location=note[::-1],
-                    icon=folium.Icon(color=colours[i])
+                lines= [
+                    [x/scalefactor+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
+                    vec[1][0:2][::-1],
+                    [x/scalefactor+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
+                ]
+                folium.PolyLine(
+                    lines,
+                    color='orange',
+                    weight=2
                 ).add_to(m)
+                for i,note in enumerate(primary[1][0:3]):
+                    folium.Marker(
+                        location=note[::-1],
+                        icon=folium.Icon(color=colours[i])
+                    ).add_to(m)
 
 print(data["trafficLights"])
 for conj,nameVec in data["trafficLights"].items():
@@ -82,14 +84,14 @@ for conj,nameVec in data["trafficLights"].items():
     if nameVec == "22024":
         print("in",)
     lines= [
-        [-x/500+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
+        [x/scalefactor+y for x,y in zip(vec[0][0:2],vec[1][0:2])][::-1],
         vec[1][0:2][::-1],
-        [-x/500+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
+        [x/scalefactor+y for x,y in zip(vec[2][0:2],vec[1][0:2])][::-1]
     ]
     folium.PolyLine(
         lines,
         color='darkred',
-        weight=2
+        weight=5
     ).add_to(m)
 
 

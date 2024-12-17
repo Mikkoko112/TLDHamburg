@@ -1,5 +1,5 @@
 from unittest.mock import MagicMock, patch
-from tldhamburg.control.trafficlightapprox import TrafficLightApprox
+from tldhamburg.control.evaluation.trafficlightapprox import TrafficLightApprox
 from datetime import datetime
 import numpy as np
 import unittest

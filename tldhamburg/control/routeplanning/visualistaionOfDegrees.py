@@ -21,10 +21,9 @@ dic = {
         ]
     ]
 }
-degin = 268.5348039106532
-degOut = 88.77493001030624
-priIn = 268.6313657883484
-priOut= 88.65764043824751 
+degin = 268.33157247267326
+degOut = 88.53253644463626
+priIn,priOut = 268.33157247267326,88.50133540391151
 # Parameter degin,degout,priIn,priOut
 gradzahlen = [degin, degOut, priIn-60,priIn+60,priOut-60,priOut+60]  # Grad in Winkel
 color = ["red","orange","blue","blue","black","black"]
@@ -51,11 +50,9 @@ for grad,c in zip(gradzahlen,color):
     plt.quiver(*origin, vektor[0], vektor[1], angles="xy", scale_units="xy", scale=1, color=c, alpha=0.7, label=f"Vektor {grad}°" if grad == gradzahlen[0] else "")
 
 
-plt.quiver(*origin,-0.9997147150427084*10,
-            -0.02388490165515265*10,color="purple")
+plt.quiver(*origin,-0.9995955084374588, -0.028439752313588623,color="purple")
 
-plt.quiver(*origin,0.9997255630428168*10,
-            0.023426450834969435*10,color="pink")
+plt.quiver(*origin,0.9996720288464607, 0.025609270626103048,color="pink")
 
 
 
@@ -69,4 +66,4 @@ plt.title("Vektoren um einen Kreis")
 plt.xlabel("X")
 plt.ylabel("Y")
 plt.grid(alpha=0.3)
-plt.savefig("16963.pdf")
+plt.savefig("6608.pdf")

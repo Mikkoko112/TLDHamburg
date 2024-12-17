@@ -5,7 +5,7 @@ import igraph
 from math import sqrt,acos,inf,degrees,pi
 from tldhamburg.control.routeplanning.fetchRoutes import getRouteFromGraph
 modif = 1000
-testName = "16963"
+testName = "6585"
 
 def inbound(bound,coord:list)->bool: #vllt schneller, wenn Gegensatzt getestet
     assert (len(bound) == 2 and len(coord) == 2 
@@ -90,7 +90,7 @@ def inDegreeOffset(inputDegree, offsetDegree):
     
 
     #this needs to be fixed. It does not account to the overflow of an angle
-    lowerValue,upperValue = offsetDegree-60,offsetDegree+60 #das ist ein offset von 25°
+    lowerValue,upperValue = offsetDegree-65,offsetDegree+65 #das ist ein offset von 25°
     
     theta = inputDegree % 360
     theta1 = lowerValue % 360
@@ -119,7 +119,7 @@ def lanesOverlap(primarydegIn,primarydegOut,inDeg,outDeg)->bool:
             inDegreeOffset(roundValues(outDeg),primarydegOut)]
 
 def getBestPrimarySignal(possibleSignals,conjId:str="0")->str:
-    smallestError = 0
+    smallestError = inf
     outPrimarySignal = ""
     
     
@@ -128,7 +128,7 @@ def getBestPrimarySignal(possibleSignals,conjId:str="0")->str:
         values = item[1]+item[2]
         if conjId == testName:
             print(item[0],values)
-        if values > smallestError:
+        if values < smallestError:
             outPrimarySignal = item[0]
             smallestError = values
     
@@ -164,18 +164,19 @@ def getRouteTrafficLights(route:list, conjFile:dict,conjList:list,vectorization:
             
 
             check = lanesOverlap(primarydegIn,primarydegOut,degIn,degOut)
-                        
-            if name == testName:
-                print(primarySignalName)
-                print("Incoord",route[pointIndex[ 0]-1])
-                print("Outcoord",route[pointIndex[-1]+1])
-                print("vectors",vecIn,vecOut)
-                print("degrees",degIn,degOut)
-                print("primary degrees",primarydegIn,primarydegOut)
+                    
+                    
 
             if all([tr[0] for tr in check]):
 
-                
+                        
+                if name == testName:
+                    print(primarySignalName)
+                    print("Incoord",route[pointIndex[ 0]-1])
+                    print("Outcoord",route[pointIndex[-1]+1])
+                    print("vectors",vecIn,vecOut)
+                    print("degrees",degIn,degOut)
+                    print("primary degrees",primarydegIn,primarydegOut)
     
 
                 allPossiblePrimarysignal.append([primarySignalName,

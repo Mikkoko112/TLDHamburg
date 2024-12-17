@@ -5,12 +5,19 @@ from tldhamburg.control.evaluation  import trafficlightapprox as tlapp
 from tldhamburg.control.routeplanning import routing 
 import igraph
 import json
+from datetime import datetime
 import time
 import datetime
+from math import sqrt
 from tldhamburg.backend.DataFetcher import DataFetcher
 from tldhamburg.backend.Things import Things
 
 class RoutePlanner:
+
+    def _distBetweenPoints(self,point1ID,point2ID)->float:
+        coord1 = self.routeData["features"][0]["properties"]["geometry"]["coordinate"][point1ID]
+        coord2 = self.routeData["features"][0]["properties"]["geometry"]["coordinate"][point2ID]
+        return sqrt(coord1[0]*coord2[0]+coord1[1]*coord2[1])
 
 
     def _casperEval(self,trafficLightsId:str):
@@ -30,8 +37,27 @@ class RoutePlanner:
         nextPhaseTime=min(zeitGrün,zeitRot)
         return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
 
-    def _calcSpeedNextRoute(self,trafficLightsId:str):
-        pass
+    def _calcSpeed(self,trafficLightsId:str,routePoint:int)->float:
+        trafficLightPos = -1
+        for trafficLight in self.routeData["features"][0]["properties"]["trafficlights"]:
+            if trafficLight["properties"]["id"] == trafficLightsId:
+                trafficLightPos =  trafficLight["properties"]["way-point"]
+        
+        if trafficLightPos == -1:
+            print("Traffic light could not be found in the route")
+            return -1
+
+        nextSwitch = tlapp.approx_next_switch(trafficLightsId)
+        now = datetime.now()
+
+        difference = nextSwitch - now
+        timeTillSwitch = difference.total_seconds()
+        totalDistance  = sum([self._distBetweenPoints(p1,p1+1) 
+                             for p1 in range(routePoint,trafficLightPos)])
+        
+        meanSpeed = totalDistance/timeTillSwitch
+        
+        return meanSpeed*3.6
 
     def getUpdateOnTrafficLight(self,trafficLightsId,curredPositionID:int = -1): #we need to add this
         status,nextPhase,nextPhaseTime,rapidUpdate,speed = 0,0,0,False,-1
@@ -52,6 +78,7 @@ class RoutePlanner:
             if curredPositionID == -1:
                 return status,nextPhase,nextPhaseTime,rapidUpdate
             else:
+                speed = self._calcSpeed(trafficLightsId)
                 return status,nextPhase,nextPhaseTime,rapidUpdate,speed
             #return self._casperEval(trafficLightsId)
             #return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)

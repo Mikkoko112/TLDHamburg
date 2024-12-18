@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock, patch
 from tldhamburg.control.evaluation.trafficlightapprox import TrafficLightApprox
-from datetime import datetime
+from datetime import datetime, timezone
 import numpy as np
 import unittest
 
@@ -90,7 +90,10 @@ class TestTrafficLightApprox(unittest.TestCase):
             mock_observations
         )
         result = TrafficLightApprox.approx_next_switch(1)
-        expeted_result = (datetime(2024, 12, 13, 17, 27, 28), "green")
+        expeted_result = (
+            datetime(2024, 12, 13, 17, 27, 28, tzinfo=timezone.utc),
+            "green",
+        )
         self.assertEqual(result, expeted_result)
 
     @patch("tldhamburg.control.evaluation.trafficlightapprox.Things")
@@ -117,7 +120,10 @@ class TestTrafficLightApprox(unittest.TestCase):
             mock_observations
         )
         result = TrafficLightApprox.approx_next_switch(1)
-        expected_result = (datetime(2024, 12, 13, 17, 50, 33), "red")
+        expected_result = (
+            datetime(2024, 12, 13, 17, 50, 33, tzinfo=timezone.utc),
+            "red",
+        )
         self.assertEqual(result, expected_result)
 
 

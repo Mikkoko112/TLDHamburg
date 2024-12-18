@@ -31,8 +31,5 @@ def layout(**kwargs):
     data_live(position)
     ],
     fluid = True, # remove the margins
-    style={"padding": 0,
-           "height": "98vh",
-           "width": "100%"}, # removes ALL the margins
-    className="bg-light", # background color
+    className="demo-live-container",
 )

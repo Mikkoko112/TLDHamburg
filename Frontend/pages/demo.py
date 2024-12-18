@@ -48,10 +48,7 @@ def layout(**kwargs):
     data_demo(pos)
     ],
     fluid = True, # remove the margins
-    style={"padding": 0,
-           "height": "98vh",
-           "width": "100%"}, # removes ALL the margins
-    className="bg-light", # background color
+    className="demo-live-container",
 )
 
 # triggers if you click the button

@@ -26,10 +26,9 @@ class RoutePlanner:
         fetcher.fetch_data(params={"$filter":f"@iot.id eq {trafficLightsId}","$expand":"Thing"})
         id=fetcher.get_data()[0]["Thing"]["@iot.id"]
         switchTime,nextPhase=tlapp.TrafficLightApprox.approx_next_switch(id)
-        switchTime=switchTime.astimezone(datetime.timezone.utc)
         status="green" if nextPhase=="red" else "red"
         zeitAktuell=dtime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
-        nextPhaseTime=(switchTime-zeitAktuell+datetime.timedelta(hours=1)).total_seconds()
+        nextPhaseTime=(switchTime-zeitAktuell).total_seconds()
         return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
         thing=Things([id])
         zyklusDaten=thing.get_cycle_second_observations(2,True)[id]

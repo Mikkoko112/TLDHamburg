@@ -99,12 +99,35 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
             lastWayPoint = 0
             for i,node in enumerate(route): #this generates the direction
                                             #This should maybe be it`s own func
-                if i == len(route)-1: continue #Um Out of index zu umgehen
+                if i == len(route)-1: 
+                    speeds.append(
+                        {
+                            "maxspeed":lastSpeed,
+                            "way_points":[
+                                lastSpeedChangeIdx,
+                                len(route)-1
+                            ]
+                        }
+                    )
+                    directions.append(
+                        {
+                            "distance": sum([tNode[3] for tNode in route[lastWayPoint:]]), #this could be reduced to a running value
+                            "duration": sum([tNode[3]/((5/18)*(tNode[4] if tNode[4] != 0 else 50)) for tNode in route[lastWayPoint:]]), #same here if i have time i should change this
+                            "type": 10,
+                            "instruction": f"Next is your goal.",
+                            "name": "Goal",
+                            "way_points": [
+                                lastWayPoint,
+                                len(route)-1
+                            ]
+                        }
+                    )
+                    continue #Um Out of index zu umgehen
                 if lastSpeed == 0:
                     lastSpeed = node[4]
                     lastSpeedChangeIdx = 0
                 
-                if node[4] != lastSpeed or i == len(route)-2:
+                if node[4] != lastSpeed:
                     speeds.append(
                         {
                             "maxspeed":lastSpeed,
@@ -168,7 +191,7 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                     "segments": {
                       "distance":sum([dire["distance"] for dire in directions]),
                       "duration":sum([dire["duration"] for dire in directions]),
-                      "stepts":directions
+                      "steps":directions
                     },
                     "speeds": speeds,
                     "name": "Example Route"

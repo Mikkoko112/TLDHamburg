@@ -97,7 +97,6 @@ for conj,nameVec in data["trafficLights"].items():
 
 
 
-
 #jetzt die neuen
 for i,coord in enumerate(data['wayPoints'][:-1]):
     folium.PolyLine(
@@ -105,6 +104,7 @@ for i,coord in enumerate(data['wayPoints'][:-1]):
                 color='purple',
                 weight=3
             ).add_to(m)
+
 
 
 

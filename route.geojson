@@ -1744,9 +1744,9 @@
             },
             "properties": {
                 "segments": {
-                    "distance": 11397.673999999999,
-                    "duration": 1062.198144,
-                    "stepts": [
+                    "distance": 11475.163999999999,
+                    "duration": 1067.7774239999999,
+                    "steps": [
                         {
                             "distance": 0,
                             "duration": 0.0,
@@ -2098,6 +2098,17 @@
                                 415,
                                 417
                             ]
+                        },
+                        {
+                            "distance": 77.49,
+                            "duration": 5.57928,
+                            "type": 10,
+                            "instruction": "Next is your goal.",
+                            "name": "Goal",
+                            "way_points": [
+                                417,
+                                429
+                            ]
                         }
                     ]
                 },
@@ -2204,7 +2215,7 @@
                         "maxspeed": 50,
                         "way_points": [
                             315,
-                            428
+                            429
                         ]
                     }
                 ],

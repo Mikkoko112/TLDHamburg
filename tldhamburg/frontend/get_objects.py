@@ -6,9 +6,9 @@ from tldhamburg.backend.Things import Things
 def get_trafficlights(lights):
     traffic_light_markers = [
         dl.Marker(
-        position=[light['lat'], light['lon']],
+        position=[lat, lon],
         children=[dl.Tooltip("Traffic Light")]
-        ) for light in lights['elements'] 
+        ) for lon,lat in lights 
         ]
     return traffic_light_markers
     '''

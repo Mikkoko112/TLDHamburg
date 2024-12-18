@@ -55,7 +55,7 @@ def searchbar():
                 ),
             dbc.Col(
                  dbc.Button(
-                    "Route",id="route_button", color="primary", className="mb-3", n_clicks=0
+                    "Route",id="route_button", color="primary", className="mb-3", n_clicks=0,
                     ), 
                     width = "auto",
                 ),
@@ -174,7 +174,7 @@ def control_demo(current_speed):
             ),
             dbc.Col(
                     dbc.ListGroup([
-                            dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}"),
+                            dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="current-speed"),
                         ],
                         horizontal=True,
                         className="mb-2",
@@ -195,7 +195,7 @@ def control_live(current_speed):
         children= [
             dbc.Col(
                     dbc.ListGroup([
-                            dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}"),
+                            dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="current-speed"),
                         ],
                         horizontal=True,
                         className="mb-2",

@@ -2,7 +2,7 @@ import requests
 import json
 from pathlib import Path
 from tldhamburg.frontend.position import Position
-from tldhamburg.frontend.Trafficlights import Trafficlight
+from tldhamburg.frontend.trafficlights import Trafficlight
 from tldhamburg.control.control import RoutePlanner
 from shapely.geometry import Point, LineString
 from shapely.ops import nearest_points
@@ -18,7 +18,7 @@ class Navigation:
     _route = None            # of class Route
     departure = None
     destination = None
-    start_navigating = False
+    start_navigating = True # changed to True
     route_deviation_tolerance = 100
 
     geojson = None          # actual content of geojson file
@@ -88,7 +88,15 @@ class Navigation:
              self.load_navigation_instruction(nav_instr_key)
              )
         self.next_tl, self.next_next_tl = self._get_impending_two_trafficlights()
-        
+
+        # initialize instruction list
+        remaining_nav_instr_texts = []
+        remaining_nav_instr_distances = []
+        for key, step in self.navigation_instructions.items():
+            remaining_nav_instr_texts.append(step["instruction"])
+            remaining_nav_instr_distances.append(round(step["distance"]))
+        self.remaining_nav_instr_texts = remaining_nav_instr_texts
+        self.remaining_nav_instr_distances = remaining_nav_instr_distances 
 
     # TODO ausbauen
     def __get_ors_route(self, api_key, departure, destination, profile='driving-car'):
@@ -147,7 +155,7 @@ class Navigation:
                         2: "turn_slight_left.png", 3: "turn_slight_right.png", 
                         4: "turn_slight_left.png", 5: "turn_slight_right.png", 
                         6: "straight.png", 7: "Enter roundabout", 
-                        8: "straight.png", 9: "U_turn.png", 10: "goal.png", 
+                        8: "straight.png", 9: "U_turn.png", 10: "straight.png",  #changed goal to straight
                         11: "straight.png", 12: "keep_left.png" , 13: "keep_right.png"}
         dic_roundabouts = {1: "roundabout_right.png", 2: "roundabout_straight.png", 
                         3: "roundabout_left.png"}
@@ -157,8 +165,8 @@ class Navigation:
         total_duration = 0
         distance_integral = []
         duration_integral = []
-        # TODO change back to 'steps' 
-        steps = route["features"][0]["properties"]["segments"]["stepts"]
+        
+        steps = route["features"][0]["properties"]["segments"]["steps"]
         for step in steps:
             total_distance = total_distance + step["distance"]
             total_duration = total_duration + step["duration"]
@@ -310,7 +318,7 @@ class Navigation:
         """
         keys_list = sorted(self.navigation_instructions.keys())
         idx = bisect_right(keys_list, self.current_way_point_index)
-        key = keys_list[idx]
+        key = keys_list[idx] 
         return key
     
     def load_navigation_instruction(self, key):
@@ -415,6 +423,10 @@ class Navigation:
              self.load_navigation_instruction(cur_nav_instr_key)
              )
         
+        # distance to next direction
+        self.remaining_distance = round((self.distance_integral[cur_nav_instr_key-1] 
+                                        - self.distance_integral[self.current_way_point_index]))
+
         # update instruction list
         remaining_nav_instr_texts = []
         remaining_nav_instr_distances = []
@@ -426,20 +438,15 @@ class Navigation:
                 remaining_nav_instr_distances.append(self.remaining_distance)
             elif relevant == True:
                 remaining_nav_instr_texts.append(step["instruction"])
-                remaining_nav_instr_distances.append(step["distance"])
+                remaining_nav_instr_distances.append(round(step["distance"]))
         self.remaining_nav_instr_texts = remaining_nav_instr_texts
         self.remaining_nav_instr_distances = remaining_nav_instr_distances
-
 
         # determine next two trafficlights next_tl and next_next_tl
         self.next_tl, self.next_next_tl = self._get_impending_two_trafficlights()
 
         # determine current speed limit
         self.current_speed_limit = self._get_current_speed_limit()
-
-        # distance to next direction
-        self.remaining_distance = (self.distance_integral[cur_nav_instr_key-1] 
-                                        - self.distance_integral[self.current_way_point_index])
 
         # progress-bar. 
         tl_keys = list(self.trafficlights.keys())
@@ -463,7 +470,7 @@ class Navigation:
     
     def get_all_trafficlight_coordinates(self):
         trafficlight_positions = list(self.trafficlights.items())
-        return [self.way_points[point] for point in trafficlight_positions]
+        return [list(self.way_points[point]) for point,_ in trafficlight_positions]
             
 
     def demo_n_clicks(self, nclicks):
@@ -472,7 +479,8 @@ class Navigation:
             lat, lon = self.way_points[nclicks-1]
         except (ValueError, IndexError):
             lat, lon = self.way_points[0]
-        self.update_route(self.current_position.set_pos(lat, lon))
+        self.current_position.set_pos(lat, lon)
+        self.update_route(self.current_position)
         return lat, lon
         
 

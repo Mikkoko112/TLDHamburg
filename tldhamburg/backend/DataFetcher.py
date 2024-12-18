@@ -3,6 +3,7 @@ import json
 import pickle
 import shapely
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 
 class DataFetcher:
@@ -39,23 +40,34 @@ class DataFetcher:
             To be added later
         -----------------------------------------------------------------------------------------
         """
-        next_request_link = self.BASE_URL + endpoint
+
+        base_request_link = self.BASE_URL + endpoint 
+        
+        def single_fetch(params): #helper function for a single request
+            try:
+                response = requests.get(base_request_link,params)
+                response.raise_for_status()
+                return response.json()  # Return parsed JSON
+            except requests.RequestException as e:
+                print(f"ERROR <{str(e)}> occured on ENDPOINT: {endpoint} and PARAMS: {params}")
+                return {"error": str(e)}
+
+        
+        #check if entity is accessed by ID directly, then only one datapoint
+        #can be extracted and no use of ThreadPoolExecutor is necassary
+        if endpoint[:-1] == ")":
+            fetched_data = single_fetch(params)
+            self.data = fetched_data
+            return True
+        
         entries_to_fetch = float("inf")
         if "$top" in params:
             entries_to_fetch = params["$top"]
         all_data = list()
         entries_fetched = 0
         while True:
-            response = requests.get(next_request_link, params=params)
-
-            if response.status_code != 200:  # exit data fetching if request failed
-                raise ValueError(f"Failed to fetch data. Status code: {response.status_code}")
-
-            if not "value" in response.json():  # save json directly, if entity is accessed directly
-                all_data.append(response.json())
-                break
-
-            fetched_data = response.json().get("value", [])
+            with Thre
+            reponse_json = response.json().get("value", [])
 
             if entries_to_fetch - entries_fetched < 1000:  # exit if last necassary page is reached
                 all_data.extend(fetched_data[: entries_to_fetch % 1000])
@@ -63,12 +75,12 @@ class DataFetcher:
 
             all_data.extend(fetched_data)
             entries_fetched += len(fetched_data)
-            next_request_link = response.json().get("@iot.nextLink")
 
             if not next_request_link:  # break if last page is reached
                 break
 
         self.data = all_data
+        return True
 
     def get_data(self):
         if not self.data:

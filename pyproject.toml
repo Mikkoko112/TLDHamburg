@@ -32,4 +32,5 @@ dependencies = [
     "geopy",
     "loguru",
     "pathlib"
+    "concurrent"
 ]

@@ -1,8 +1,7 @@
 import requests
 import json
-import pickle
-import shapely
 import time
+import math
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -52,7 +51,6 @@ class DataFetcher:
                 print(f"ERROR <{str(e)}> occured on ENDPOINT: {endpoint} and PARAMS: {params}")
                 return {"error": str(e)}
 
-        
         #check if entity is accessed by ID directly, then only one datapoint
         #can be extracted and no use of ThreadPoolExecutor is necassary
         if endpoint[:-1] == ")":
@@ -60,25 +58,53 @@ class DataFetcher:
             self.data = fetched_data
             return True
         
+        #if $top is defined, fetch that many entries. Otherwise fetch all entries.
         entries_to_fetch = float("inf")
         if "$top" in params:
             entries_to_fetch = params["$top"]
+        
+        #fetching loop
         all_data = list()
         entries_fetched = 0
         while True:
-            with Thre
-            reponse_json = response.json().get("value", [])
+            #do at most 10 requests at a time. Less if less than 10000 entries are left to fetch
+            requests_to_execute = min(10,math.ceil((entries_to_fetch - entries_fetched) / 1000))
 
-            if entries_to_fetch - entries_fetched < 1000:  # exit if last necassary page is reached
-                all_data.extend(fetched_data[: entries_to_fetch % 1000])
+                
+            params_list = list()
+            for i in range(requests_to_execute):
+                single_fetch_params = params
+                single_fetch_params["$top"] = 1000
+                single_fetch_params["$skip"] = i * 1000 + entries_fetched
+                params_list.append(single_fetch_params)
+
+            #calculate leftover entries to fetch for top param of last request.
+            #Different than 1000, if non multiple of 1000 is given as entries_to_fetch
+            entries_to_fetch_on_last_request = 1000
+            if entries_to_fetch - entries_fetched < 10000 and entries_to_fetch % 1000 != 0:
+                entries_to_fetch_on_last_request = entries_to_fetch % 1000
+                params_list[-1]["$top"] == entries_to_fetch_on_last_request
+            
+            with ThreadPoolExecutor() as executor:
+                futures = [executor.submit(single_fetch, params) for params in params_list]
+                responses = [future.result() for future in futures]
+                responses_json = [response.json().get("value", []) for response in responses]
+
+                for response_json in responses_json:
+                    if not response_json: #exit if response is empty, e.g. all entries have been fetched
+                        break
+                    all_data.extend(response_json)
+            
+            #update the amount of entries fetched
+            entries_fetched += (requests_to_execute - 1) * 1000 + entries_to_fetch_on_last_request
+
+            #exit if requested amount of entries have been fetched
+            if entries_fetched == entries_to_fetch:
                 break
 
-            all_data.extend(fetched_data)
-            entries_fetched += len(fetched_data)
-
-            if not next_request_link:  # break if last page is reached
-                break
-
+            #let the API recover for a bit, testing has shown that this leads to significantly 
+            #faster average response times when fetching large amounts of entries.
+            time.sleep(1)
         self.data = all_data
         return True
 
@@ -93,123 +119,6 @@ class DataFetcher:
         print(json.dumps(self.data, indent=4))
     
     #------------------DEPRECATED-----------------
-    
-    def fetch_data_deprecated(self, endpoint="Datastreams", params={}):
-        # DEPRECATED
-        print("DEPRECATED")
-        full_url = self.BASE_URL + endpoint
-
-        # get all entries if no top parameter is set
-        if not "$top" in params:
-            # add max $top parameter so the max amount of values are fetched per page
-            # significantly reduces fetch times, as API GET requests are slow
-            params["$top"] = 1000
-            response = requests.get(full_url, params=params)
-            if response.status_code != 200:  # exit data fetching if request failed
-                print(f"Failed to fetch data. Status code: {response.status_code}")
-                return
-            # only if a Entity is accessed directly e.g. Things(1), there is no value key
-            if not "value" in response.json():
-                self.data = response.json()
-                return
-            fetched_data = response.json().get("value", [])
-            all_data = list()
-            all_data.extend(fetched_data)
-            # repeatedly fetch next page of results until last one is reached
-            while True:
-                next_link = response.json().get("@iot.nextLink")
-                if not next_link:  # break if last page is reached
-                    break
-                response = requests.get(next_link)
-                if response.status_code != 200:  # exit data fetching if request failed
-                    print(f"Failed to fetch data. Status code: {response.status_code}")
-                    return
-                fetched_data = response.json().get("value", [])
-                all_data.extend(fetched_data)
-
-            self.data = all_data
-            return
-
-        # get top x entries over multiple pages if top param exceeds 1000
-        elif params["$top"] > 1000:
-            entries_fetched = 0
-            response = requests.get(full_url, params=params)
-            if response.status_code != 200:  # exit data fetching if request failed
-                print(f"Failed to fetch data. Status code: {response.status_code}")
-                return
-            # only if a Entity is accessed directly e.g. Things(1), there is no value key
-            if "value" in response.json():
-                fetched_data = response.json().get("value", [])
-            else:
-                self.data = response.json()
-                return
-            all_data = list()
-            all_data.extend(fetched_data)
-            entries_fetched += 1000
-            # repeatedly fetch next page of results until last one is reached
-            while True:
-                next_link = response.json().get("@iot.nextLink")
-                if not next_link:  # break if last page is reached
-                    break
-                response = requests.get(next_link)
-                if response.status_code != 200:  # exit data fetching if request failed
-                    print(f"Failed to fetch data. Status code: {response.status_code}")
-                    return
-                fetched_data = response.json().get("value", [])
-                if (
-                    params["$top"] - entries_fetched < 1000
-                ):  # exit if last necassary page is reached
-                    all_data.extend(fetched_data[: params["$top"] % 1000])
-                    break
-                all_data.extend(fetched_data)
-                entries_fetched += 1000
-
-            self.data = all_data
-            return
-
-        # get top x entries in one page if top param is under or equal to 1000
-        else:
-            response = requests.get(full_url, params=params)
-            if response.status_code != 200:  # exit data fetching if request failed
-                print(f"Failed to fetch data. Status code: {response.status_code}")
-                return
-            # only if a Entity is accessed directly e.g. Things(1), there is no value key
-            if "value" in response.json():
-                fetched_data = response.json().get("value", [])
-            else:
-                self.data = response.json()
-                return
-            fetched_data = response.json().get("value", [])
-            self.data = fetched_data
-
-    def get_Datastream_id_by_coordinates(self, coordinates, error):
-        # Input: Type
-        # coordinates: list [x_coord,y_coord]
-        # DEPRECATED
-        print("DEPRECATED")
-        if (
-            coordinates[0] > coordinates[1]
-        ):  # switch coords if they are given in wrong orientation
-            temp = coordinates[0]
-            coordinates[0] = coordinates[1]
-            coordinates[1] = temp
-
-        with open("datastreams_id-observedArea.pkl", "rb") as file:
-            data = pickle.load(file)
-
-        all_matched_Datastreams_ids = list()
-        reference_point = shapely.geometry.Point(coordinates[0], coordinates[1])
-        for entry in data:
-            if not "observedArea" in entry:
-                continue
-            geoJSON_observedArea = shapely.geometry.shape(entry["observedArea"])
-            distance = reference_point.distance(geoJSON_observedArea)
-            if distance < error:
-                if not "@iot.id" in entry:
-                    print("whoops")
-                datastream_id = entry["@iot.id"]
-                all_matched_Datastreams_ids.append(datastream_id)
-        return all_matched_Datastreams_ids
 
     def get_live_Observations_for_Datastream_id(self, id):
         # DEPRECATED

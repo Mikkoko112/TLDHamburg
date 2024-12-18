@@ -21,6 +21,7 @@ classifiers = [
 ]
 dependencies = [
     "pandas",
+    "concurrent"
     "requests",
     "shapely>=2.0.6",
     "flask",
@@ -32,5 +33,4 @@ dependencies = [
     "geopy",
     "loguru",
     "pathlib"
-    "concurrent"
 ]

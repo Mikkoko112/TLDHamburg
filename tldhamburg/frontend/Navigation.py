@@ -453,20 +453,29 @@ class Navigation:
         try:
             tl_right_idx = bisect_right(tl_keys, self.current_way_point_index)
             next_reference_waypoint = tl_keys[tl_right_idx]
-        except (ValueError, IndexError):
-            next_reference_waypoint = 0
+        except (ValueError, IndexError): # we have passed all traffic lights on our route
+            next_reference_waypoint = None
         try:
             tl_left_idx = bisect_left(tl_keys, self.current_way_point_index)
             last_reference_waypoint = tl_keys[tl_left_idx]
         except (ValueError, IndexError): 
-            last_reference_waypoint = 0 
-        num_waypoints = next_reference_waypoint - last_reference_waypoint + 1
-        progress = self.current_way_point_index - last_reference_waypoint
-        if num_waypoints <= 0:
-            rel_progress = 1
-        else:
-            rel_progress = round(progress / num_waypoints, 2)
+            if len(tl_keys) == 0: # no traffic light on route
+                last_reference_waypoint = None
+            else:
+                last_reference_waypoint = 0 
+        
+        if (last_reference_waypoint is not None) and (next_reference_waypoint is not None):
+            num_waypoints = next_reference_waypoint - last_reference_waypoint
+            progress = self.current_way_point_index - last_reference_waypoint
+            if num_waypoints != 0:
+                rel_progress = round(progress / num_waypoints, 2)
+            else:
+                rel_progress = 0
+        else: 
+            rel_progress = 0
+
         self.current_progress_next_tl = rel_progress
+
     
     def get_all_trafficlight_coordinates(self):
         trafficlight_positions = list(self.trafficlights.items())

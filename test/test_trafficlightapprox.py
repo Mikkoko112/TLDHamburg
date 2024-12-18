@@ -1,13 +1,13 @@
 from unittest.mock import MagicMock, patch
 from tldhamburg.control.evaluation.trafficlightapprox import TrafficLightApprox
-from datetime import datetime
+from datetime import datetime, timezone
 import numpy as np
 import unittest
 
 
 class TestTrafficLightApprox(unittest.TestCase):
 
-    @patch("tldhamburg.control.trafficlightapprox.Things")
+    @patch("tldhamburg.control.evaluation.trafficlightapprox.Things")
     def test_mean_light_phases_valid_input(self, mock_things_class):
         mock_thing_instance = MagicMock()
         mock_things_class.return_value = mock_thing_instance
@@ -34,7 +34,7 @@ class TestTrafficLightApprox(unittest.TestCase):
         excepted_result = (np.float64(21.333333333333332), np.float64(37.0))
         self.assertEqual(excepted_result, result)
 
-    @patch("tldhamburg.control.trafficlightapprox.Things")
+    @patch("tldhamburg.control.evaluation.trafficlightapprox.Things")
     def test_mean_light_phases_valid_input_stddev(self, mock_things_class):
         mock_thing_instance = MagicMock()
         mock_things_class.return_value = mock_thing_instance
@@ -66,7 +66,7 @@ class TestTrafficLightApprox(unittest.TestCase):
         )
         self.assertEqual(excepted_result, result)
 
-    @patch("tldhamburg.control.trafficlightapprox.Things")
+    @patch("tldhamburg.control.evaluation.trafficlightapprox.Things")
     def test_next_switch_green(self, mock_things_class):
         mock_thing_instance = MagicMock()
         mock_things_class.return_value = mock_thing_instance
@@ -90,10 +90,13 @@ class TestTrafficLightApprox(unittest.TestCase):
             mock_observations
         )
         result = TrafficLightApprox.approx_next_switch(1)
-        expeted_result = (datetime(2024, 12, 13, 17, 27, 28), "green")
+        expeted_result = (
+            datetime(2024, 12, 13, 17, 27, 28, tzinfo=timezone.utc),
+            "green",
+        )
         self.assertEqual(result, expeted_result)
 
-    @patch("tldhamburg.control.trafficlightapprox.Things")
+    @patch("tldhamburg.control.evaluation.trafficlightapprox.Things")
     def test_next_switch_red(self, mock_things_class):
         mock_thing_instance = MagicMock()
         mock_things_class.return_value = mock_thing_instance
@@ -117,7 +120,10 @@ class TestTrafficLightApprox(unittest.TestCase):
             mock_observations
         )
         result = TrafficLightApprox.approx_next_switch(1)
-        expected_result = (datetime(2024, 12, 13, 17, 50, 33), "red")
+        expected_result = (
+            datetime(2024, 12, 13, 17, 50, 33, tzinfo=timezone.utc),
+            "red",
+        )
         self.assertEqual(result, expected_result)
 
 

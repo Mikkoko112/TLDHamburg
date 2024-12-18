@@ -5,7 +5,7 @@ from tldhamburg.control.evaluation  import trafficlightapprox as tlapp
 from tldhamburg.control.routeplanning import routing 
 import igraph
 import json
-from datetime import datetime
+from datetime import datetime as dtime
 import time
 import datetime
 from math import sqrt
@@ -23,15 +23,24 @@ class RoutePlanner:
     def _casperEval(self,trafficLightsId:str):
         status,nextPhase,nextPhaseTime,rapidUpdate = 0,0,0,False
         fetcher=DataFetcher()
-        fetcher.fetch_data(params={"$filter":f"@iot.id eq '{trafficLightsId}'","$expand":"Thing"})
+        fetcher.fetch_data(params={"$filter":f"@iot.id eq {trafficLightsId}","$expand":"Thing"})
         id=fetcher.get_data()[0]["Thing"]["@iot.id"]
+        switchTime,nextPhase=tlapp.TrafficLightApprox.approx_next_switch(id)
+        switchTime=switchTime.astimezone(datetime.timezone.utc)
+        status="green" if nextPhase=="red" else "red"
+        zeitAktuell=dtime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
+        nextPhaseTime=(switchTime-zeitAktuell+datetime.timedelta(hours=1)).total_seconds()
+        return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
         thing=Things([id])
-        schaltungen=thing.get_primary_signal_observations(4,True)[id]
         zyklusDaten=thing.get_cycle_second_observations(2,True)[id]
-        zyklusLänge=datetime.datetime.fromisoformat(zyklusDaten[0][0])-datetime.datetime.fromisoformat(zyklusDaten[1][0])
-        zeitAktuell=datetime.datetime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
-        zeitGrün=(zeitAktuell-[datetime.datetime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==3][0])%zyklusLänge
-        zeitRot=(zeitAktuell-[datetime.datetime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==1][0])%zyklusLänge
+        schaltungen=thing.get_primary_signal_observations(8,True)[id]
+        tStart=dtime.fromisoformat(zyklusDaten[1][0])
+        tEnd=dtime.fromisoformat(zyklusDaten[0][0])
+        zyklusLänge=tEnd-tStart
+        eventsInCycle=[(dtime.fromisoformat(zeit),state) for zeit,state in schaltungen if tStart<=dtime.fromisoformat(zeit)<=tEnd and state in [1,3]]
+        
+        zeitGrün=(zeitAktuell-[dtime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==3][0])%zyklusLänge
+        zeitRot=(zeitAktuell-[dtime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==1][0])%zyklusLänge
         status="grün" if zeitGrün>zeitRot else "rot"
         nextPhase="rot" if status=="grün" else "grün"
         nextPhaseTime=min(zeitGrün,zeitRot)

@@ -76,10 +76,12 @@ class TrafficLightApprox:
         )
         for time_stamp, signal in observations:
             if signal == 3:  # if current_color == green
+            if signal == 3:  # if current_color == green
                 switch_time = timedelta(seconds=time_green)
                 approx_time = datetime.fromisoformat(time_stamp) + switch_time
                 # Approximated time to next switch, color of next switch
                 return (approx_time, "red")
+            if signal == 1:  # if current_color == red
             if signal == 1:  # if current_color == red
                 switch_time = timedelta(seconds=time_red)
                 approx_time = datetime.fromisoformat(time_stamp) + switch_time

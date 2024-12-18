@@ -22,7 +22,6 @@ class TrafficLightApprox:
         end_time = 0
         last_signal = -1
         timestamp_format = "%Y-%m-%dT%H:%M:%SZ"
-
         red_phases, green_phases = list(), list()
         for time_stamp, signal in observations:
             start_time = datetime.strptime(time_stamp, timestamp_format)
@@ -75,20 +74,15 @@ class TrafficLightApprox:
         time_green, time_red = TrafficLightApprox.mean_light_phases(
             thing_id=thing_id, support_points=32
         )
-        timestamp_format = "%Y-%m-%dT%H:%M:%SZ"
         for time_stamp, signal in observations:
             if signal == 3:  # if current_color == green
                 switch_time = timedelta(seconds=time_green)
-                approx_time = (
-                    datetime.strptime(time_stamp, timestamp_format) + switch_time
-                )
+                approx_time = datetime.fromisoformat(time_stamp) + switch_time
                 # Approximated time to next switch, color of next switch
                 return (approx_time, "red")
             if signal == 1:  # if current_color == red
                 switch_time = timedelta(seconds=time_red)
-                approx_time = (
-                    datetime.strptime(time_stamp, timestamp_format) + switch_time
-                )
+                approx_time = datetime.fromisoformat(time_stamp) + switch_time
                 # Approximated time to next switch, color of next switch
                 return (approx_time, "green")
         print("Currently an approximation can not be calculated.")
@@ -118,11 +112,11 @@ class TrafficLightApprox:
         time_green, time_red = TrafficLightApprox.mean_light_phases(
             thing_id=thing_id, support_points=32
         )
-        timestamp_format = "%Y-%m-%dT%H:%M:%SZ"
+        # timestamp_format = "%Y-%m-%dT%H:%M:%SZ"
         last_switch_time = None
         current_color = None
         for time_stamp, signal in observations:
-            last_switch_time = datetime.strptime(time_stamp, timestamp_format)
+            last_switch_time = datetime.fromisoformat(time_stamp)
             if signal == 1:
                 current_color = "red"
                 break

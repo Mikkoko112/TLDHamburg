@@ -119,4 +119,5 @@ class TestPrintData(unittest.TestCase):
         print("Done")
 
 if __name__ == "__main__":
+    print("start mock test")
     unittest.main()

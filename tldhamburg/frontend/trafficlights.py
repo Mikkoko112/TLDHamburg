@@ -11,20 +11,19 @@ def get_trafficlights(): # Nike ausbauen
     return data
 
 class Trafficlight:
-    thing = None             # things object
+    things_id = None            # things object
     _lat = None
     _lon = None
-    way_point_idx = None    # 
-    _color = None            
-    _turns_green = None      # green prediction; time
-    _turns_red = None        # red prediction; time
+    object_type = None          # signal type
+
+    status = None                
 
 
-    def __init__(self, things_id, lat, lon, way_point_index):
-        self.thing = Things([things_id])
+    def __init__(self, things_id, lat, lon, object_type):
+        self.things_id = things_id
         self._lat = lat
         self._lon = lon
-        self.way_point_index = way_point_index
+        self.object_type = object_type
         pass
 
     def get_coordinates(self, option=["latlon", "lonlat"]):
@@ -33,21 +32,8 @@ class Trafficlight:
         if option == "lonlat":
             return self._lon, self._lat
         
-    def get_predictions(self):
-        print("getting predictions...")
-        pass
-
-    def update(self):
-        # checks if predictions are outdated
-        if self._turns_green is not None:
-            current_time = time.time()
-            if self._turns_green <= current_time:
-                self.get_predictions()
-            if self._turns_red <= current_time:
-                self.get_predictions()
-        
-        # gets color of traffic light
-        
-        pass
+    def set_status(self, status):
+        self.status = status
+        return status
         
     

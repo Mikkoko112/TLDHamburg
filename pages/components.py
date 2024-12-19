@@ -20,7 +20,6 @@ def dropdown():
                 )
                 for page in dash.page_registry.values()
         ],
-        style={"margin-left": "15px"}
     )                  
 
 # the searchbar with the search field for the start and end location
@@ -37,7 +36,6 @@ def searchbar():
                         dbc.FormFeedback("", type="invalid", id="start_invalid"),
                         dbc.FormFeedback("", type="valid", id="start_valid"),
                     ], 
-                        className="mb-3",
                     ), 
                     width="auto",
                 ),
@@ -49,20 +47,17 @@ def searchbar():
                         dbc.FormFeedback("", type="invalid", id="end_invalid"), 
                         dbc.FormFeedback("", type="valid", id="end_valid"),
                     ],
-                        className="mb-3",
                     ), 
                     width="auto",
                 ),
             dbc.Col(
                  dbc.Button(
-                    "Route",id="route_button", color="primary", className="mb-3", n_clicks=0
+                    "Route",id="route_button", color="primary", n_clicks=0,
                     ), 
                     width = "auto",
                 ),
             ],
-            className="g-3 ms-auto flex-nowrap mt-3 mt-md-0", 
-            style={"height": "6vh"},
-            align="center",
+            className="flex-searchbar-container"
         )
 
 
@@ -76,20 +71,19 @@ def navbar_demo():
                 # Use row and col to control vertical alignment of logo / brand
                     dbc.Row( 
                         [
-                            dbc.NavbarBrand("Real-Time Traffic Light Map: Demo", className="ms-0"),
+                        dbc.NavbarBrand("Real-Time Traffic Light Map: Demo", 
+                                        style={"color": "white"},
+                            ),
                         ],
-                        align="center",
-                        className="g-0",
                     ),
-                style={"textDecoration": "none"},
                 ),
                 searchbar(),
                 dropdown(),
             ], 
             fluid = True, 
         ),
+        className="navbar-container",
         color="secondary",
-        dark=True, 
     )
 
 def navbar_live():
@@ -100,20 +94,19 @@ def navbar_live():
                 # Use row and col to control vertical alignment of logo / brand
                     dbc.Row( 
                         [
-                            dbc.NavbarBrand("Real-Time Traffic Light Map: Live", className="ms-0"),
+                        dbc.NavbarBrand("Real-Time Traffic Light Map: Live", 
+                                        style={"color": "white"},
+                            ),
                         ],
-                        align="center",
-                        className="g-0",
                     ),
-                style={"textDecoration": "none"},
                 ),
                 searchbar(),
                 dropdown(),
             ], 
             fluid = True, 
         ),
+        className="navbar-container",
         color="secondary",
-        dark=True, 
     )
 
 # shows instruction: a picture and a text
@@ -124,32 +117,17 @@ def next_turn():
             html.Div([
                 html.Img(id = "route_picture",
                          src="", 
-                         style={"display": "flex",
-                                "alignItems": "left", 
-                                "width": "20vw",
-                               # "height": "35vh",
-                                "marginRight": "8px"})
-            ],
-            ), align = "center",
-            
+                         className="picture-container")
+            ],), 
         ),
         dbc.Col(
             html.Div("",
                     id = "route_instruction", 
-                    style={"fontSize": "28px", 
-                        "display": "flex", 
-                        "alignItems": "left", 
-                        "marginBottom": "8px", 
-                        "marginTop": "8px",
-                        }
-                        ), 
-               align="center",
-            )
+                    className="instruction-container"
+            ), 
+        )
     ], 
-    style={"display": "flex", 
-           "alignItems": "left",
-            "marginRight": "2vw",
-            "height": "40vh"}
+    className="flex-container-top",
 )
 
 # buttons for clicking through the route in the demo page
@@ -159,34 +137,28 @@ def control_demo(current_speed):
         children= [
             dbc.Col(
                 dbc.Button("Prev", id = "prev_button", color="secondary", 
-                            className="me-1", disabled=True),
+                            disabled=True),
                 width = "auto",
             ),
             dbc.Col(
                 dbc.Button("Start", id = "start_next_button", color="secondary", 
-                            className="me-1", disabled=True),
+                            disabled=True),
                 width = "auto",
             ),
             dbc.Col(
                 dbc.Button("Restart", id = "restart_button", color="secondary", 
-                            className="me-1", disabled=True),
+                            disabled=True),
                 width = "auto",
             ),
             dbc.Col(
                     dbc.ListGroup([
-                            dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}"),
+                        dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="current-speed"),
                         ],
-                        horizontal=True,
-                        className="mb-2",
                     ), 
                     width = "auto",
             ),
         ],
-        style={"display": "flex", 
-            "alignItems": "left",
-            "marginLeft": "1vw",
-            "marginRight": "2vw",
-            },
+        className="flex-container-control",
 )
 
 # shows the maximal speed allowed
@@ -195,37 +167,20 @@ def control_live(current_speed):
         children= [
             dbc.Col(
                     dbc.ListGroup([
-                            dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}"),
+                            dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="current-speed"),
                         ],
-                        horizontal=True,
-                        className="mb-2",
                     ), 
                     width = "auto",
             ),
         ],
-        style={"display": "flex", 
-            "alignItems": "left",
-            "marginLeft": "1vw",
-            "marginRight": "2vw",
-            },
+       className=".flex-container-control"
 )
 
+# says how fast you should drive
+# and 
 # picture of a traffic light 
 # standard: off
 # can be changed to green, yellow and red
-def tl_picture():
-    return html.Div([
-                html.Img(id = "tl_picture",
-                         src="", 
-                         style={"display": "flex",
-                                "alignItems": "left", 
-                                "width": "7vw",
-                                "height": "25vh",
-                                "marginRight": "8px"})
-            ],
-            )
-
-# says how fast you should drive
 def speed_recommendation(necessary_speed): 
     return dbc.Row(children=
             [dbc.Col(
@@ -235,58 +190,38 @@ def speed_recommendation(necessary_speed):
                         html.Br(),
                         "um\t",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                        "\tzu erreichen"],
-                            ),
-                    style={"fontSize": "28px", 
-                                    "display": "flex", 
-                                    "alignItems": "left", 
-                                    "marginBottom": "8px", 
-                                    "marginTop": "8px",
-                                    "marginLeft": "1vw",
-                                    "marginRight": "2vw",  
-                                    "gap": "5px",
-                                    } 
-                    ),width="auto", align="center",
+                        "\tzu erreichen"],),
+                    ),
                 ),
-            dbc.Col(tl_picture(), width="auto", align='center',
-                    style={         "display": "flex", 
-                                    "alignItems": "center", 
-                                    "marginBottom": "8px", 
-                                    "gap": "5px",
-                                    } ),
-            ]
+            dbc.Col(
+                html.Div([
+                    html.Img(id = "tl_picture", src="")
+                ],
+                className="tl-container",
+                ),
+            )],
+        className="flex-container-bottom",
     )
-            
-    
+              
 # progress bar for the next traffic light
 def progress():
     return html.Div(
                     [dbc.Progress(id = "progress", value=0, 
                                 striped=True, 
                                 animated=False, 
-                                className="mb-3",
                                 color="info",
-                                style={"height": "25px",
-                                       "marginLeft": "1vw",
-                                       "marginRight": "2vw"}
-                        )
-                    ], 
+                                className="progress-container",
+                    )], 
                     ) 
 
-
+# overview of all steps remaining
 def overview():
     return dbc.Col(children=
             [
-                #html.Img(src="", id="picture-overview"),
-                html.Div("Hallo", id="instruction-overview")
+                html.Div("", id="instruction-overview")
             ],
-            style={"width": "100%", 
-                        "height": "84vh", 
-                        "padding": 0,
-                        "overflow": "scroll"
-                        })
-   
-
+            className="overview-container",
+            )
 
 # the map on the left side and on the right side the route instructions
 def data_demo(position):
@@ -298,7 +233,6 @@ def data_demo(position):
                         dl.TileLayer(),
                         dl.GeoJSON(id="route-layer", data=None, options={"color": "blue"}, zoomToBounds=True),
                         #dl.Circle(id="position", center=position.get_pos(), radius=20),
-                        #dl.LayerGroup(id="tl-id-layer"),  # This is where markers will be added
                         dl.LayerGroup(id="start-end-layer"),
                         dl.LayerGroup(id="tl-route-layer"),
                         dl.LocateControl(locateOptions={'enableHighAccuracy': True, 
@@ -310,8 +244,8 @@ def data_demo(position):
                         dl.ScaleControl(position="bottomleft", imperial=False), #shows the scala 
                         dl.FullScreenControl()
                         ], 
-                    style={'width': '100%', 'height': '84vh'}),
-                    ]),
+                    className="left-container",
+                    ),],),
 
                    dbc.Col(dbc.Tabs(
                         [
@@ -323,10 +257,6 @@ def data_demo(position):
                                 speed_recommendation("-"),
                                 progress()
                                 ],
-                                style={"width": "100%", 
-                                        "height": "84vh", 
-                                        "padding": 0,
-                                        }
                             ), 
                             label="Instruktion",tab_id="tab-1-demo",
                             ),
@@ -337,8 +267,7 @@ def data_demo(position):
                         ], active_tab="tab-1-demo",
                     ))       
             ],
-           # className="g-1", #change Row gutter (distance between the Columns)
-           style={"width": "100%"}
+        className="left-container", 
         )
 
 def data_live(position):
@@ -362,8 +291,8 @@ def data_live(position):
                         dl.ScaleControl(position="bottomleft", imperial=False), #shows the scala 
                         dl.FullScreenControl()
                         ], 
-                    style={'width': '100%', 'height': '84vh'}),
-                    ]),
+                    className="left-container", 
+                    ),]),
 
                     dbc.Col(dbc.Tabs(
                         [
@@ -375,10 +304,6 @@ def data_live(position):
                                 speed_recommendation("-"),
                                 progress()
                                 ],
-                                style={"width": "100%", 
-                                        "height": "84vh", 
-                                        "padding": 0,
-                                        }
                             ), 
                             label="Instruktion", tab_id="tab-1-live", 
                             ),
@@ -389,8 +314,7 @@ def data_live(position):
                         ], active_tab="tab-1-live",
                     ))              
             ],
-           # className="g-1", #change Row gutter (distance between the Columns)
-           style={"width": "100%"}
+            className="left-container", 
         )
 
 
@@ -414,7 +338,7 @@ def info():
         html.Br(),
         "Außerdem wird der aktuelle Standort des Nutzers live angezeigt und bei Abwegen der Route, registriert das Programm dies und berechnet anhand der aktuellen Standortdaten eine neue Route. ",
         "Zusätzliche Informationen, wie von anderen Navigations-anbieter bekannt, wie Geschwindigkeit, ungefähre Gesamtzeit der Strecke und Gesamtentfernung werden dem Nutzer angezeigt für die jeweilige Route."]
-    ), className="bg-opacity-10 p-2 bg-primary text-dark rounded small", style={"width": "15rem", "height": "44.7rem", "margin-left": "20px", "margin-top": "7px"})
+    ), className="bg-primary bg-opacity-10 text-dark rounded small p-2 info-container-left ")
 
 def contributors():
     return html.Div(
@@ -432,15 +356,15 @@ def contributors():
                 html.Br(),
                 "Berenike Rutz,",
                 html.Br(),
+                "Rasmus Steen,",
+                html.Br(),
                 "Teodor Terziev und",
                 html.Br(),
                 "Harry Zick",
                 html.Br(),
                 html.Br(),"Großer Dank geht raus an "]
     ), 
-    className="float-end bg-opacity-10 p-2 bg-primary text-dark rounded small", 
-    style={"width": "15rem", "height": "44.7rem", "margin-right": "20px", "margin-top": "7px"})
-
+    className="float-end bg-primary bg-opacity-10 text-dark rounded small p-2 info-container-right")
  
 # Define the card_left component
 def card_left(): 
@@ -470,7 +394,7 @@ def card_left():
             ]
         )
     ],
-    style={"width": "28rem"},
+    className="card-container",
     id="left-card",
 )    
 
@@ -500,14 +424,20 @@ def card_right():
             ]
         )    
     ],
-    style={"width": "28rem"},
+   className="card-container",
     id="right-card",
 )  
 
-# Create a div to hold both cards
-def cards(): 
-    return html.Div([
-    html.Div(card_left()),
-    html.Div(card_right()),
-    ],  className="hstack g-0 position-absolute top-50 start-50 translate-middle")
+# information texts and cards for the starting page
+def components_startseite():
+    return dbc.Row(children=[
+        dbc.Col(info()), #Include information text 
+        dbc.Col(card_left()), # Include the cards
+        dbc.Col(card_right()),
+        dbc.Col(contributors()),
+    ], 
+    className="startseite-components-container",
+    )
+   
+    
 

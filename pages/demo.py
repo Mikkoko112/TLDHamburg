@@ -233,7 +233,6 @@ def show_instructions(n_clicks, prev, restart, store):
 
         # calculate progress to the next trafficlight
         progress_value = navigate.current_progress_next_tl*100
-        print(progress_value)
         remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
                         {
                             "in ... metern": navigate.remaining_nav_instr_distances,

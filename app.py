@@ -4,7 +4,6 @@ from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from tldhamburg.frontend import * 
 
-
 #external JavaScript files
 external_scripts = []
 

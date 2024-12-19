@@ -10,6 +10,7 @@ class TestFetchData(unittest.TestCase):
 
     @patch('requests.get')
     def test_single_fetch(self, mock_get):
+        print("started first test")
         # Mock a single API response
         mock_response = {
             "value": [

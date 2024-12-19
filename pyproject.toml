@@ -31,5 +31,6 @@ dependencies = [
     "dash_html_components",
     "geopy",
     "loguru",
-    "pathlib"
+    "pathlib",
+    "scipy"
 ]

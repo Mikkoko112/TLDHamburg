@@ -24,6 +24,7 @@ class TestFetchData(unittest.TestCase):
 
         self.assertEqual(len(fetcher.get_data()), 2)
         self.assertEqual(fetcher.get_data()[0]['name'], "Thing 1")
+        print("Done")
 
     @patch('requests.get')
     def test_invalid_endpoint(self, mock_get):
@@ -33,6 +34,7 @@ class TestFetchData(unittest.TestCase):
         fetcher = DataFetcher()
         with self.assertRaises(ValueError):
             fetcher.fetch_data(endpoint="InvalidEndpoint")
+        print("Done")
 
     @patch('requests.get')
     def test_pagination(self, mock_get):
@@ -59,6 +61,7 @@ class TestFetchData(unittest.TestCase):
         
         self.assertEqual(len(fetcher.get_data()), 2)
         self.assertEqual(fetcher.get_data()[1]['name'], "Thing 2")
+        print("Done")
 
     @patch('requests.get')
     def test_invalid_params(self, mock_get):
@@ -72,6 +75,7 @@ class TestFetchData(unittest.TestCase):
         fetcher = DataFetcher()
         with self.assertRaises(ValueError):
             fetcher.fetch_data(endpoint="Things", params={"$invalid": 1})
+        print("Done")
 
 class TestGetData(unittest.TestCase):
     def test_get_no_data(self):
@@ -93,6 +97,7 @@ class TestGetData(unittest.TestCase):
 
         self.assertEqual(len(fetcher.get_data()), 1)
         self.assertEqual(fetcher.get_data()[0]['name'], "Thing 1")
+        print("Done")
 
 class TestPrintData(unittest.TestCase):
     @patch('requests.get')
@@ -110,6 +115,7 @@ class TestPrintData(unittest.TestCase):
         with patch('builtins.print') as mock_print:
             fetcher.print_raw_data()
             mock_print.assert_called()
+        print("Done")
 
 if __name__ == "__main__":
     unittest.main()

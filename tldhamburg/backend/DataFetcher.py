@@ -59,7 +59,7 @@ class DataFetcher:
             return True
         
         #if $top is defined, fetch that many entries. Otherwise fetch all entries.
-        entries_to_fetch = float("inf")
+        entries_to_fetch = 1_000_000_000
         if "$top" in params:
             entries_to_fetch = params["$top"]
         
@@ -69,7 +69,6 @@ class DataFetcher:
         while True:
             #do at most 10 requests at a time. Less if less than 10000 entries are left to fetch
             requests_to_execute = min(10,math.ceil((entries_to_fetch - entries_fetched) / 1000))
-
                 
             params_list = list()
             for i in range(requests_to_execute):
@@ -83,12 +82,12 @@ class DataFetcher:
             entries_to_fetch_on_last_request = 1000
             if entries_to_fetch - entries_fetched < 10000 and entries_to_fetch % 1000 != 0:
                 entries_to_fetch_on_last_request = entries_to_fetch % 1000
-                params_list[-1]["$top"] == entries_to_fetch_on_last_request
-            
+                params_list[-1]["$top"] = entries_to_fetch_on_last_request
+
             with ThreadPoolExecutor() as executor:
                 futures = [executor.submit(single_fetch, params) for params in params_list]
                 responses = [future.result() for future in futures]
-                responses_json = [response.json().get("value", []) for response in responses]
+                responses_json = [response.get("value", []) for response in responses]
 
                 for response_json in responses_json:
                     if not response_json: #exit if response is empty, e.g. all entries have been fetched

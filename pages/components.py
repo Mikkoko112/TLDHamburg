@@ -25,7 +25,7 @@ def dropdown():
 # the searchbar with the search field for the start and end location
 # and the button to start the search
 # locates in the navbar
-def searchbar(): 
+def searchbar_demo(): 
     return  dbc.Row(
           [
             dbc.Col(
@@ -33,8 +33,8 @@ def searchbar():
                     [
                         dbc.InputGroupText("Start"),
                         dbc.Input(type="search", id="startpunkt", placeholder="Informatikum", value=""),
-                        dbc.FormFeedback("", type="invalid", id="start_invalid"),
-                        dbc.FormFeedback("", type="valid", id="start_valid"),
+                        dbc.FormFeedback("", type="invalid", id="start-invalid"),
+                        dbc.FormFeedback("", type="valid", id="start-valid"),
                     ], 
                     ), 
                     width="auto",
@@ -44,15 +44,15 @@ def searchbar():
                     [
                         dbc.InputGroupText("Ziel"),
                         dbc.Input(type="search", id="endpunkt", placeholder="Hauptbahnhof", value=""),
-                        dbc.FormFeedback("", type="invalid", id="end_invalid"), 
-                        dbc.FormFeedback("", type="valid", id="end_valid"),
+                        dbc.FormFeedback("", type="invalid", id="end-invalid"), 
+                        dbc.FormFeedback("", type="valid", id="end-valid"),
                     ],
                     ), 
                     width="auto",
                 ),
             dbc.Col(
                  dbc.Button(
-                    "Route",id="route_button", color="primary", n_clicks=0,
+                    "Route",id="route-button", color="primary", n_clicks=0,
                     ), 
                     width = "auto",
                 ),
@@ -60,6 +60,40 @@ def searchbar():
             className="flex-searchbar-container"
         )
 
+def searchbar_live(): 
+    return  dbc.Row(
+          [
+            dbc.Col(
+                dbc.InputGroup(
+                    [
+                        dbc.InputGroupText("Start"),
+                        dbc.Input(type="search", id="startpunkt-live", placeholder="Informatikum", value=""),
+                        dbc.FormFeedback("", type="invalid", id="start-invalid-live"),
+                        dbc.FormFeedback("", type="valid", id="start-valid-live"),
+                    ], 
+                    ), 
+                    width="auto",
+                ),
+            dbc.Col(   
+                dbc.InputGroup(
+                    [
+                        dbc.InputGroupText("Ziel"),
+                        dbc.Input(type="search", id="endpunkt-live", placeholder="Hauptbahnhof", value=""),
+                        dbc.FormFeedback("", type="invalid", id="end-invalid-live"), 
+                        dbc.FormFeedback("", type="valid", id="end-valid-live"),
+                    ],
+                    ), 
+                    width="auto",
+                ),
+            dbc.Col(
+                 dbc.Button(
+                    "Route",id="route-button-live", color="primary", n_clicks=0,
+                    ), 
+                    width = "auto",
+                ),
+            ],
+            className="flex-searchbar-container"
+        )
 
 # the navigation bar
 # in this field you can find the searchbar and the dropdown menu
@@ -77,7 +111,7 @@ def navbar_demo():
                         ],
                     ),
                 ),
-                searchbar(),
+                searchbar_demo(),
                 dropdown(),
             ], 
             fluid = True, 
@@ -100,7 +134,7 @@ def navbar_live():
                         ],
                     ),
                 ),
-                searchbar(),
+                searchbar_live(),
                 dropdown(),
             ], 
             fluid = True, 
@@ -110,19 +144,39 @@ def navbar_live():
     )
 
 # shows instruction: a picture and a text
-def next_turn(): 
+def next_turn_demo(): 
     return dbc.Row(
     children=[
         dbc.Col(
             html.Div([
-                html.Img(id = "route_picture",
+                html.Img(id = "route-picture",
                          src="", 
                          className="picture-container")
             ],), 
         ),
         dbc.Col(
             html.Div("",
-                    id = "route_instruction", 
+                    id = "route-instruction", 
+                    className="instruction-container"
+            ), 
+        )
+    ], 
+    className="flex-container-top",
+)
+
+def next_turn_live(): 
+    return dbc.Row(
+    children=[
+        dbc.Col(
+            html.Div([
+                html.Img(id = "route-picture-live",
+                         src="", 
+                         className="picture-container")
+            ],), 
+        ),
+        dbc.Col(
+            html.Div("",
+                    id = "route-instruction-live", 
                     className="instruction-container"
             ), 
         )
@@ -136,23 +190,23 @@ def control_demo(current_speed):
     return dbc.Row(
         children= [
             dbc.Col(
-                dbc.Button("Prev", id = "prev_button", color="secondary", 
+                dbc.Button("Prev", id = "prev-button", color="secondary", 
                             disabled=True),
                 width = "auto",
             ),
             dbc.Col(
-                dbc.Button("Start", id = "start_next_button", color="secondary", 
+                dbc.Button("Start", id = "start-next-button", color="secondary", 
                             disabled=True),
                 width = "auto",
             ),
             dbc.Col(
-                dbc.Button("Restart", id = "restart_button", color="secondary", 
+                dbc.Button("Restart", id = "restart-button", color="secondary", 
                             disabled=True),
                 width = "auto",
             ),
             dbc.Col(
                     dbc.ListGroup([
-                        dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="current-speed"),
+                        dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="speed-limit"),
                         ],
                     ), 
                     width = "auto",
@@ -161,13 +215,13 @@ def control_demo(current_speed):
         className="flex-container-control",
 )
 
-# shows the maximal speed allowed
+# shows the maximal speed allowed - live
 def control_live(current_speed):
     return dbc.Row(
         children= [
             dbc.Col(
                     dbc.ListGroup([
-                            dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="current-speed"),
+                            dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="speed-limit-live"),
                         ],
                     ), 
                     width = "auto",
@@ -181,7 +235,7 @@ def control_live(current_speed):
 # picture of a traffic light 
 # standard: off
 # can be changed to green, yellow and red
-def speed_recommendation(necessary_speed): 
+def speed_recommendation_demo(necessary_speed): 
     return dbc.Row(children=
             [dbc.Col(
                 html.Div(html.P(["fahre mindestens\t",
@@ -195,16 +249,38 @@ def speed_recommendation(necessary_speed):
                 ),
             dbc.Col(
                 html.Div([
-                    html.Img(id = "tl_picture", src="")
+                    html.Img(id = "tl-picture", src="")
                 ],
                 className="tl-container",
                 ),
             )],
         className="flex-container-bottom",
     )
-              
+
+def speed_recommendation_live(necessary_speed): 
+    return dbc.Row(children=
+            [dbc.Col(
+                html.Div(html.P(["fahre mindestens\t",
+                        html.Span(f"{necessary_speed}", style={"color": "green"}),
+                        "\tkm/h,", 
+                        html.Br(),
+                        "um\t",
+                        html.Span("grün", style={"color": "green", "white-space": "pre"}),
+                        "\tzu erreichen"],),
+                    ),
+                ),
+            dbc.Col(
+                html.Div([
+                    html.Img(id = "tl-picture-live", src="")
+                ],
+                className="tl-container",
+                ),
+            )],
+        className="flex-container-bottom",
+    )
+          
 # progress bar for the next traffic light
-def progress():
+def progress_demo():
     return html.Div(
                     [dbc.Progress(id = "progress", value=0, 
                                 striped=True, 
@@ -214,8 +290,18 @@ def progress():
                     )], 
                     ) 
 
+def progress_live():
+    return html.Div(
+                    [dbc.Progress(id = "progress-live", value=0, 
+                                striped=True, 
+                                animated=False, 
+                                color="info",
+                                className="progress-container",
+                    )], 
+                    ) 
+
 # overview of all steps remaining
-def overview():
+def overview_demo():
     return dbc.Col(children=
             [
                 html.Div("", id="instruction-overview")
@@ -223,24 +309,32 @@ def overview():
             className="overview-container",
             )
 
+def overview_live():
+    return dbc.Col(children=
+            [
+                html.Div("", id="instruction-overview-live")
+            ],
+            className="overview-container",
+            )
+
 # the map on the left side and on the right side the route instructions
-def data_demo(position):
+def data_demo():
     return dbc.Row([
                 dbc.Col([
                     dcc.Store(id='map-store', data={"center": None, "zoom": None}),  # Store to keep the map zoom level
-                    dl.Map(id = "map", center=position.get_pos(), zoom=14,
+                    dl.Map(id = "map", center=[53.549573,9.953330], zoom=10,
                     children=[
                         dl.TileLayer(),
                         dl.GeoJSON(id="route-layer", data=None, options={"color": "blue"}, zoomToBounds=True),
-                        #dl.Circle(id="position", center=position.get_pos(), radius=20),
+                        dl.Circle(id="position", center=(0,0), radius=10),
                         dl.LayerGroup(id="start-end-layer"),
                         dl.LayerGroup(id="tl-route-layer"),
-                        dl.LocateControl(locateOptions={'enableHighAccuracy': True, 
-                                "setView": False, 
-                                "watch": True, 
-                                "maxZoom": 17,
-                                },
-                                showCompass = False),
+                       # dl.LocateControl(locateOptions={'enableHighAccuracy': True, 
+                       #         "setView": False, 
+                       #         "watch": True, 
+                       #         "maxZoom": 17,
+                       #         },
+                       #         showCompass = False),
                         dl.ScaleControl(position="bottomleft", imperial=False), #shows the scala 
                         dl.FullScreenControl()
                         ], 
@@ -252,15 +346,15 @@ def data_demo(position):
                             dbc.Tab(
                             dbc.Col(children= 
                                 [
-                                next_turn(),
+                                next_turn_demo(),
                                 control_demo("-"),
-                                speed_recommendation("-"),
-                                progress()
+                                speed_recommendation_demo("-"),
+                                progress_demo()
                                 ],
                             ), 
                             label="Instruktion",tab_id="tab-1-demo",
                             ),
-                            dbc.Tab(overview(), 
+                            dbc.Tab(overview_demo(), 
                                     label="Übersicht", 
                                     disabled=True,
                                     id="tab-2")
@@ -270,24 +364,21 @@ def data_demo(position):
         className="left-container", 
         )
 
-def data_live(position):
+def data_live():
     return dbc.Row([
                 dbc.Col([
-                    dcc.Store(id='map-store', data={"center": None, "zoom": None}),  # Store to keep the map zoom level
-                    dl.Map(id = "map", center=position.get_pos(), zoom=14,
+                    dcc.Store(id='map-store-live', data=None),  # Store to keep the map zoom level
+                    dl.Map(id = "map-live", center=[53.549573,9.953330], zoom=10,
                     children=[
                         dl.TileLayer(),
-                        dl.GeoJSON(id="route-layer", data=None, options={"color": "blue"}, zoomToBounds=True),
-                        #dl.Circle(id="position", center=position.get_pos(), radius=20),
-                        #dl.LayerGroup(id="tl-id-layer"),  # This is where markers will be added
-                        dl.LayerGroup(id="start-end-layer"),
-                        dl.LayerGroup(id="tl-route-layer"),
-                        dl.LocateControl(locateOptions={'enableHighAccuracy': True, 
-                                "setView": False, 
+                        dl.GeoJSON(id="route-layer-live", data=None, options={"color": "blue"}, zoomToBounds=True),
+                        dl.LayerGroup(id="start-end-layer-live"),
+                        dl.LayerGroup(id="tl-route-layer-live"),
+                        dl.LocateControl(id="locate-control-live", locateOptions={'enableHighAccuracy': True, 
+                                "setView": True, 
                                 "watch": True, 
                                 "maxZoom": 17,
-                                },
-                                showCompass = False),
+                                }),
                         dl.ScaleControl(position="bottomleft", imperial=False), #shows the scala 
                         dl.FullScreenControl()
                         ], 
@@ -299,18 +390,18 @@ def data_live(position):
                             dbc.Tab(
                             dbc.Col(children= 
                                 [
-                                next_turn(),
+                                next_turn_live(),
                                 control_live("-"),
-                                speed_recommendation("-"),
-                                progress()
+                                speed_recommendation_live("-"),
+                                progress_live()
                                 ],
                             ), 
                             label="Instruktion", tab_id="tab-1-live", 
                             ),
-                            dbc.Tab(overview(), 
+                            dbc.Tab(overview_live(), 
                                     label="Übersicht", 
                                     disabled=True,
-                                    id="tab-2")
+                                    id="tab-2-live")
                         ], active_tab="tab-1-live",
                     ))              
             ],

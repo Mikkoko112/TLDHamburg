@@ -1,7 +1,8 @@
 import requests
 import json
-import time
+import time, datetime
 import math
+import logging
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -14,7 +15,8 @@ class DataFetcher:
     ---------------------------------------------------------------------------------------------"""
 
     def __init__(self):
-        self.data = None
+        self.data = list()
+        self.errors = list()
 
     def fetch_data(self, endpoint="Datastreams", params={}):
         """-----------------------------------------------------------------------------------------
@@ -22,19 +24,26 @@ class DataFetcher:
         fetch traffic light data from IoT Hamburg.
         IoT Hamburg API returns at most 1000 entries per GET request, even if top parameter is
         set higher. It is most efficient top set the top parameter to 1000 if needed so minimal
-        time consuming GET requests are send. 3 cases distinctions are made for a "top" parameter
-        of below 1000, over 1000 or not set.
+        time consuming GET requests are send. If no top parametet is defined, all available enities
+        in the endpoint are fetched. Requests are parallelized up to 10 requests at a time. When 
+        an error occures in a request, it is saved in a log file. The program is not terminated.
 
         Parameters:
         - endpoint (str):   Defines which type of Entity to Query from the API
             Available options:  'Things', 'Datastreams', 'Observations', 'FeatureOfInterests',
                                 'Locations', 'HistoricalLocations', 'Sensors', 'ObservedProperties'
-                            In Addition, Entities can be accessed directly by their id, e.g.
-                            'Thing(123)' as well as their sublinks e.g. 'Thing(123)/Locations'
+            
+            In Addition, Entities can be accessed directly by their id, e.g.
+            'Thing(123)' as well as their sublinks e.g. 'Thing(123)/Locations'
 
         - params (dict):    Defines the search commands for the Query
             Available options:  '$filter', '$expand', '$top', '$orderby', '$select', '$count'
 
+            Note that in this framework, these commands can only be applied directly to
+            the first layer of entity, not the sublinks. It is advised to access an entity
+            in the first layer instead of a sublink. E.g. 'Observations' instead of 
+            'Datastream(1)/Observations
+            
         Examples:
             To be added later
         -----------------------------------------------------------------------------------------
@@ -48,31 +57,32 @@ class DataFetcher:
                 response.raise_for_status()
                 return response.json()  # Return parsed JSON
             except requests.RequestException as e:
-                print(f"ERROR <{str(e)}> occured on ENDPOINT: {endpoint} and PARAMS: {params}")
+                logging.error(f"{str(e)}")
                 return {"error": str(e)}
 
         #check if entity is accessed by ID directly, then only one datapoint
-        #can be extracted and no use of ThreadPoolExecutor is necassary
-        if endpoint[:-1] == ")":
+        #can be extracted and no use of ThreadPoolExecutor is necessary
+        if endpoint[-1] == ")":
             fetched_data = single_fetch(params)
-            self.data = fetched_data
-            return True
+            self.data.append(fetched_data)
+            return
         
         #if $top is defined, fetch that many entries. Otherwise fetch all entries.
-        entries_to_fetch = 1_000_000_000
+        entries_to_fetch = 1_000_000
         if "$top" in params:
             entries_to_fetch = params["$top"]
         
         #fetching loop
-        all_data = list()
         entries_fetched = 0
+        consecutive_errors = 0 
         while True:
             #do at most 10 requests at a time. Less if less than 10000 entries are left to fetch
             requests_to_execute = min(10,math.ceil((entries_to_fetch - entries_fetched) / 1000))
-                
+            
+            #define the parameters of each individual request. Assign the approriate skip amount
             params_list = list()
             for i in range(requests_to_execute):
-                single_fetch_params = params
+                single_fetch_params = params.copy()
                 single_fetch_params["$top"] = 1000
                 single_fetch_params["$skip"] = i * 1000 + entries_fetched
                 params_list.append(single_fetch_params)
@@ -80,19 +90,36 @@ class DataFetcher:
             #calculate leftover entries to fetch for top param of last request.
             #Different than 1000, if non multiple of 1000 is given as entries_to_fetch
             entries_to_fetch_on_last_request = 1000
-            if entries_to_fetch - entries_fetched < 10000 and entries_to_fetch % 1000 != 0:
+            if entries_to_fetch - entries_fetched < 10000:
                 entries_to_fetch_on_last_request = entries_to_fetch % 1000
                 params_list[-1]["$top"] = entries_to_fetch_on_last_request
 
             with ThreadPoolExecutor() as executor:
+                #make pooled requests
                 futures = [executor.submit(single_fetch, params) for params in params_list]
-                responses = [future.result() for future in futures]
-                responses_json = [response.get("value", []) for response in responses]
+                
+                #Sort responses based on the $skip value, ascendingly
+                responses_with_skip = [
+                    (future.result(), params["$skip"])
+                    for future, params in zip(futures, params_list)
+                ]
+                sorted_responses = sorted(responses_with_skip, key=lambda x: x[1])
 
-                for response_json in responses_json:
-                    if not response_json: #exit if response is empty, e.g. all entries have been fetched
-                        break
-                    all_data.extend(response_json)
+                #check if any response is an error message
+                for response, _ in sorted_responses:
+                    if "error" in response:
+                        self.errors.append(response["error"])
+                        consecutive_errors += 1
+                        if consecutive_errors == 10: #end fetching if 10 errors occur consecutively
+                            logging.warning(f"Fetching Terminated as 10 errors occured consecutively")
+                            return
+                        continue
+                    consecutive_errors = 0
+                    entries = response.get("value", [])
+                    #exit if response is empty, e.g. all entries have been fetched
+                    if not entries:
+                        return
+                    self.data.extend(entries)
             
             #update the amount of entries fetched
             entries_fetched += (requests_to_execute - 1) * 1000 + entries_to_fetch_on_last_request
@@ -104,17 +131,30 @@ class DataFetcher:
             #let the API recover for a bit, testing has shown that this leads to significantly 
             #faster average response times when fetching large amounts of entries.
             time.sleep(1)
-        self.data = all_data
-        return True
+        
+        #save potential errors in a log file
+        if self.get_errors():
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            with open(f"error_log_{current_time}.txt", "a") as log_file:
+                for error in self.get_errors():
+                    # Write each error message to the file, followed by a new line
+                    log_file.write(error + "\n")
 
+    def get_errors(self):
+        if not self.errors:
+            logging.info(f"No errors occured")
+            return None
+        return self.errors
+    
     def get_data(self):
         if not self.data:
-            raise ValueError("No data fetched yet")
+            logging.warning(f"No Data fetched yet")
+            return None
         return self.data
     
     def print_raw_data(self):
         if not self.data:
-            raise ValueError("No data fetched yet")
+            logging.warning(f"No Data fetched yet")
         print(json.dumps(self.data, indent=4))
     
     #------------------DEPRECATED-----------------

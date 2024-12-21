@@ -90,7 +90,7 @@ class DataFetcher:
             #calculate leftover entries to fetch for top param of last request.
             #Different than 1000, if non multiple of 1000 is given as entries_to_fetch
             entries_to_fetch_on_last_request = 1000
-            if entries_to_fetch - entries_fetched < 10000:
+            if entries_to_fetch - entries_fetched < 10000 and entries_to_fetch % 1000 != 0:
                 entries_to_fetch_on_last_request = entries_to_fetch % 1000
                 params_list[-1]["$top"] = entries_to_fetch_on_last_request
 

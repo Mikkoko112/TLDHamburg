@@ -447,7 +447,7 @@ def contributors():
                 html.Br(),
                 "Berenike Rutz,",
                 html.Br(),
-                "Rasmus Steen,",
+                "Helge Rasmus Steen,",
                 html.Br(),
                 "Teodor Terziev und",
                 html.Br(),

@@ -25,8 +25,11 @@ class Position:
         self._lat, self._lon = coordinates
         return self._lat, self._lon
 
-    def get_pos(self):
-        return self._lat, self._lon
+    def get_pos(self, latlon="latlon"):
+        if latlon == "latlon":
+            return self._lat, self._lon
+        else:
+            return self._lon, self._lat
 
 #Alternative: Positionsdaten in eine geojson-Datei schreiben
 

@@ -4,9 +4,10 @@ from pathlib import Path
 from tldhamburg.frontend.position import Position
 from tldhamburg.frontend.trafficlights import Trafficlight
 from tldhamburg.control.control import RoutePlanner
+import geopy.distance
 from shapely.geometry import Point, LineString
 from shapely.ops import nearest_points
-from bisect import bisect_left, bisect_right
+from bisect import bisect_right
 
 class Navigation:
     """
@@ -65,8 +66,8 @@ class Navigation:
         self.geojson = self._init_route_geojson()
 
         # build static data of the route
-        self.navigation_instructions = self._init_navigation_instructions()
         self.way_points, self.way_points_lon_lat = self._init_waypoints()
+        self.navigation_instructions = self._init_navigation_instructions()
         try:
             self.speed_limits = self._init_speed_limits()
         except (KeyError):
@@ -127,11 +128,44 @@ class Navigation:
                         3: "roundabout_left.png"}
         
         navigation_instructions = {}
-        total_distance = 0
-        total_duration = 0
-        distance_integral = [0]
-        duration_integral = [0]
+
+        """
+        # determine distances between points SHAPELY
+        distance_integral = []
+        lat, lon = self.way_points[0]
+        last_point = Point(lat, lon)
+        for lat, lon in self.way_points:
+            next_point = Point(lat, lon)
+            distance = last_point.distance(next_point)
+            print(f"distance last, next: {distance}")
+            distance_integral.append(distance)
+            last_point = next_point
+        print(f"total distance: {distance_integral[-1]}")
+        total_distance = distance_integral[-1]
         
+        total_duration = 0
+        # duration_integral = [0]
+        """
+
+        # determine distances between points Geopy
+        distance_integral = []
+        last_point = self.way_points_lon_lat[0]
+        for i, next_point in enumerate(self.way_points_lon_lat):
+            distance = geopy.distance.geodesic(last_point, next_point).meters
+            if i == 0:
+                distance_integral.append(distance)
+            else:
+                distance_integral.append(distance_integral[i-1] + distance)
+            last_point = next_point
+            # print(f"distance at point {i}: {distance_integral[i]}")
+        # print(f"distance integral: {distance_integral}")
+        # print(f"total distance: {distance_integral[-1]}")
+        total_distance = distance_integral[-1]
+        
+        total_duration = 0
+        # duration_integral = [0]
+
+
         steps = route["features"][0]["properties"]["segments"]["steps"]
         for step in steps:
             total_distance = total_distance + step["distance"]
@@ -148,8 +182,10 @@ class Navigation:
                 "duration": step["duration"],
                 "num_waypoints": num_waypoints # overlapping waypoints between steps
                 }
-            
+
+            """
             # assuming approx. equal distance between waypoints of given step
+            # this was a very bad assumption. It does not reflext how it works... nice try
             if num_waypoints == 0:
                 distance_per_waypoint = 0
                 duration_per_waypoint = 0
@@ -167,22 +203,37 @@ class Navigation:
                     distance_integral.append(distance_integral[i-1] + distance_per_waypoint)
                     duration_integral.append(duration_integral[i-1] + duration_per_waypoint)
                     # print(f"last: {distance_integral[i-1]} add {distance_per_waypoint} = {distance_integral[i]} (at pos {i})")
-
+        """
+            
         # print(f"len waypoints = {len(self.way_points)}")
         # print(f"len integral = {len(distance_integral)}")
         # if len(self.way_points) == len(distance_integral):
         self.distance_integral = distance_integral
-        self.duration_integral = duration_integral
+        # self.duration_integral = duration_integral
         self.total_distance = total_distance
         self.total_duration = total_duration
 
         return navigation_instructions
-    
+
     def _init_waypoints(self):
         waypoints_lat_lon = self.geojson['features'][0]['geometry']['coordinates']
         waypoints_lon_lat = []
+        
+        distance_integral = []
+
+        lat, lon = waypoints_lat_lon[0]
+        last_point = Point(lat, lon)
         for lat, lon in waypoints_lat_lon:
-            waypoints_lon_lat.append([lon, lat])
+            waypoints_lon_lat.append([lon, lat]) # lat, lon inversed list
+
+            next_point = Point(lat, lon)
+            distance = last_point.distance(next_point)
+            print(f"distance: {distance}")
+            distance_integral.append(distance)
+            last_point = next_point
+        print(f"total distance: {distance_integral[-1]}")
+
+        self.total_distance = distance_integral[-1]
 
         return waypoints_lat_lon, waypoints_lon_lat
 
@@ -234,19 +285,19 @@ class Navigation:
 
     def _get_current_navigation_instruction_key(self):
         """
-        determines upcoming navigation instruction key
+        determines next navigation instruction key
         based on the current waypoint index
         """
         keys_list = list(self.navigation_instructions.keys())
         # print(f"keys_list: {keys_list}")
-        if self.current_way_point_index in keys_list: # we are at a traffic light
-            key = self.current_way_point_index
-        else:
-            idx = bisect_right(keys_list, self.current_way_point_index)
-            try:
-                key = keys_list[idx]
-            except (ValueError, IndexError): # we have passed all traffic lights on our route
-                raise("Navigationsanweisung konnte nicht gefunden werden. Wahrscheinlich sind die Anweisungen unvollständig.")
+        # if self.current_way_point_index in keys_list:
+        #     key = self.current_way_point_index
+        # else:
+        idx = bisect_right(keys_list, self.current_way_point_index)
+        try:
+            key = keys_list[idx]
+        except (ValueError, IndexError): # if there is no further instruction, use last.
+            key = keys_list[idx-1]
         # print(f"key: {key}")
         return key
     

@@ -7,7 +7,7 @@ class Position:
     navigating = bool
     def __init__(self):
         self.navigating = False
-        directory = f"{Path.cwd()}/Frontend/schnittstelle"
+        directory = f"{Path.cwd()}/schnittstelle"
         with open(f"{directory}/position.geojson", "r") as f:
             _file = json.load(f)
             self._lat, self._lon = _file["coordinates"]
@@ -25,8 +25,11 @@ class Position:
         self._lat, self._lon = coordinates
         return self._lat, self._lon
 
-    def get_pos(self):
-        return self._lat, self._lon
+    def get_pos(self, latlon="latlon"):
+        if latlon == "latlon":
+            return self._lat, self._lon
+        else:
+            return self._lon, self._lat
 
 #Alternative: Positionsdaten in eine geojson-Datei schreiben
 

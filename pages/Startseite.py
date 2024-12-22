@@ -4,9 +4,8 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
 from .components import headline
-from .components import info
-from .components import cards
-from .components import contributors
+from .components import components_startseite
+
 
 dash.register_page(__name__,
                     path='/',
@@ -23,20 +22,10 @@ def layout(**kwargs):
    return dbc.Container(children = [
     dcc.Location(id='url', refresh=True),  
     headline(), # Include the headline
-    dbc.Row(children=[
-       dbc.Col(info()), #Include inofrmation text 
-    dbc.Col(contributors()),
-    ], style={"padding": 0,
-              "margin": 0,
-              "width": "100%"}, # removes ALL the margins
-    ),
-    cards(), # Include the cards
-    ],
+    components_startseite(), # Include cards and information texts
+   ],
     fluid = True, # remove the margins
-    style={"padding": 0,
-           "height": "98vh",
-           "width": "100%"}, # removes ALL the margins
-    className="bg-light", # background color
+    className="startseite-container", 
 )
 
 # Decide to navigate to page demo or live

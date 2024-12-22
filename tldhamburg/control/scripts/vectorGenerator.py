@@ -122,12 +122,12 @@ def genPerPrimarySignal(coords:dict,conjunctionDict:dict)->dict:
     return:dict -> A dict with every primary signal with its dedicated vector and degree
                    of ingress and egress lane. The point in the middle is the mean Value
     '''
-
+    expep = 0
     out = dict()
     for name,coords in coords.items():
         for conjName,body in conjunctionDict.items():
             
-            if (name in body["traficLights"] 
+            if (name in body["trafficLights"] 
                     and len(body["junctionNodes"]) > 0):
                             #this asserts that the necessary data is present 
                 
@@ -138,6 +138,9 @@ def genPerPrimarySignal(coords:dict,conjunctionDict:dict)->dict:
                 meanCoord = findFurthestAndNearestCoord(meanCoordCalc,imNodes)[0]
                 
                 vec0,vec2 = list(),list()
+                if len(coords[0]) != 0 or len(coords) > 2:
+                    expep += 1
+                    print("exception")
                 if len(coords[0]) != 0:
                     vec0 = generateVector(meanCoordCalc,coords[0])
                     deg = getDegree(vec0)
@@ -149,6 +152,10 @@ def genPerPrimarySignal(coords:dict,conjunctionDict:dict)->dict:
                     vec2.append(deg)
                     vec2.append(degrees(deg))
                 out[name] = [vec0,meanCoord,vec2]
+                if name == "7880":
+                    exit()
+            
+    print(expep)
     return out
 
 def startGenerator()->None:

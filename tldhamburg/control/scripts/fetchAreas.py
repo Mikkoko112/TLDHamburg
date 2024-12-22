@@ -54,18 +54,18 @@ def getNotes(coordsMinMax:list)->dict:
 def singleCall():
     area = [
             [
-                9.9489717,
-                53.5462321
+                10.0340747,
+                53.5748801
             ],
             [
-                9.9561542,
-                53.5588747
+                10.0580548,
+                53.5962368
             ]
         ]
    
     areas = getNotes(area)
 
-    with open("holeDataTest.json","w") as file:
+    with open("../data/holeData13937.json","w") as file:
         json.dump(areas, file, indent=4)
 def mapPaths():
     with open("missingData.json","r") as file:
@@ -118,6 +118,6 @@ if __name__ == "__main__":
     modif = options["modif"]
 
     #mapPaths()
-    #singleCall()
+    singleCall()
     #correctTheHoleData()
-    combineDict()
+    #combineDict()

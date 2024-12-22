@@ -77,21 +77,20 @@ def run():
             [0,0]
         ]
         j+=1
-        if True:
-            ingress,path,egress = list(),list(),list()
+        ingress,path,egress = list(),list(),list()
+        
+        if len(lane) < 2: continue
+
+        meanPath = calcMean(lane[1])
+        for i,paths in enumerate(lane):
             
-            if len(lane) < 2: continue
+            if i == 0: ingress = calcMean(paths)
+            if i == 2: egress  = calcMean(paths)
 
-            meanPath = calcMean(lane[1])
-            for i,paths in enumerate(lane):
-                
-                if i == 0: ingress = calcMean(paths)
-                if i == 2: egress  = calcMean(paths)
-
-                #if i == 0: ingress = closestCordToMid(meanPath,paths) #evtl hier nächste Coordinate zu mean path
-                if i == 1: path = meanPath
-                #if i == 2: egress = closestCordToMid(meanPath,paths) #.||.
-            midCoords[name] = [ingress,path,egress]
+            #if i == 0: ingress = closestCordToMid(meanPath,paths) #evtl hier nächste Coordinate zu mean path
+            if i == 1: path = meanPath
+            #if i == 2: egress = closestCordToMid(meanPath,paths) #.||.
+        midCoords[name] = [ingress,path,egress]
 
     print(len(midCoords))
     with open("../data/cleanedCoorsAverage.json","w") as jsonFile:

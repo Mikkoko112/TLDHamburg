@@ -97,41 +97,7 @@ class Navigation:
             remaining_nav_instr_distances.append(round(step["distance"]))
         self.remaining_nav_instr_texts = remaining_nav_instr_texts
         self.remaining_nav_instr_distances = remaining_nav_instr_distances 
-
-    # TODO ausbauen
-    def __get_ors_route(self, api_key, departure, destination, profile='driving-car'):
-        UPLOAD_DIRECTORY = f"{Path.cwd().parent}/schnittstelle"
-        print(UPLOAD_DIRECTORY)
-        url = f"https://api.openrouteservice.org/v2/directions/{profile}/geojson"
-        headers = {
-            "Authorization": api_key,
-            "Content-Type": "application/json"
-        }
-        payload = {
-            "language": "de",
-            "coordinates": [
-                departure,  # [longitude_start, latitude_start]
-                destination     # [longitude_end, latitude_end]
-            ],
-            "format": "geojson"
-        }
-
-        try:
-            response = requests.post(url, headers=headers, json=payload)
-            response.raise_for_status()  # Raise an error for bad status codes
-            geojson_data = response.json()
-
-            # Save to a .geojson file (optional)
-            with open(f"{UPLOAD_DIRECTORY}/route.geojson", "w") as file:
-                json.dump(geojson_data, file, indent=4)
-
-            return geojson_data
-
-        except requests.exceptions.RequestException as e:
-            print("Error:", e)
-            return None
-    
-    # TODO check loading of geojson works
+ 
     def _init_route_geojson(self):
         """loads dict(route) that was created"""
         with open(f"{self._path}/route.geojson", "r") as f:
@@ -163,8 +129,8 @@ class Navigation:
         navigation_instructions = {}
         total_distance = 0
         total_duration = 0
-        distance_integral = []
-        duration_integral = []
+        distance_integral = [0]
+        duration_integral = [0]
         
         steps = route["features"][0]["properties"]["segments"]["steps"]
         for step in steps:
@@ -188,8 +154,8 @@ class Navigation:
                 distance_per_waypoint = 0
                 duration_per_waypoint = 0
             else:
-                distance_per_waypoint = step["distance"] / num_waypoints
-                duration_per_waypoint = step["duration"] / num_waypoints
+                distance_per_waypoint = round(step["distance"] / num_waypoints, 3)
+                duration_per_waypoint = round(step["duration"] / num_waypoints, 3)
             start_idx = len(distance_integral)
             end_idx = start_idx + num_waypoints
             # print(f"num_waypoints = {num_waypoints}, distance = {step["distance"]}\n dist_per_wp = {distance_per_waypoint}")
@@ -238,51 +204,6 @@ class Navigation:
                 trafficlight["properties"]["object"])
         return trafficlights_dict
 
-    # TODO ausbauen ? Nike fragen
-    def ausbauen_init_traffic_lights(self):
-        route = self.geojson
-        # Prepare Overpass API query
-        overpass_url = "http://overpass-api.de/api/interpreter"
-        steps = route["features"][0]["properties"]["segments"][0]["steps"]
-        step_waypoints = [
-        step["way_points"][1] for step in steps  
-        ]
-        step_coord = [
-        [route['features'][0]['geometry']['coordinates'][i-1][1],route['features'][0]['geometry']['coordinates'][i-1][0]] for i in step_waypoints 
-        ]
-        #every_waypoints = route['features'][0]['geometry']['coordinates']
-        #every_coord = [   point for point in every_waypoints]
-        overpass_queries = []
-        for lon, lat in step_coord: #step_coord
-            overpass_queries.append(
-                f"node[highway=traffic_signals](around:10,{lon},{lat});"
-            )
-        
-        # Combine all queries into one Overpass query
-        combined_query = "[out:json];(" + " ".join(overpass_queries) + ");out;"
-        '''
-        combined_query = f"""
-        [out:json];
-        (node
-            [highway=traffic_signals]
-            (around:100,{route['features'][0]['geometry']['coordinates'][0][1]},{route['features'][0]['geometry']['coordinates'][0][0]});
-        node
-            [highway=traffic_signals]
-            (around:100,{route['features'][0]['geometry']['coordinates'][216][1]},{route['features'][0]['geometry']['coordinates'][216][0]});
-        );
-        out;
-        """
-        '''
-
-        try:
-            response = requests.get(overpass_url, params={'data': combined_query})
-            response.raise_for_status()  # Raise an error for bad status codes
-            return response.json()     
-
-        except requests.exceptions.RequestException as e:
-            print("Error:", e)
-            return None  
-        
     def is_on_route(self, current_position:Position):
         """
         Check if the current position is on or near the route.
@@ -316,9 +237,17 @@ class Navigation:
         determines upcoming navigation instruction key
         based on the current waypoint index
         """
-        keys_list = sorted(self.navigation_instructions.keys())
-        idx = bisect_right(keys_list, self.current_way_point_index)
-        key = keys_list[idx] 
+        keys_list = list(self.navigation_instructions.keys())
+        # print(f"keys_list: {keys_list}")
+        if self.current_way_point_index in keys_list: # we are at a traffic light
+            key = self.current_way_point_index
+        else:
+            idx = bisect_right(keys_list, self.current_way_point_index)
+            try:
+                key = keys_list[idx]
+            except (ValueError, IndexError): # we have passed all traffic lights on our route
+                raise("Navigationsanweisung konnte nicht gefunden werden. Wahrscheinlich sind die Anweisungen unvollständig.")
+        # print(f"key: {key}")
         return key
     
     def load_navigation_instruction(self, key):
@@ -339,10 +268,19 @@ class Navigation:
         determines speed limit based on the current waypoint index
         """
         if self.speed_limits is not None:
-            keys_list = sorted(self.speed_limits.keys())
-            idx = bisect_right(keys_list, self.current_way_point_index)
-            key = keys_list[idx]
-            return self.speed_limits[key]
+            keys_list = list(self.speed_limits.keys())
+            # print(f"keys_list: {keys_list}")
+            if self.current_way_point_index in keys_list: # we are at a traffic light
+                key = self.current_way_point_index
+            else:
+                idx = bisect_right(keys_list, self.current_way_point_index)
+                try:
+                    key = keys_list[idx]
+                except (ValueError, IndexError): # we have passed all traffic lights on our route
+                    # print(f"key: {key}")
+                    # Speedlimit could not be found. Probably the data is incomplete. Check the route.geojson file.
+                    return -1
+                return self.speed_limits[key]
         else:
             return -1
 
@@ -424,6 +362,9 @@ class Navigation:
              )
         
         # distance to next direction
+        # print(f"distance integral: {self.distance_integral}, len: {len(self.distance_integral)}")
+        # print(f"distance to next direction: cur_nav_instr_key-1 = {cur_nav_instr_key-1}, current_way_point_index = {self.current_way_point_index}")
+        # print(f"remaining = {self.distance_integral[cur_nav_instr_key-1]} minus {self.distance_integral[self.current_way_point_index]}")
         self.remaining_distance = round((self.distance_integral[cur_nav_instr_key-1] 
                                         - self.distance_integral[self.current_way_point_index]))
 
@@ -450,38 +391,51 @@ class Navigation:
 
         # progress-bar. 
         tl_keys = list(self.trafficlights.keys())
-        try:
-            tl_right_idx = bisect_right(tl_keys, self.current_way_point_index)
-            next_reference_waypoint = tl_keys[tl_right_idx]
-        except (ValueError, IndexError): # we have passed all traffic lights on our route
-            next_reference_waypoint = None
-        try:
-            tl_left_idx = bisect_left(tl_keys, self.current_way_point_index)
-            last_reference_waypoint = tl_keys[tl_left_idx]
-        except (ValueError, IndexError): 
-            if len(tl_keys) == 0: # no traffic light on route
-                last_reference_waypoint = None
-            else:
-                last_reference_waypoint = 0 
+        if self.current_way_point_index in tl_keys: # we are at a traffic light
+            next_reference_waypoint = self.current_way_point_index
+            tl_right_idx = tl_keys.index(next_reference_waypoint)
+        else:
+            try:
+                tl_right_idx = bisect_right(tl_keys, self.current_way_point_index)
+                # print(f"right ref: {tl_right_idx}")
+                next_reference_waypoint = tl_keys[tl_right_idx]
+            except (ValueError, IndexError): # we have passed all traffic lights on our route
+                tl_right_idx = None
+                next_reference_waypoint = None
         
-        if (last_reference_waypoint is not None) and (next_reference_waypoint is not None):
-            num_waypoints = next_reference_waypoint - last_reference_waypoint
-            progress = self.current_way_point_index - last_reference_waypoint
-            if num_waypoints != 0:
-                rel_progress = round(progress / num_waypoints, 2)
-            else:
-                rel_progress = 0
-        else: 
-            rel_progress = 0
+        if tl_right_idx == 0: # we have not passed any traffic light yet
+            last_reference_waypoint = 0
+        elif tl_right_idx is None:
+            last_reference_waypoint = None
+        else:
+            try:
+                last_reference_waypoint = tl_keys[tl_right_idx - 1]
+            except (ValueError, IndexError, TypeError): 
+                # print("dude, this should not happen")
+                last_reference_waypoint = None
+            
+        # print(f"our position: {self.current_way_point_index}")
+        # print(f"last ref index: {last_reference_waypoint}, next ref: {next_reference_waypoint}")
 
+        if (last_reference_waypoint is not None) and (next_reference_waypoint is not None):
+            distance = next_reference_waypoint - last_reference_waypoint
+            # print(f"num_waypoints: {num_waypoints}")
+            progress = self.current_way_point_index - last_reference_waypoint
+            # print(f"progress (in way_points): {progress}")
+            if distance != 0: # measured in waypoints
+                rel_progress = round(progress / distance, 2)
+                # print(f"measured progress {progress / distance}, rounded: {rel_progress}")
+            else:
+                rel_progress = 1 # no distance -> we are at the location we are heading for
+        else: 
+            rel_progress = 0 # at least one of the reference points cannot be determined
+        # print(f"progress: {rel_progress}")
         self.current_progress_next_tl = rel_progress
 
-    
     def get_all_trafficlight_coordinates(self):
         trafficlight_positions = list(self.trafficlights.items())
         return [list(self.way_points[point]) for point,_ in trafficlight_positions]
             
-
     def demo_n_clicks(self, nclicks):
         """use on demo page only"""
         try:

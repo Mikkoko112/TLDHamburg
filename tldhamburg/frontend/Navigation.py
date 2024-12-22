@@ -18,7 +18,7 @@ class Navigation:
     _route = None            # of class Route
     departure = None
     destination = None
-    start_navigating = False
+    start_navigating = True # changed to True
     route_deviation_tolerance = 100
 
     geojson = None          # actual content of geojson file

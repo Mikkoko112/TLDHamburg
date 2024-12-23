@@ -3,11 +3,11 @@
     "importantData":{
         "meanValueData":"/data/cleanedCoorsAverage.json",
         "thingsLoc":"/data/thingsLoc.json",
-        "vectorData":"/data/vectorisation.json",
-        "conjunctionData":"/data/conjunctionsMean.json",
+        "vectorData":"/data/vectorisationOnMeanPointInvert.json",
+        "conjunctionData":"/data/conjcuntionMean.json",
         "cleanedConjunctionData":"/data/conjunctionsJoint.json",
         "allFetchAreas":"/data/fetchAreasFullData.json",
         "GraphData":"/data/shHamburg.gml",
-        "holeData":"/data/holeData.json"
+        "holeData":"/data/combinedHoleData.json"
     }
 }

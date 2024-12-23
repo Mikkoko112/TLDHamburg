@@ -143,7 +143,7 @@ def getRouteTrafficLights(route:list, conjFile:dict,conjList:list,vectorization:
         pointList    = [dat[1] for dat in data]
         pointIndex   = [dat[0] for dat in data]
         allPossiblePrimarysignal = []
-        for primarySignalName in conjFile[name]['traficLights']:
+        for primarySignalName in conjFile[name]['trafficLights']:
             
             meanofPoints =  vectorization[primarySignalName][1]
 

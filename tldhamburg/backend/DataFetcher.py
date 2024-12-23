@@ -1,8 +1,9 @@
 import requests
 import json
-import pickle
-import shapely
-import time
+import time, datetime
+import math
+import logging
+from concurrent.futures import ThreadPoolExecutor
 
 
 class DataFetcher:
@@ -14,7 +15,8 @@ class DataFetcher:
     ---------------------------------------------------------------------------------------------"""
 
     def __init__(self):
-        self.data = None
+        self.data = list()
+        self.errors = list()
 
     def fetch_data(self, endpoint="Datastreams", params={}):
         """-----------------------------------------------------------------------------------------
@@ -22,182 +24,140 @@ class DataFetcher:
         fetch traffic light data from IoT Hamburg.
         IoT Hamburg API returns at most 1000 entries per GET request, even if top parameter is
         set higher. It is most efficient top set the top parameter to 1000 if needed so minimal
-        time consuming GET requests are send. 3 cases distinctions are made for a "top" parameter
-        of below 1000, over 1000 or not set.
+        time consuming GET requests are send. If no top parametet is defined, all available enities
+        in the endpoint are fetched. Requests are parallelized up to 10 requests at a time. When 
+        an error occures in a request, it is saved in a log file. The program is not terminated.
 
         Parameters:
         - endpoint (str):   Defines which type of Entity to Query from the API
             Available options:  'Things', 'Datastreams', 'Observations', 'FeatureOfInterests',
                                 'Locations', 'HistoricalLocations', 'Sensors', 'ObservedProperties'
-                            In Addition, Entities can be accessed directly by their id, e.g.
-                            'Thing(123)' as well as their sublinks e.g. 'Thing(123)/Locations'
+            
+            In Addition, Entities can be accessed directly by their id, e.g.
+            'Thing(123)' as well as their sublinks e.g. 'Thing(123)/Locations'
 
         - params (dict):    Defines the search commands for the Query
             Available options:  '$filter', '$expand', '$top', '$orderby', '$select', '$count'
 
+            Note that in this framework, these commands can only be applied directly to
+            the first layer of entity, not the sublinks. It is advised to access an entity
+            in the first layer instead of a sublink. E.g. 'Observations' instead of 
+            'Datastream(1)/Observations
+            
         Examples:
             To be added later
         -----------------------------------------------------------------------------------------
         """
-        next_request_link = self.BASE_URL + endpoint
-        entries_to_fetch = float("inf")
+
+        base_request_link = self.BASE_URL + endpoint 
+        
+        def single_fetch(params): #helper function for a single request
+            try:
+                response = requests.get(base_request_link,params)
+                response.raise_for_status()
+                return response.json()  # Return parsed JSON
+            except requests.RequestException as e:
+                logging.error(f"{str(e)}")
+                return {"error": str(e)}
+
+        #check if entity is accessed by ID directly, then only one datapoint
+        #can be extracted and no use of ThreadPoolExecutor is necessary
+        if endpoint[-1] == ")":
+            fetched_data = single_fetch(params)
+            self.data.append(fetched_data)
+            return
+        
+        #if $top is defined, fetch that many entries. Otherwise fetch all entries.
+        entries_to_fetch = 1_000_000
         if "$top" in params:
             entries_to_fetch = params["$top"]
-        all_data = list()
+        
+        #fetching loop
         entries_fetched = 0
+        consecutive_errors = 0 
         while True:
-            response = requests.get(next_request_link, params=params)
+            #do at most 10 requests at a time. Less if less than 10000 entries are left to fetch
+            requests_to_execute = min(10,math.ceil((entries_to_fetch - entries_fetched) / 1000))
+            
+            #define the parameters of each individual request. Assign the approriate skip amount
+            params_list = list()
+            for i in range(requests_to_execute):
+                single_fetch_params = params.copy()
+                single_fetch_params["$top"] = 1000
+                single_fetch_params["$skip"] = i * 1000 + entries_fetched
+                params_list.append(single_fetch_params)
 
-            if response.status_code != 200:  # exit data fetching if request failed
-                raise ValueError(f"Failed to fetch data. Status code: {response.status_code}")
+            #calculate leftover entries to fetch for top param of last request.
+            #Different than 1000, if non multiple of 1000 is given as entries_to_fetch
+            entries_to_fetch_on_last_request = 1000
+            if entries_to_fetch - entries_fetched < 10000 and entries_to_fetch % 1000 != 0:
+                entries_to_fetch_on_last_request = entries_to_fetch % 1000
+                params_list[-1]["$top"] = entries_to_fetch_on_last_request
 
-            if not "value" in response.json():  # save json directly, if entity is accessed directly
-                all_data.append(response.json())
+            with ThreadPoolExecutor() as executor:
+                #make pooled requests
+                futures = [executor.submit(single_fetch, params) for params in params_list]
+                
+                #Sort responses based on the $skip value, ascendingly
+                responses_with_skip = [
+                    (future.result(), params["$skip"])
+                    for future, params in zip(futures, params_list)
+                ]
+                sorted_responses = sorted(responses_with_skip, key=lambda x: x[1])
+
+                #check if any response is an error message
+                for response, _ in sorted_responses:
+                    if "error" in response:
+                        self.errors.append(response["error"])
+                        consecutive_errors += 1
+                        if consecutive_errors == 10: #end fetching if 10 errors occur consecutively
+                            logging.warning(f"Fetching Terminated as 10 errors occured consecutively")
+                            return
+                        continue
+                    consecutive_errors = 0
+                    entries = response.get("value", [])
+                    #exit if response is empty, e.g. all entries have been fetched
+                    if not entries:
+                        return
+                    self.data.extend(entries)
+            
+            #update the amount of entries fetched
+            entries_fetched += (requests_to_execute - 1) * 1000 + entries_to_fetch_on_last_request
+
+            #exit if requested amount of entries have been fetched
+            if entries_fetched == entries_to_fetch:
                 break
 
-            fetched_data = response.json().get("value", [])
+            #let the API recover for a bit, testing has shown that this leads to significantly 
+            #faster average response times when fetching large amounts of entries.
+            time.sleep(1)
+        
+        #save potential errors in a log file
+        if self.get_errors():
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            with open(f"error_log_{current_time}.txt", "a") as log_file:
+                for error in self.get_errors():
+                    # Write each error message to the file, followed by a new line
+                    log_file.write(error + "\n")
 
-            if entries_to_fetch - entries_fetched < 1000:  # exit if last necassary page is reached
-                all_data.extend(fetched_data[: entries_to_fetch % 1000])
-                break
-
-            all_data.extend(fetched_data)
-            entries_fetched += len(fetched_data)
-            next_request_link = response.json().get("@iot.nextLink")
-
-            if not next_request_link:  # break if last page is reached
-                break
-
-        self.data = all_data
-
+    def get_errors(self):
+        if not self.errors:
+            logging.info(f"No errors occured")
+            return None
+        return self.errors
+    
     def get_data(self):
         if not self.data:
-            raise ValueError("No data fetched yet")
+            logging.warning(f"No Data fetched yet")
+            return None
         return self.data
     
     def print_raw_data(self):
         if not self.data:
-            raise ValueError("No data fetched yet")
+            logging.warning(f"No Data fetched yet")
         print(json.dumps(self.data, indent=4))
     
     #------------------DEPRECATED-----------------
-    
-    def fetch_data_deprecated(self, endpoint="Datastreams", params={}):
-        # DEPRECATED
-        print("DEPRECATED")
-        full_url = self.BASE_URL + endpoint
-
-        # get all entries if no top parameter is set
-        if not "$top" in params:
-            # add max $top parameter so the max amount of values are fetched per page
-            # significantly reduces fetch times, as API GET requests are slow
-            params["$top"] = 1000
-            response = requests.get(full_url, params=params)
-            if response.status_code != 200:  # exit data fetching if request failed
-                print(f"Failed to fetch data. Status code: {response.status_code}")
-                return
-            # only if a Entity is accessed directly e.g. Things(1), there is no value key
-            if not "value" in response.json():
-                self.data = response.json()
-                return
-            fetched_data = response.json().get("value", [])
-            all_data = list()
-            all_data.extend(fetched_data)
-            # repeatedly fetch next page of results until last one is reached
-            while True:
-                next_link = response.json().get("@iot.nextLink")
-                if not next_link:  # break if last page is reached
-                    break
-                response = requests.get(next_link)
-                if response.status_code != 200:  # exit data fetching if request failed
-                    print(f"Failed to fetch data. Status code: {response.status_code}")
-                    return
-                fetched_data = response.json().get("value", [])
-                all_data.extend(fetched_data)
-
-            self.data = all_data
-            return
-
-        # get top x entries over multiple pages if top param exceeds 1000
-        elif params["$top"] > 1000:
-            entries_fetched = 0
-            response = requests.get(full_url, params=params)
-            if response.status_code != 200:  # exit data fetching if request failed
-                print(f"Failed to fetch data. Status code: {response.status_code}")
-                return
-            # only if a Entity is accessed directly e.g. Things(1), there is no value key
-            if "value" in response.json():
-                fetched_data = response.json().get("value", [])
-            else:
-                self.data = response.json()
-                return
-            all_data = list()
-            all_data.extend(fetched_data)
-            entries_fetched += 1000
-            # repeatedly fetch next page of results until last one is reached
-            while True:
-                next_link = response.json().get("@iot.nextLink")
-                if not next_link:  # break if last page is reached
-                    break
-                response = requests.get(next_link)
-                if response.status_code != 200:  # exit data fetching if request failed
-                    print(f"Failed to fetch data. Status code: {response.status_code}")
-                    return
-                fetched_data = response.json().get("value", [])
-                if (
-                    params["$top"] - entries_fetched < 1000
-                ):  # exit if last necassary page is reached
-                    all_data.extend(fetched_data[: params["$top"] % 1000])
-                    break
-                all_data.extend(fetched_data)
-                entries_fetched += 1000
-
-            self.data = all_data
-            return
-
-        # get top x entries in one page if top param is under or equal to 1000
-        else:
-            response = requests.get(full_url, params=params)
-            if response.status_code != 200:  # exit data fetching if request failed
-                print(f"Failed to fetch data. Status code: {response.status_code}")
-                return
-            # only if a Entity is accessed directly e.g. Things(1), there is no value key
-            if "value" in response.json():
-                fetched_data = response.json().get("value", [])
-            else:
-                self.data = response.json()
-                return
-            fetched_data = response.json().get("value", [])
-            self.data = fetched_data
-
-    def get_Datastream_id_by_coordinates(self, coordinates, error):
-        # Input: Type
-        # coordinates: list [x_coord,y_coord]
-        # DEPRECATED
-        print("DEPRECATED")
-        if (
-            coordinates[0] > coordinates[1]
-        ):  # switch coords if they are given in wrong orientation
-            temp = coordinates[0]
-            coordinates[0] = coordinates[1]
-            coordinates[1] = temp
-
-        with open("datastreams_id-observedArea.pkl", "rb") as file:
-            data = pickle.load(file)
-
-        all_matched_Datastreams_ids = list()
-        reference_point = shapely.geometry.Point(coordinates[0], coordinates[1])
-        for entry in data:
-            if not "observedArea" in entry:
-                continue
-            geoJSON_observedArea = shapely.geometry.shape(entry["observedArea"])
-            distance = reference_point.distance(geoJSON_observedArea)
-            if distance < error:
-                if not "@iot.id" in entry:
-                    print("whoops")
-                datastream_id = entry["@iot.id"]
-                all_matched_Datastreams_ids.append(datastream_id)
-        return all_matched_Datastreams_ids
 
     def get_live_Observations_for_Datastream_id(self, id):
         # DEPRECATED

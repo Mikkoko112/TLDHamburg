@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from tldhamburg.control.scripts.makeFetchSquares import findSmallestAndLargestCoord
+from makeFetchSquares import findSmallestAndLargestCoord
 import json
 from shapely.geometry import box
 
@@ -21,13 +21,27 @@ def combineAreas(areas:dict)->dict:
                         values2.append(True)
                         listOfName += values2[1]
             coordMinMax = findSmallestAndLargestCoord(listOfName)
-            out[name] = [coordMinMax,listOfName]
+            cleanedListOfName = cleanSimilar(listOfName)
+            out[name] = [coordMinMax,cleanedListOfName]
+            nameLength = len([name for name,coords in cleanedListOfName])
+            shnameLength = len(set([name for name,coords in cleanedListOfName]))
+            if not nameLength == shnameLength:
+                print(name,nameLength,shnameLength,nameLength == shnameLength)
     return out
 
-
-
+def cleanSimilar(listOfName:list)->list:
+    out = []
+    newNames = []
+    for name,coords in listOfName:
+        if not name in newNames:
+            newNames.append(name)
+            out.append([
+                name,
+                coords
+            ])
+    return out
 def runCombination()->None:
-    with open("../data/conjunctions.json","r") as file:
+    with open("../data/conjunctionsMean.json","r") as file:
         coords = json.load(file)
     print(len(coords))
     areas = combineAreas(coords)

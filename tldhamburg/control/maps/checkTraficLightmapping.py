@@ -50,7 +50,7 @@ for name,dat in conj.items():
     
     
 scalefactor = 500
-showAllPrim = False
+showAllPrim = True
 if showAllPrim: 
     for vecAreaName,area in data['conjList'].items():
         for i,primary in enumerate(conj[vecAreaName][1]):

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 import json
 import requests
-from math import floor,ceil,dist
+from math import floor,ceil,sqrt
 from geopy import distance
 import sys
 
 searchTraffic,searchArea = 0.01,1.5
 
 
-nameOfProcessedThing,nameOfOutputfile="../data/cleanedCoorsAverage.json","../data/conjunctionsMeanSmall.json"
+nameOfProcessedThing,nameOfOutputfile="../data/cleanedCoorsAverage.json","../data/fetchAreasFullDataRerun.json"
 '''
 
 '''
@@ -60,6 +60,7 @@ def getCallingAreas(trafficLights:dict)->list:
             coordMinMax = findSmallestAndLargestCoord(trafficLightsPerArea)
             outPutAreas[name] = [coordMinMax,trafficLightsPerArea]
             summarked += len(trafficLightsPerArea)
+            
             print("{:.2f}% {} {}/{} {}".format(ismarked/dictLen*100
                                      ,len(trafficLightsPerArea)
                                      ,summarked,len(trafficLights)
@@ -76,7 +77,7 @@ def generateAreas():
     print("minDistance ist:{}".format( searchTraffic if len(sys.argv) > 1 and sys.argv[1] == "1" else searchArea))
     areas = getCallingAreas(coords)
     print(len(areas))
-    with open("../data/conjunctionsMeanSmall.json","w") as file:
+    with open(nameOfOutputfile,"w") as file:
         json.dump(areas, file, indent=4)
 
 if __name__ == "__main__":

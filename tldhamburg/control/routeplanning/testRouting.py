@@ -40,8 +40,7 @@ def testDegree():
 
     print("Degree test passed")
 
-#es muss ein test gemacht werden für 6275 daten, da die eigentlich klappen sollten
-#Dies kann gecheckt werden, wenn du 03-12-routing ansehen
+
 
 def testTarficlightMapping6275():
     name = "6275"

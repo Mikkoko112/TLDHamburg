@@ -52,4 +52,4 @@ def getMinAvgRedTime(routeList: dict, support_points: int = 20) -> int:
     if minIndex == -1:
         raise RuntimeError(f"getMinAvgRedTime({routeList}, {support_points}) error:\n"
                            "All routes in the input dictionary have infinite wait-time estimates.")
-    return MinIndex
+    return minIndex

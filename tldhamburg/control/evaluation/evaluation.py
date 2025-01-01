@@ -17,7 +17,7 @@ def getMinTrafficLights(routeListDict:dict)->int:
             idx = i
     return idx
 
-def getMinAvgRedTime(routeList: dict, support_points: int = 20) -> int:
+def getMinAvgRedTime(routeListDict: dict, support_points: int = 20) -> int:
     """
     Find the best route by statistical estimation of red-phases.
     We estimate the mean % of red-time for each traffic light along the route,
@@ -43,7 +43,11 @@ def getMinAvgRedTime(routeList: dict, support_points: int = 20) -> int:
         for light in trafficLights:
             light_id = int(light["properties"]["id"])
             green, red = TrafficLightApprox.mean_light_phases(light_id, support_points)
-            redRatio = red/(green+red)
+            # We use r²/(r+g) as an estimate of dimension "Time".
+            # We want to weight lights with longer red phases more heavily,
+            # but also take into account how fast they will switch to green.
+            # The formula r(r/(r+g)) is a natural result of this idea.
+            redRatio = (red*red)/(green+red)
             routeWeight += redRatio
         if routeWeight < minWeight:
             minIndex = i

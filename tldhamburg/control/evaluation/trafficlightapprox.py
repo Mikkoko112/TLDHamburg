@@ -1,3 +1,4 @@
+from typing import Tuple
 from tldhamburg.backend.Things import Things
 from datetime import datetime, timedelta
 from scipy import stats
@@ -40,7 +41,7 @@ class TrafficLightApprox:
         std_dev=False,
         confidence_intervals: bool = False,
         confidence_level: float = 0.95,
-    ):
+    ) -> Tuple[int, int] | dict:
         """
         Calculates the mean, and optionally the standard deviation and confidence intervals,
         of red and green phases based on signal observations for a given Thing.

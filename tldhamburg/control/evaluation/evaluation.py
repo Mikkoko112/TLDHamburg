@@ -17,7 +17,7 @@ def getMinTrafficLights(routeListDict:dict)->int:
             idx = i
     return idx
 
-def getMinAvgRedTime(routeList: dict, support_points: int = 20) -> int:
+def getMinAvgRedTime(routeListDict: dict, support_points: int = 20) -> int:
     """
     Find the best route by statistical estimation of red-phases.
     We estimate the mean % of red-time for each traffic light along the route,
@@ -56,4 +56,4 @@ def getMinAvgRedTime(routeList: dict, support_points: int = 20) -> int:
     if minIndex == -1:
         raise RuntimeError(f"getMinAvgRedTime({routeList}, {support_points}) error:\n"
                            "All routes in the input dictionary have infinite wait-time estimates.")
-    return MinIndex
+    return minIndex

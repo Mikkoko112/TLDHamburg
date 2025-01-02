@@ -1,26 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-dic = {
-"7038": [
-        [
-            0.9604373087002828,
-            0.278496276557798,
-            1.288568239167253,
-            73.82952171888766
-        ],
-        [
-            10.02994,
-            53.606837
-        ],
-        [
-            -0.9694705364119203,
-            -0.24520782823797302,
-            4.464654920732215,
-            255.80588394027103
-        ]
-    ]
-}
+'''
+This script is just a visualistion file to generate differend conjucntion hits.
+The data is retrieved from the routing file. There is a test option that 
+prints the relativ data.
+
+'''
+
 degin = 268.33157247267326
 degOut = 88.53253644463626
 priIn,priOut = 268.33157247267326,88.50133540391151

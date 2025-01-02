@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+
+
+'''
+This file containes the RoutePlanner class that allows the frontend to 
+interact with routeplanning featchers of the control. Requests and 
+calulations for approximated speeds are kept ins this class.
+
+Autor: Helge Rasmus Steen
+    - _casperEval -> made py Casper
+
+Relevant Data: 
+    The Graph file is needed.
+
+'''
 from tldhamburg.control.routeplanning import fetchRoutes as fetcher
 from tldhamburg.control.evaluation  import evaluation
 from tldhamburg.control.evaluation  import trafficlightapprox as tlapp
@@ -13,8 +27,30 @@ from tldhamburg.backend.DataFetcher import DataFetcher
 from tldhamburg.backend.Things import Things
 
 class RoutePlanner:
+    '''
+    This class allows the frontend to generate routes wih traffic light data
+    and get the approximated furture phasedata for primary signals.
+    
+    The route is outputed as a file on a spesified path.
+    '''
 
-    def _distBetweenPoints(self,point1ID,point2ID)->float:
+
+    def _distBetweenPoints(self,point1ID:int,point2ID:int)->float:
+        '''
+        Input 
+            <- point1ID = ... This is the first  point id
+            <- point2ID = ... This is the second point id
+
+        Output
+            -> The output is the distance of the two points. 
+
+        The Distance is measuered in coordinate degree and not the 
+        metric system. This is done to make quick distance calculations that 
+        only need relativ distances to other point pairs. Moreover this function
+        uses the euklidian distance because we only observe Hamburg and this 
+
+
+        '''
         coord1 = self.routeData["features"][0]["properties"]["geometry"]["coordinate"][point1ID]
         coord2 = self.routeData["features"][0]["properties"]["geometry"]["coordinate"][point2ID]
         return sqrt(coord1[0]*coord2[0]+coord1[1]*coord2[1])
@@ -30,6 +66,7 @@ class RoutePlanner:
         zeitAktuell=dtime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
         nextPhaseTime=(switchTime-zeitAktuell).total_seconds()
         return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
+        #why is this?
         thing=Things([id])
         zyklusDaten=thing.get_cycle_second_observations(2,True)[id]
         schaltungen=thing.get_primary_signal_observations(8,True)[id]
@@ -46,6 +83,22 @@ class RoutePlanner:
         return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
 
     def _calcSpeed(self,trafficLightsId:str,routePoint:int)->float:
+        '''
+        Input 
+            <- trafficLightsId = ... This is the id of the looked appon primary
+                                        signal
+            <- routePoint      = ... This is the currend position of the 
+                                        driver.
+        
+        Output 
+            -> The output is the speed that the driver approxemetly needs to 
+                drive to reach the next traffic light in the green phase.
+                The output is -1 when the traffic light could not be found.
+
+        This function does not take into account that there could be other 
+        than the given maximum speed. 
+        '''
+        
         trafficLightPos = -1
         for trafficLight in self.routeData["features"][0]["properties"]["trafficlights"]:
             if trafficLight["properties"]["id"] == trafficLightsId:
@@ -54,20 +107,62 @@ class RoutePlanner:
         if trafficLightPos == -1:
             print("Traffic light could not be found in the route")
             return -1
-
-        nextSwitch = tlapp.approx_next_switch(trafficLightsId)
-        now = datetime.now()
-
-        difference = nextSwitch - now
-        timeTillSwitch = difference.total_seconds()
+        #this need to be fixed to a generator
+        
+        i = 0
+        
         totalDistance  = sum([self._distBetweenPoints(p1,p1+1) 
-                             for p1 in range(routePoint,trafficLightPos)])
-        
-        meanSpeed = totalDistance/timeTillSwitch
-        
-        return meanSpeed*3.6
+                            for p1 in range(routePoint,trafficLightPos)])
 
-    def getUpdateOnTrafficLight(self,trafficLightsId,curredPositionID:int = -1): #we need to add this
+        for nextSwitch,nextPhase in tlapp.approx_next_switch(trafficLightsId):
+            
+            if nextPhase == "green":
+                
+                msToKmhKonvert  = 3.6
+
+                now             = datetime.now()
+
+                timeDifference  = nextSwitch - now
+                timeTillSwitch  = timeDifference.total_seconds()
+                meanSpeed       = (totalDistance/timeTillSwitch)*msToKmhKonvert
+                
+                if meanSpeed > self.maxSpeed:
+                    return meanSpeed
+            
+                i += 1
+                if i > 1000:
+                    print("No speed could be calculated")
+                    return -1
+
+
+    def getUpdateOnTrafficLight(self,trafficLightsId,curredPositionID:int = -1): 
+        '''
+        Input
+            <- trafficLightsId   = ...This is the primary signal or signals that
+                                        are observed. This could eigther be one
+                                        signal as a string or a list of strings.
+                                        If the input is a list the output is a
+                                        list of tuples and if it is a single str
+                                        then the output is a tuple.
+            <- currendPositionID = ...This is the index of the node the driver 
+                                        is on.
+
+        Output 
+            -> status        = ... The status at the moment as a string
+                                       in "green" and "red".
+            -> nextPhase     = ... This is the status after the last swtich
+                                        in "green" and "red".
+            -> nextPhaseTime = ... This is the number of seconds till the next 
+                                        switch.
+            -> rapidUpdate   = ... This is a bool value indicating if this 
+                                        traffic light needs to be observed 
+                                        often in the next time.
+            -> speed         = ... This is the approximated speed the driver
+                                        needs to keep to reach the next green 
+                                        phase
+        
+        This function is still work in progress.
+        '''
         status,nextPhase,nextPhaseTime,rapidUpdate,speed = 0,0,0,False,-1
         
         if isinstance(trafficLightsId, list):
@@ -95,25 +190,87 @@ class RoutePlanner:
             return self.getUpdateOnTrafficLight(str(trafficLightsId),curredPositionID)
 
     def safeRoute(self)->None:
+        '''
+        Input 
+            <- None
+        
+        Output
+            -> The output is the saved route at the point indicated at 
+                self.path
+        '''
+        
+        
         with open("{}/route.geojson".format(self.path),"w") as file:
             json.dump(self.routeData,file,indent=4)
 
     def _getData(self,coords:list)->dict:
+        '''
+        Input
+            <- coords = [[float,float],[float,float]] These are the start and 
+                                end coordinate
+            
+        Output
+            -> The output is a GeoJson file represented as a dictonary.
+        
+        This section uses the route fetcher method.
+        '''
+        
+        
         return fetcher.getRouteFromGraph(coords,self.graph)
 
     def _getBestRoute(self,routeList:dict):
+        '''
+        Input
+            <- routeList = ... This is the generated geojson route.
+        
+        Output:
+            -> This return a geojson file but now just containing one route.
+                The evaluation now is based on the least traffic light count.
+
+        This function should be changed to a static evalution based on the 
+        graph. The corresponding function from Stevan will be deliverd soon. 
+
+        '''
+        
         route = routeList.copy()
-        value = evaluation.getMinTrafficLights(routeList)
+        value = evaluation.getMinAvgRedTime(routeList)
+        #removes every other route and preserve the structure of a GeoJson file.
         route["features"] = [routeList["features"][value]]
         return route
 
     def generateRoute(self,options:dict):
-        data = self._getData(options["coordinates"])
+        '''
+        Input
+            <- options = {
+                "coordinates" : [[float,float],[...]], These are the coordinates 
+                    of the start and end
+                "max_speed" : int                      This is the max speed for
+                    speed in km/h evaluation _calcSpeed(). If this is not in the 
+                    dict the default value is 50 km/h.
+            
+            }
+        Output
+            -> The output is a GeoJson file with a single route
+                and traffic light data.
+        '''
+        
+        if "max_speed" in options.keys():
+            self.maxSpeed  = int(options(["max_speed"])) 
+        else: 
+            self.maxSpeed = 50
+        
+
+        data           = self._getData(options["coordinates"])
         trafficLightRoutes = routing.getTrafficLightsRoute(data)
         self.routeData = self._getBestRoute(trafficLightRoutes)
+        
+        
         self.safeRoute()
     
     def _initMapData(self):
+        '''
+        This sets up the graph data.
+        '''
         with open("tldhamburg/control/optionsfile.json","r") as file:
             options = json.load(file)
     
@@ -129,7 +286,8 @@ class RoutePlanner:
 def test():
     testDict = {
         "coordinates":[[10.015552520751953,53.64086151123047],
-                       [10.075848579406738,53.65281677246094]]
+                       [10.075848579406738,53.65281677246094]],
+        "max_speed": 20
     }
     routeObj = RoutePlanner(".")
     routeObj.generateRoute(testDict)

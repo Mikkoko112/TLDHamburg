@@ -108,7 +108,6 @@ def check_validity(starttext, endtext, n_clicks):
             #get route from control
             navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
             pos.set_pos(lat=start_lat, lon=start_lon)
-            navigate.start_navigation(pos)
             
             return (is_valid_start, 
                     not is_valid_start, 

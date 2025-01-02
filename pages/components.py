@@ -112,6 +112,22 @@ def navbar_demo():
                     ),
                 ),
                 searchbar_demo(),
+                dbc.Checklist(
+                    options=[
+                        {"label": html.A(id="switch",children=[
+                            #"Fahrradmodus",
+                            html.Img(id = "bike-picture", src=dash.get_relative_path(f"/assets/bike.png"), height=30),
+                            ]), "value": 0, "disabled": False},
+                    ],
+                    value=[1],
+                    id="switches-input",
+                    switch=True,
+                ),
+                dbc.Tooltip(
+                    "Fahrradmodus: beim Fahrradmodus wird die maximale Geschwindigkeit"
+                    " auf 20 km/h beschränkt",
+                    target="bike-picture",
+                ),
                 dropdown(),
             ], 
             fluid = True, 
@@ -135,6 +151,22 @@ def navbar_live():
                     ),
                 ),
                 searchbar_live(),
+                dbc.Checklist(
+                    options=[
+                        {"label": html.A(id="switch",children=[
+                            #"Fahrradmodus",
+                            html.Img(id = "bike-picture", src=dash.get_relative_path(f"/assets/bike.png"), height=30),
+                            ]), "value": 0, "disabled": False},
+                    ],
+                    value=[1],
+                    id="switches-input",
+                    switch=True,
+                ),
+                dbc.Tooltip(
+                    "Fahrradmodus: beim Fahrradmodus wird die maximale Geschwindigkeit"
+                    " auf 20 km/h beschränkt",
+                    target="bike-picture",
+                ),
                 dropdown(),
             ], 
             fluid = True, 

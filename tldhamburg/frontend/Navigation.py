@@ -227,7 +227,7 @@ class Navigation:
     def _init_speed_limits(self):
         maxspeeds = self.geojson['features'][0]['properties']['speeds']
         maxspeeds_dict = {}
-        for step in maxspeeds:
+        for step in maxspeeds:    
             maxspeeds_dict[step["way_points"][1]] = step["maxspeed"]
         return maxspeeds_dict
 

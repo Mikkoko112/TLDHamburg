@@ -58,6 +58,7 @@ def layout(**kwargs):
 
     [State("startpunkt-live","value"),
      State("endpunkt-live","value"),
+     State("bike-switch-live", "switch"),
      Input("route-button-live", "n_clicks"),
      ],
      running=[
@@ -68,7 +69,7 @@ def layout(**kwargs):
     ],
     prevent_initial_call=True
 )
-def check_validity(starttext, endtext, n_clicks): 
+def check_validity(starttext, endtext, bicycle_mode, n_clicks): 
     marker = [{"id": "departure", "lat": 53.5975929, "lon": 9.9318831},
                   {"id": "destination", "lat": 53.5524079, "lon": 10.0084222}]
     if n_clicks:
@@ -102,7 +103,11 @@ def check_validity(starttext, endtext, n_clicks):
                     )
             
             #get route from control
-            navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
+            if bicycle_mode is True:
+                navigate.create_route([start_lon,start_lat], [end_lon, end_lat],True)
+            else:
+                navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
+            pos.set_pos(lat=start_lat, lon=start_lon)
             pos.set_pos(lat=start_lat, lon=start_lon)
             navigate.start_navigation(pos)
 

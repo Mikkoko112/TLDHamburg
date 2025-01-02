@@ -114,8 +114,7 @@ def navbar_demo():
                 searchbar_demo(),
                 dbc.Checklist(
                     options=[
-                        {"label": html.A(id="switch",children=[
-                            #"Fahrradmodus",
+                        {"label": html.A(id="bike-switch",children=[
                             html.Img(id = "bike-picture", src=dash.get_relative_path(f"/assets/bike.png"), height=30),
                             ]), "value": 0, "disabled": False},
                     ],
@@ -153,7 +152,7 @@ def navbar_live():
                 searchbar_live(),
                 dbc.Checklist(
                     options=[
-                        {"label": html.A(id="switch",children=[
+                        {"label": html.A(id="bike-switch-live",children=[
                             #"Fahrradmodus",
                             html.Img(id = "bike-picture", src=dash.get_relative_path(f"/assets/bike.png"), height=30),
                             ]), "value": 0, "disabled": False},

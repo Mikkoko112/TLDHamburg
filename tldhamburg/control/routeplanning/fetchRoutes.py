@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+
+'''
+This script is used to generate all relevant GeoJson data from the iGraph object 
+provided by the control.RoutePlanner. 
+
+Author: Helge Ramsus Steen
+'''
+
+
+
 import requests
 import json
 import igraph
@@ -84,7 +94,8 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                     edge = graph.es.select(_source=int(pNode["nodeid"][0]),
                                            _target=int(vector["nodeid"][0]))
                     distancefromBefore = edge["length"][0]
-                    if maxSpeed != "None":
+                    if edge["maxspeed"][0] != "None" and edge["maxspeed"][0] is not None:
+                        print(edge)
                         maxSpeed = int(edge["maxspeed"][0])
                     else:
                         maxSpeed = 50
@@ -130,7 +141,7 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
             speeds = []
             lastSpeed,lastSpeedChangeIdx = 0,0            
             lastWayPoint = 0
-            #Every route is generated seperatly.
+            #Every route is generated separately.
             for i,node in enumerate(route): 
 
                 #This is done to prevent out of index problems and to generate 

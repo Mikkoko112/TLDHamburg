@@ -146,16 +146,11 @@ def navbar_live():
                     ),
                 ),
                 searchbar_live(),
-                dbc.Checklist(
-                    options=[
-                        {"label": html.A(children=[
-                            #"Fahrradmodus",
-                            html.Img(id = "bike-picture", src=dash.get_relative_path(f"/assets/bike.png"), height=30),
-                            ]), "value": 0, "disabled": False},
-                    ],
-                    value=[1],
+                dbc.Switch(
                     id="bike-switch-live",
-                    switch=True,
+                    label=html.A(children=[
+                            html.Img(id = "bike-picture", src=dash.get_relative_path(f"/assets/bike.png"), height=30)]),
+                    value=False,
                 ),
                 dbc.Tooltip(
                     "Fahrradmodus: beim Fahrradmodus wird die maximale Geschwindigkeit"

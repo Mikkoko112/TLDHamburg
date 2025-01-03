@@ -1,5 +1,5 @@
 import dash
-from dash import no_update, callback
+from dash import no_update, callback, dcc
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
@@ -27,18 +27,39 @@ external_stylesheets = [
 
 # it will show the map with the markers and the Overview
 pos = Position() # Create a Position object
-navigate = Navigation() # Create a Navigation object
+#navigate = Navigation() # Create a Navigation object
 
 # Main layout
 def layout(**kwargs): 
     return dbc.Container(children = [
+    dcc.Store(id='data-navigate-live', data=""), 
     navbar_live(),
     data_live()
     ],
     fluid = True, # remove the margins
     className="demo-live-container",
+    id = "loadingscreen-live"
 )
 
+@callback(
+    Output('data-navigate-live', 'data'),
+    Input('data-navigate-live', 'data'),  # Dummy input to trigger on app load
+    running=[
+        (Output("loadingscreen-live", "children"), [dcc.Loading(children=[navbar_live(),
+            data_live()],type="default")], [dcc.Store(id='data-navigate', data="1"),  
+            navbar_live(),
+            data_live()
+            ],),                                    
+    ],
+)
+def load_data_on_init(dummy_data):
+    if dummy_data == "":
+        # it will show the map with the markers and the Overview
+        global pos, navigate
+        pos = Position() # Create a Position object
+        navigate = Navigation() # Create a Navigation object
+        return "1"
+    return no_update
 
 # triggers if you click the route button
 # this callback will get the Input for the start and end adresses
@@ -58,7 +79,7 @@ def layout(**kwargs):
 
     [State("startpunkt-live","value"),
      State("endpunkt-live","value"),
-     State("bike-switch-live", "switch"),
+     State("bike-switch-live", "value"),
      Input("route-button-live", "n_clicks"),
      ],
      running=[
@@ -106,7 +127,7 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks):
             if bicycle_mode is True:
                 navigate.create_route([start_lon,start_lat], [end_lon, end_lat],True)
             else:
-                navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
+                navigate.create_route([start_lon,start_lat], [end_lon, end_lat],False)
             pos.set_pos(lat=start_lat, lon=start_lon)
             pos.set_pos(lat=start_lat, lon=start_lon)
             navigate.start_navigation(pos)
@@ -169,7 +190,6 @@ def show_instructions(data, store):
     progress_value = 0
     remaining_instructions = ""
     speed_limit_text = "Maximal erlaubte Geschwindigkeit: -"
-
     n_clicks = 0 # löschen!
     if data and store!=None:
         # update position

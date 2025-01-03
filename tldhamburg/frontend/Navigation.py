@@ -83,6 +83,15 @@ class Navigation:
         except (KeyError):
             self.trafficlights = None
         
+        # initialize instruction list
+        remaining_nav_instr_texts = []
+        remaining_nav_instr_distances = []
+        for key, step in self.navigation_instructions.items():
+            remaining_nav_instr_texts.append(step["instruction"])
+            remaining_nav_instr_distances.append(round(step["distance"]))
+        self.remaining_nav_instr_texts = remaining_nav_instr_texts
+        self.remaining_nav_instr_distances = remaining_nav_instr_distances
+
         # initialize dynamic data of the route based on starting way_point
         self.current_way_point_index = 0
         self.current_speed_limit = self._get_current_speed_limit()
@@ -96,14 +105,7 @@ class Navigation:
              )
         self.next_tl, self.next_next_tl = self._get_impending_two_trafficlights()
 
-        # initialize instruction list
-        remaining_nav_instr_texts = []
-        remaining_nav_instr_distances = []
-        for key, step in self.navigation_instructions.items():
-            remaining_nav_instr_texts.append(step["instruction"])
-            remaining_nav_instr_distances.append(round(step["distance"]))
-        self.remaining_nav_instr_texts = remaining_nav_instr_texts
-        self.remaining_nav_instr_distances = remaining_nav_instr_distances 
+
  
     def _init_route_geojson(self):
         """loads dict(route) that was created"""

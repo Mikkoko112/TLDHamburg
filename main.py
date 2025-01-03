@@ -8,4 +8,7 @@ testDict = {
 routeObj = RoutePlanner(".")
 routeObj.generateRoute(testDict)
 
+print(routeObj.getUpdateOnTrafficLight(14310,currentPositionID=1))
+
+
 del routeObj

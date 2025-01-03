@@ -15,7 +15,7 @@ Relevant Data:
 '''
 from tldhamburg.control.routeplanning import fetchRoutes as fetcher
 from tldhamburg.control.evaluation  import evaluation
-from tldhamburg.control.evaluation  import trafficlightapprox as tlapp
+from tldhamburg.control.evaluation import trafficlightapprox as tlapp
 from tldhamburg.control.routeplanning import routing 
 import igraph
 import json
@@ -29,9 +29,9 @@ from tldhamburg.backend.Things import Things
 class RoutePlanner:
     '''
     This class allows the frontend to generate routes wih traffic light data
-    and get the approximated furture phasedata for primary signals.
+    and get the approximated future phasedata for primary signals.
     
-    The route is outputed as a file on a spesified path.
+    The route is outputted as a file on a specified path.
     '''
 
 
@@ -44,15 +44,15 @@ class RoutePlanner:
         Output
             -> The output is the distance of the two points. 
 
-        The Distance is measuered in coordinate degree and not the 
+        The Distance is measured in coordinate degree and not the 
         metric system. This is done to make quick distance calculations that 
-        only need relativ distances to other point pairs. Moreover this function
-        uses the euklidian distance because we only observe Hamburg and this 
+        only need relative distances to other point pairs. Moreover this function
+        uses the euclidean distance because we only observe Hamburg and this 
 
 
         '''
-        coord1 = self.routeData["features"][0]["properties"]["geometry"]["coordinate"][point1ID]
-        coord2 = self.routeData["features"][0]["properties"]["geometry"]["coordinate"][point2ID]
+        coord1 = self.routeData["features"][0]["geometry"]["coordinates"][point1ID]
+        coord2 = self.routeData["features"][0]["geometry"]["coordinates"][point2ID]
         return sqrt(coord1[0]*coord2[0]+coord1[1]*coord2[1])
 
 
@@ -85,13 +85,13 @@ class RoutePlanner:
     def _calcSpeed(self,trafficLightsId:str,routePoint:int)->float:
         '''
         Input 
-            <- trafficLightsId = ... This is the id of the looked appon primary
+            <- trafficLightsId = ... This is the id of the looked upon primary
                                         signal
-            <- routePoint      = ... This is the currend position of the 
+            <- routePoint      = ... This is the current position of the 
                                         driver.
         
         Output 
-            -> The output is the speed that the driver approxemetly needs to 
+            -> The output is the speed that the driver approximately needs to 
                 drive to reach the next traffic light in the green phase.
                 The output is -1 when the traffic light could not be found.
 
@@ -100,9 +100,11 @@ class RoutePlanner:
         '''
         
         trafficLightPos = -1
-        for trafficLight in self.routeData["features"][0]["properties"]["trafficlights"]:
+        for trafficLight in self.routeData["features"][0]["properties"]["trafficlights"]["features"]:
+            print(trafficLight)
             if trafficLight["properties"]["id"] == trafficLightsId:
                 trafficLightPos =  trafficLight["properties"]["way-point"]
+                break
         
         if trafficLightPos == -1:
             print("Traffic light could not be found in the route")
@@ -114,43 +116,65 @@ class RoutePlanner:
         totalDistance  = sum([self._distBetweenPoints(p1,p1+1) 
                             for p1 in range(routePoint,trafficLightPos)])
 
-        for nextSwitch,nextPhase in tlapp.approx_next_switch(trafficLightsId):
+        if self.maxSpeed == "Get speed from road":
+            sumOfSpeeds   = sum([
+                        self.routeData["features"]["properties"]["speeds"][p1]["maxspeed"] 
+                        for p1 in range(routePoint,trafficLightPos)
+                        ])
             
+            self.maxSpeed = sumOfSpeeds/(abs(trafficLightPos-routePoint))
+
+        print("_calcSpeed:",trafficLightPos,totalDistance,self.maxSpeed)
+        
+        print([func for func in dir(tlapp.TrafficLightApprox) if callable(getattr(tlapp.TrafficLightApprox, func)) and not func.startswith("__")])
+
+        fetcher=DataFetcher()
+        fetcher.fetch_data(params={"$filter":f"@iot.id eq {trafficLightsId}","$expand":"Thing"})
+        id=fetcher.get_data()[0]["Thing"]["@iot.id"]
+
+        gen = tlapp.TrafficLightApprox.approx_next_switch_generator(id)
+        
+        
+        now                       = dtime.fromtimestamp(time.time(),
+                                                    tz=datetime.timezone.utc)
+        for i in range(1,1000):
+            nextSwitch,nextPhase = next(gen)
+
+
+
             if nextPhase == "green":
                 
-                msToKmhKonvert  = 3.6
+                msToKmhConvert   = 3.6
 
-                now             = datetime.now()
+                timeTillSwitch=(nextSwitch-now).total_seconds()            
 
-                timeDifference  = nextSwitch - now
-                timeTillSwitch  = timeDifference.total_seconds()
-                meanSpeed       = (totalDistance/timeTillSwitch)*msToKmhKonvert
-                
-                if meanSpeed > self.maxSpeed:
+                meanSpeed        = (totalDistance/timeTillSwitch)*msToKmhConvert
+                print(f"{meanSpeed}km/h")
+                if meanSpeed     > self.maxSpeed:
                     return meanSpeed
             
                 i += 1
-                if i > 1000:
-                    print("No speed could be calculated")
-                    return -1
+
+        print("No speed could be calculated")
+        return -1
 
 
-    def getUpdateOnTrafficLight(self,trafficLightsId,curredPositionID:int = -1): 
+    def getUpdateOnTrafficLight(self,trafficLightsId,currentPositionID:int = -1): 
         '''
         Input
             <- trafficLightsId   = ...This is the primary signal or signals that
-                                        are observed. This could eigther be one
+                                        are observed. This could either be one
                                         signal as a string or a list of strings.
                                         If the input is a list the output is a
                                         list of tuples and if it is a single str
                                         then the output is a tuple.
-            <- currendPositionID = ...This is the index of the node the driver 
+            <- currentPositionID = ...This is the index of the node the driver 
                                         is on.
 
         Output 
             -> status        = ... The status at the moment as a string
                                        in "green" and "red".
-            -> nextPhase     = ... This is the status after the last swtich
+            -> nextPhase     = ... This is the status after the last switch
                                         in "green" and "red".
             -> nextPhaseTime = ... This is the number of seconds till the next 
                                         switch.
@@ -169,25 +193,25 @@ class RoutePlanner:
             out = []
             for elem in trafficLightsId:
                 if not isinstance(elem,list):
-                    out.append(self.getUpdateOnTrafficLight(elem,curredPositionID))  
+                    out.append(self.getUpdateOnTrafficLight(elem,currentPositionID))  
                 else:
                     print("Wrong format. Input should be a list of strings")
                     exit(1)
             
             return out
         elif isinstance(trafficLightsId,str):
-            status,nextPhase,nextPhaseTime,rapidUpdate = self._casperEval(trafficLightsId)
+            tfLID,status,nextPhase,nextPhaseTime,rapidUpdate = self._casperEval(trafficLightsId)
 
-            if curredPositionID == -1:
+            if currentPositionID == -1:
                 return status,nextPhase,nextPhaseTime,rapidUpdate
             else:
-                speed = self._calcSpeed(trafficLightsId)
+                speed = self._calcSpeed(trafficLightsId,currentPositionID)
                 return status,nextPhase,nextPhaseTime,rapidUpdate,speed
             #return self._casperEval(trafficLightsId)
             #return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
 
         elif isinstance(trafficLightsId,int):
-            return self.getUpdateOnTrafficLight(str(trafficLightsId),curredPositionID)
+            return self.getUpdateOnTrafficLight(str(trafficLightsId),currentPositionID)
 
     def safeRoute(self)->None:
         '''
@@ -210,7 +234,7 @@ class RoutePlanner:
                                 end coordinate
             
         Output
-            -> The output is a GeoJson file represented as a dictonary.
+            -> The output is a GeoJson file represented as a dictionary.
         
         This section uses the route fetcher method.
         '''
@@ -226,14 +250,10 @@ class RoutePlanner:
         Output:
             -> This return a geojson file but now just containing one route.
                 The evaluation now is based on the least traffic light count.
-
-        This function should be changed to a static evalution based on the 
-        graph. The corresponding function from Stevan will be deliverd soon. 
-
         '''
         
         route = routeList.copy()
-        value = evaluation.getMinAvgRedTime(routeList)
+        value = evaluation.getMinTrafficLights(routeList)
         #removes every other route and preserve the structure of a GeoJson file.
         route["features"] = [routeList["features"][value]]
         return route
@@ -257,12 +277,12 @@ class RoutePlanner:
         if "max_speed" in options.keys():
             self.maxSpeed  = int(options(["max_speed"])) 
         else: 
-            self.maxSpeed = 50
+            self.maxSpeed = "Get  average speed from road"
         
 
-        data           = self._getData(options["coordinates"])
+        data               = self._getData(options["coordinates"])
         trafficLightRoutes = routing.getTrafficLightsRoute(data)
-        self.routeData = self._getBestRoute(trafficLightRoutes)
+        self.routeData     = self._getBestRoute(trafficLightRoutes)
         
         
         self.safeRoute()

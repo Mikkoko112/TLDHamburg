@@ -2103,7 +2103,7 @@
                             "distance": 77.49,
                             "duration": 5.57928,
                             "type": 10,
-                            "instruction": "Next is your goal.",
+                            "instruction": "Your destination is next.",
                             "name": "Goal",
                             "way_points": [
                                 417,

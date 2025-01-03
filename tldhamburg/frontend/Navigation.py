@@ -57,11 +57,15 @@ class Navigation:
         self._path = f"{Path.cwd()}/schnittstelle"
         self._route = RoutePlanner(self._path)
     
-    def create_route(self, departure:list, destination:list):
+    def create_route(self, departure:list, destination:list, bicycle_mode:bool):
         # instruct creation of route
         self.departure = departure
         self.destination = destination
-        nav_coordinates = {"coordinates": [departure,destination]}
+        if bicycle_mode is True:
+           nav_coordinates = {"coordinates": [departure,destination],
+                              "maxspeed": 20} 
+        else:
+            nav_coordinates = {"coordinates": [departure,destination]}
         self._route.generateRoute(nav_coordinates)
 
         # route is saved as a geojson file. Load it...

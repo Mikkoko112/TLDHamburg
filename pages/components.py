@@ -242,6 +242,11 @@ def control_live(current_speed):
     return dbc.Row(
         children= [
             dbc.Col(
+                dbc.Button("Start", id = "start-button-live", color="secondary", 
+                            disabled=True),
+                width = "auto",
+            ),
+            dbc.Col(
                     dbc.ListGroup([
                             dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="speed-limit-live"),
                         ],

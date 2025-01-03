@@ -1,5 +1,5 @@
 import dash
-from dash import no_update, callback, dcc
+from dash import no_update, ctx, callback, dcc
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
@@ -26,7 +26,7 @@ external_stylesheets = [
 ]
 
 # it will show the map with the markers and the Overview
-pos = Position() # Create a Position object
+#pos = Position() # Create a Position object
 #navigate = Navigation() # Create a Navigation object
 
 # Main layout
@@ -74,6 +74,8 @@ def load_data_on_init(dummy_data):
     Output("start-end-layer-live", "children"),  # load start and end point into the map
     Output("route-layer-live", "data"),          # load route (geojson) into the map
     Output("tl-route-layer-live", "children"),  # load traffic lights into the map
+    Output("start-button-live", "disabled", allow_duplicate=True),# True: disables the start button if no route is given
+    Output("start-button-live", "n_clicks", allow_duplicate=True),
     Output("tab-2-live","disabled"),             # enables the Overview tab
     Output("instruction-overview-live","children",allow_duplicate=True),  # list all instruction 
 
@@ -81,6 +83,7 @@ def load_data_on_init(dummy_data):
      State("endpunkt-live","value"),
      State("bike-switch-live", "value"),
      Input("route-button-live", "n_clicks"),
+     Input("start-button-live", "n_clicks"),
      ],
      running=[
         (Output("route-button-live", "disabled"), True, False),
@@ -90,10 +93,13 @@ def load_data_on_init(dummy_data):
     ],
     prevent_initial_call=True
 )
-def check_validity(starttext, endtext, bicycle_mode, n_clicks): 
+def check_validity(starttext, endtext, bicycle_mode, n_clicks, start_button): 
     marker = [{"id": "departure", "lat": 53.5975929, "lon": 9.9318831},
                   {"id": "destination", "lat": 53.5524079, "lon": 10.0084222}]
-    if n_clicks:
+    button_id = ctx.triggered_id
+    if button_id == "start-button-live":
+        navigate.start_navigation(pos) 
+    else:    
         if starttext or endtext: 
             is_valid_start = True
             is_valid_end = True
@@ -119,6 +125,8 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks):
                     no_update, 
                     no_update, 
                     "",
+                    True,
+                    0,
                     no_update,
                     no_update,
                     )
@@ -130,7 +138,7 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks):
                 navigate.create_route([start_lon,start_lat], [end_lon, end_lat],False)
             pos.set_pos(lat=start_lat, lon=start_lon)
             pos.set_pos(lat=start_lat, lon=start_lon)
-            navigate.start_navigation(pos)
+            #navigate.start_navigation(pos)
 
             return (is_valid_start, 
                     not is_valid_start, 
@@ -141,20 +149,24 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks):
                     navigate.geojson, 
                     get_objects.get_trafficlights(navigate.get_all_trafficlight_coordinates()),  
                     False,
+                    0,
+                    False,
                     (dbc.Table.from_dataframe(pd.DataFrame(
                             {
                                 "in ... metern": navigate.remaining_nav_instr_distances,
                                 "Anweisung": navigate.remaining_nav_instr_texts,
                             }), striped=True, bordered=True, hover=True)), 
                     )
-    return (False, 
-            False, 
-            False, 
-            False, 
+    return (no_update, 
+            no_update, 
+            no_update, 
+            no_update, 
             0, 
             no_update, 
             no_update, 
             no_update, 
+            True,
+            no_update,
             no_update,
             no_update,
             )
@@ -177,21 +189,24 @@ def store_map_view(center):
     Output("progress-live", "value"),                # change progress value 
     Output("instruction-overview-live","children"),  # list all instruction still left
     Output("speed-limit-live", "children"),          # change the speed limit 
+    #Output("start-button-live", "disabled"),
+    #Output("start-button-live", "n_clicks"),
 
-    Input("route-layer-live", "data"),
-    Input("map-store-live", "data"), # center of user-location
+    State("route-layer-live", "data"),
+    State("map-store-live", "data"), # center of user-location
+    Input("start-button-live", "n_clicks"),
 
     prevent_initial_call=True
 )
-def show_instructions(data, store):
+def show_instructions(data, store, n_clicks):
     # return values
     picture = ""
     text = ""
     progress_value = 0
     remaining_instructions = ""
     speed_limit_text = "Maximal erlaubte Geschwindigkeit: -"
-    n_clicks = 0 # löschen!
-    if data and store!=None:
+    
+    if n_clicks == 1 and (data and store != None):
         # update position
         lat = store["lat"]
         lon = store["lng"]
@@ -223,7 +238,7 @@ def show_instructions(data, store):
         
     return (picture, text, store, 
             progress_value, remaining_instructions,
-            speed_limit_text)
+            speed_limit_text,)
 
 # change trafficlight picture
 @callback(

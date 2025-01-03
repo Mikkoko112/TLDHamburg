@@ -60,7 +60,7 @@ def layout(**kwargs):
 
     [State("startpunkt","value"),
      State("endpunkt","value"),
-     State("bike-switch", "switch"),
+     State("bike-switch", "value"),
      Input("route-button", "n_clicks"),
      ],
      running=[
@@ -201,6 +201,7 @@ def show_instructions(n_clicks, prev, restart, store):
     # restart the route instructions and picture
     if button_id == "restart-button":
         n_clicks = 0
+        picture = ""
         # update pos with the new waypoint
         lat, lon = navigate.demo_n_clicks(n_clicks+1)
         pos.set_pos(lat, lon)
@@ -217,7 +218,7 @@ def show_instructions(n_clicks, prev, restart, store):
         if button_id == "prev-button":
             n_clicks = n_clicks - 1
         
-        elif n_clicks == len(navigate.way_points):
+        elif n_clicks == len(navigate.way_points)+1:
             n_clicks = 0
 
         # update pos with the new waypoint
@@ -245,7 +246,7 @@ def show_instructions(n_clicks, prev, restart, store):
             toggle_prev_button = True
 
         # after last step, restart automatically
-        elif n_clicks == len(navigate.way_points)-1:
+        elif n_clicks == len(navigate.way_points):
             #n_clicks = 0
             toggle_startnext_button = True
             #button_text = "Start"

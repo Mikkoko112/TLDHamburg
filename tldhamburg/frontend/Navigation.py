@@ -55,17 +55,13 @@ class Navigation:
         
     def __init__(self):
         self._path = f"{Path.cwd()}/schnittstelle"
+        self._route = RoutePlanner(self._path)
     
-    def create_route(self, departure:list, destination:list, bicycle_mode=False):
+    def create_route(self, departure:list, destination:list):
         # instruct creation of route
         self.departure = departure
         self.destination = destination
-        if bicycle_mode is True:
-            nav_coordinates = {"coordinates": [departure,destination],
-                               "max_speed": 20} 
-        else:
-            nav_coordinates = {"coordinates": [departure,destination]}
-        self._route = RoutePlanner(self._path)
+        nav_coordinates = {"coordinates": [departure,destination]}
         self._route.generateRoute(nav_coordinates)
 
         # route is saved as a geojson file. Load it...
@@ -226,13 +222,15 @@ class Navigation:
         waypoints_lon_lat = []
         for lat, lon in waypoints_lat_lon:
             waypoints_lon_lat.append([lon, lat])
+        print(f"len waypoint: {len(waypoints_lat_lon)}")
         return waypoints_lat_lon, waypoints_lon_lat
 
     def _init_speed_limits(self):
         maxspeeds = self.geojson['features'][0]['properties']['speeds']
         maxspeeds_dict = {}
-        for step in maxspeeds:    
+        for step in maxspeeds:
             maxspeeds_dict[step["way_points"][1]] = step["maxspeed"]
+        print(f"speeds_dict: {maxspeeds_dict}")
         return maxspeeds_dict
 
     def _init_traffic_lights(self):
@@ -306,7 +304,7 @@ class Navigation:
         distances = np.array([self._haversine_approx(lat, lon, lat_wp, lon_wp) for lat_wp, lon_wp in self.way_points])
         # print(f"distances: {distances}")
         nearest = np.argmin(distances)
-        # print(f"min: {nearest}")
+        # print(f"waypoint: {nearest}")
         # nearest = min(self.way_points, key=lambda wp: self._haversine_approx(lat, lon, wp[0], wp[1]))
         return nearest
 
@@ -350,7 +348,6 @@ class Navigation:
         """
         if self.speed_limits is not None:
             keys_list = list(self.speed_limits.keys())
-            # print(f"keys_list: {keys_list}")
             if self.current_way_point_index in keys_list: # we are at a traffic light
                 key = self.current_way_point_index
             else:
@@ -358,12 +355,11 @@ class Navigation:
                 try:
                     key = keys_list[idx]
                 except (ValueError, IndexError): # we have passed all traffic lights on our route
-                    # print(f"key: {key}")
                     # Speedlimit could not be found. Probably the data is incomplete. Check the route.geojson file.
-                    return -1
-                return self.speed_limits[key]
+                    return 0
+            return self.speed_limits[key]
         else:
-            return -1
+            return self.current_speed_limit
 
     def _get_impending_two_trafficlights(self):
         """

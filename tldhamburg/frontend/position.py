@@ -4,14 +4,8 @@ from pathlib import Path
 class Position:
     _lat = 0
     _lon = 0
-    #navigating = bool
     def __init__(self):
         pass
-        #self.navigating = False
-        #directory = f"{Path.cwd()}/schnittstelle"
-        #with open(f"{directory}/position.geojson", "r") as f:
-        #    _file = json.load(f)
-        #    self._lat, self._lon = _file["coordinates"]
 
     def set_pos(self, lat, lon):
         self._lat = lat

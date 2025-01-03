@@ -53,8 +53,8 @@ class Navigation:
     next_tl = None          # Trafficlight Object
     next_next_tl = None
         
-    def __init__(self):
-        self._path = f"{Path.cwd()}/schnittstelle"
+    def __init__(self, path=f"{Path.cwd()}/schnittstelle"):
+        self._path = path
         self._route = RoutePlanner(self._path)
     
     def create_route(self, departure:list, destination:list, bicycle_mode:bool):

@@ -32,7 +32,6 @@ unit-test-job:
     - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
-s
 #unit-test-job:
 #  stage: frontend
 #  image: python:3.12-slim

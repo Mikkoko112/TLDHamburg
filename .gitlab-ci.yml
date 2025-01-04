@@ -82,3 +82,4 @@ API_availability_job:
   allow_failure : true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "push"'

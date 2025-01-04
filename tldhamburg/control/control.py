@@ -277,6 +277,7 @@ class RoutePlanner:
         '''
         
         route = routeList.copy()
+        #value = evaluation.getMinAvgRedTime(routeList)
         value = evaluation.getMinTrafficLights(routeList)
         #removes every other route and preserve the structure of a GeoJson file.
         route["features"] = [routeList["features"][value]]

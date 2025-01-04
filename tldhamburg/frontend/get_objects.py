@@ -34,8 +34,8 @@ def get_marker(dep_dest):
     Returns: Dash-Leaflet marker
 
     Example Input
-    positions = [{"id": "start", "lat": 53.5975929, "lon": 9.9318831},
-               {"id": "end", "lat": 53.5524079, "lon": 10.0084222}]
+    positions = [{"id": "departure", "lat": 53.5975929, "lon": 9.9318831},
+               {"id": "destination", "lat": 53.5524079, "lon": 10.0084222}]
     """    
     out = []
     for pos in dep_dest:

@@ -112,6 +112,17 @@ def navbar_demo():
                     ),
                 ),
                 searchbar_demo(),
+                dbc.Switch(
+                    id="bike-switch",
+                    label=html.A(children=[
+                            html.Img(id = "bike-picture", src=dash.get_relative_path(f"/assets/bike.png"), height=30)]),
+                    value=False,
+                ),
+                dbc.Tooltip(
+                    "Fahrradmodus: beim Fahrradmodus wird die maximale Geschwindigkeit"
+                    " auf 20 km/h beschränkt",
+                    target="bike-picture",
+                ),
                 dropdown(),
             ], 
             fluid = True, 
@@ -135,6 +146,17 @@ def navbar_live():
                     ),
                 ),
                 searchbar_live(),
+                dbc.Switch(
+                    id="bike-switch-live",
+                    label=html.A(children=[
+                            html.Img(id = "bike-picture", src=dash.get_relative_path(f"/assets/bike.png"), height=30)]),
+                    value=False,
+                ),
+                dbc.Tooltip(
+                    "Fahrradmodus: beim Fahrradmodus wird die maximale Geschwindigkeit"
+                    " auf 20 km/h beschränkt",
+                    target="bike-picture",
+                ),
                 dropdown(),
             ], 
             fluid = True, 
@@ -219,6 +241,11 @@ def control_demo(current_speed):
 def control_live(current_speed):
     return dbc.Row(
         children= [
+            dbc.Col(
+                dbc.Button("Start", id = "start-button-live", color="secondary", 
+                            disabled=True),
+                width = "auto",
+            ),
             dbc.Col(
                     dbc.ListGroup([
                             dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="speed-limit-live"),

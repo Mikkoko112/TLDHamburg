@@ -32,5 +32,6 @@ dependencies = [
     "geopy",
     "loguru",
     "pathlib",
-    "scipy"
+    "scipy",
+    "igraph"
 ]

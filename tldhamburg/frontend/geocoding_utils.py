@@ -19,7 +19,7 @@ import sys
 #Initialize logging
 logger.add(sys.stderr, format="{time} {level} {message}", filter="my_module", level="INFO")
 
-def return_coordinates(address: str, geolocator = Nominatim):
+def return_coordinates(address: str, geolocator = Nominatim(user_agent="http")):
     """
     Fetches the latitude and longitude of a given address using geocoding.
     
@@ -31,7 +31,7 @@ def return_coordinates(address: str, geolocator = Nominatim):
     Tuple[Optional[float], Optional[float]]: Latitude and Longitude as a tuple, or (None, None) if unsuccessful.
     """
 
-    geolocator = Nominatim(user_agent="http")
+    #geolocator = Nominatim(user_agent="http")
 
     # initialize variables
     lat, lon = None, None
@@ -39,7 +39,7 @@ def return_coordinates(address: str, geolocator = Nominatim):
     viewbox_hh = [Point(53.781807,9.675926),Point(53.366671,10.426862)]
 
     try:
-        geocode_info = geolocator.geocode(query=address, country_codes="de", viewbox=viewbox_hh, bounded=True)
+        geocode_info = geolocator.geocode(query=address, country_codes="de", viewbox=viewbox_hh, bounded=True) 
         lat = float(geocode_info.latitude)
         lon = float(geocode_info.longitude)
         logger.info(f"Fetched coordinates {lat}, {lon} for {address}.")

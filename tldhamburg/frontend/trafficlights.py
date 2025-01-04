@@ -1,6 +1,5 @@
 import json
 import time
-from tldhamburg.backend.Things import Things
 from pathlib import Path
 
 
@@ -35,5 +34,8 @@ class Trafficlight:
     def set_status(self, status):
         self.status = status
         return status
+
+    def get_status(self):
+        return self.status
         
     

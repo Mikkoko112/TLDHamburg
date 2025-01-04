@@ -1,9 +1,10 @@
 import dash
-from dash import no_update, ctx, callback
+from dash import no_update, ctx, callback, dcc
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
 import pandas as pd
+import time
 
 # import functions and classes
 from tldhamburg.frontend.Navigation import Navigation
@@ -25,20 +26,38 @@ external_stylesheets = [
     dbc.themes.BOOTSTRAP,
 ]
 
-# it will show the map with the markers and the Overview
-pos = Position() # Create a Position object
-navigate = Navigation() # Create a Navigation object
-
 # Main layout
 def layout(**kwargs): 
     return dbc.Container(children = [
-    navbar_demo(),
-    data_demo()
-    ],
-    fluid = True, # remove the margins
-    className="demo-live-container",
-)
+            dcc.Store(id='data-navigate', data=""), 
+            navbar_demo(),
+            data_demo()
+            ],
+        fluid = True, # remove the margins
+        className="demo-live-container",
+        id = "loadingscreen"
+        )
 
+# Callback to load data when the app starts
+@callback(
+    Output('data-navigate', 'data'),
+    Input('data-navigate', 'data'),  # Dummy input to trigger on app load
+    running=[
+        (Output("loadingscreen", "children"), [dcc.Loading(children=[navbar_demo(),
+            data_demo()],type="default")], [dcc.Store(id='data-navigate', data="1"),  
+            navbar_demo(),
+            data_demo()
+            ],),                                    
+    ],
+)
+def load_data_on_init(dummy_data):
+    if dummy_data == "":
+        # it will show the map with the markers and the Overview
+        global pos, navigate
+        pos = Position() # Create a Position object
+        navigate = Navigation() # Create a Navigation object
+        return "1"
+    return no_update
 
 # triggers if you click the route button
 # this callback will get the Input for the start and end adresses
@@ -55,11 +74,12 @@ def layout(**kwargs):
     Output("tl-route-layer", "children"),  # load traffic lights into the map
     Output("start-next-button", "disabled", allow_duplicate=True),# True: disables the start/next button if no route is given
     Output("tab-2","disabled"),             # enables the Overview tab
-    Output("instruction-overview","children",allow_duplicate=True),  # list all instruction 
+    Output("instruction-overview","children", allow_duplicate=True),  # list all instruction 
     Output("start-next-button", "n_clicks", allow_duplicate=True), # reset n_clicks if calculating new route
 
     [State("startpunkt","value"),
      State("endpunkt","value"),
+     State("bike-switch", "value"),
      Input("route-button", "n_clicks"),
      ],
      running=[
@@ -70,7 +90,7 @@ def layout(**kwargs):
     ],
     prevent_initial_call=True
 )
-def check_validity(starttext, endtext, n_clicks): 
+def check_validity(starttext, endtext, bicycle_mode, n_clicks): 
     marker = [{"id": "departure", "lat": 53.5975929, "lon": 9.9318831},
                   {"id": "destination", "lat": 53.5524079, "lon": 10.0084222}]
     if n_clicks:
@@ -102,14 +122,20 @@ def check_validity(starttext, endtext, n_clicks):
                     True,
                     no_update,
                     no_update,
-                    0
+                    0,
                     )
             
             #get route from control
-            navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
+            if bicycle_mode is True:
+                navigate.create_route([start_lon,start_lat], [end_lon, end_lat],True)
+            else:
+                navigate.create_route([start_lon,start_lat], [end_lon, end_lat],False)
             pos.set_pos(lat=start_lat, lon=start_lon)
-            navigate.start_navigation(pos)
-            
+            remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
+                {
+                    "in ... metern": navigate.remaining_nav_instr_distances,
+                    "Anweisung": navigate.remaining_nav_instr_texts,
+                }), striped=True, bordered=True, hover=True)) 
             return (is_valid_start, 
                     not is_valid_start, 
                     is_valid_end, 
@@ -120,12 +146,8 @@ def check_validity(starttext, endtext, n_clicks):
                     get_objects.get_trafficlights(navigate.get_all_trafficlight_coordinates()),  
                     False,
                     False,
-                    (dbc.Table.from_dataframe(pd.DataFrame(
-                            {
-                                "in ... metern": navigate.remaining_nav_instr_distances,
-                                "Anweisung": navigate.remaining_nav_instr_texts,
-                            }), striped=True, bordered=True, hover=True)), 
-                    0
+                    remaining_instructions,
+                    0,
                     )
     return (False, 
             False, 
@@ -138,7 +160,7 @@ def check_validity(starttext, endtext, n_clicks):
             no_update,
             no_update,
             no_update,
-            no_update
+            no_update,
             )
 
 # stores the data of the View for the whole route 
@@ -157,17 +179,17 @@ def store_map_view(data, zoom, center):
 # go through the steps of the route with the start/next button
 # progress shows in the progressbar
 @callback(
-    Output("start-next-button", "n_clicks"),    # 
+    Output("start-next-button", "n_clicks", allow_duplicate=True),    # 
     Output("start-next-button", "children"),    # change text from start to next after going one step
     Output("route-picture", "src"),             # change picture for instruction
     Output("route-instruction", "children"),    # change text for instruction
     Output('map', 'viewport'),                  # change view of the map
     Output("prev-button", "disabled"),          # True: disables the prev button
-    Output("start-next-button", "disabled"),    # True: disables the start/next button
+    Output("start-next-button", "disabled", allow_duplicate=True),    # True: disables the start/next button
     Output("restart-button", "disabled"),       # True: disables the restart button
     Output("progress", "value"),                # change progress value 
     Output("prev-button", "n_clicks"),          #
-    Output("instruction-overview","children"),  # list all instruction still left
+    Output("instruction-overview","children", allow_duplicate=True),  # list all instruction still left
     Output("speed-limit", "children"),          # change the speed limit 
     Output("position", "center"),               # change current position 
 
@@ -198,10 +220,10 @@ def show_instructions(n_clicks, prev, restart, store):
     # restart the route instructions and picture
     if button_id == "restart-button":
         n_clicks = 0
+        picture = ""
         # update pos with the new waypoint
         lat, lon = navigate.demo_n_clicks(n_clicks+1)
         pos.set_pos(lat, lon)
-
         remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
                         {
                             "in ... metern": navigate.remaining_nav_instr_distances,
@@ -214,7 +236,7 @@ def show_instructions(n_clicks, prev, restart, store):
         if button_id == "prev-button":
             n_clicks = n_clicks - 1
         
-        elif n_clicks == len(navigate.way_points):
+        elif n_clicks == len(navigate.way_points)+1:
             n_clicks = 0
 
         # update pos with the new waypoint
@@ -235,6 +257,7 @@ def show_instructions(n_clicks, prev, restart, store):
                             "in ... metern": navigate.remaining_nav_instr_distances,
                             "Anweisung": navigate.remaining_nav_instr_texts,
                         }), striped=True, bordered=True, hover=True))
+
         speed_limit_text = f"Maximal erlaubte Geschwindigkeit: {navigate.current_speed_limit}"
         # first step: prev button disabled 
         if n_clicks == 1:
@@ -242,7 +265,7 @@ def show_instructions(n_clicks, prev, restart, store):
             toggle_prev_button = True
 
         # after last step, restart automatically
-        elif n_clicks == len(navigate.way_points)-1:
+        elif n_clicks == len(navigate.way_points):
             #n_clicks = 0
             toggle_startnext_button = True
             #button_text = "Start"
@@ -252,8 +275,7 @@ def show_instructions(n_clicks, prev, restart, store):
     return (n_clicks, button_text, picture, text, store, 
             toggle_prev_button, toggle_startnext_button, toggle_restart_button,
             progress_value, prev_nclicks, remaining_instructions,
-            speed_limit_text, pos.get_pos("lonlat"))
-
+            speed_limit_text, pos.get_pos("lonlat"),)
 
 # change trafficlight picture
 @callback(

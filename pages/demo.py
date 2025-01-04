@@ -1,5 +1,5 @@
 import dash
-from dash import no_update, ctx, callback, dcc
+from dash import no_update, ctx, callback, dcc, html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
@@ -31,11 +31,21 @@ def layout(**kwargs):
     return dbc.Container(children = [
             dcc.Store(id='data-navigate', data=""), 
             navbar_demo(),
-            data_demo()
+            data_demo(),
+            dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Loading..."), close_button=False),
+                dbc.ModalBody(html.Div([dbc.Spinner(size="lg")], 
+                                       className="centered-spinner",))
+            ],
+            id="loadingscreen",
+            is_open=False,
+            backdrop="static",
+            centered=True,
+        ),
             ],
         fluid = True, # remove the margins
         className="demo-live-container",
-        id = "loadingscreen"
         )
 
 # Callback to load data when the app starts
@@ -43,11 +53,7 @@ def layout(**kwargs):
     Output('data-navigate', 'data'),
     Input('data-navigate', 'data'),  # Dummy input to trigger on app load
     running=[
-        (Output("loadingscreen", "children"), [dcc.Loading(children=[navbar_demo(),
-            data_demo()],type="default")], [dcc.Store(id='data-navigate', data="1"),  
-            navbar_demo(),
-            data_demo()
-            ],),                                    
+        (Output("loadingscreen", "is_open"), True, False)    
     ],
 )
 def load_data_on_init(dummy_data):
@@ -136,6 +142,7 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks):
                     "in ... metern": navigate.remaining_nav_instr_distances,
                     "Anweisung": navigate.remaining_nav_instr_texts,
                 }), striped=True, bordered=True, hover=True)) 
+            print(get_objects.get_marker(marker))
             return (is_valid_start, 
                     not is_valid_start, 
                     is_valid_end, 

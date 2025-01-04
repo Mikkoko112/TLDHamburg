@@ -14,7 +14,7 @@ before_script:
   - export SHAPELY_USE_CUSTOM_GEOS=0 
   - pip install .
 
-unit-test-bakcend-job:
+unit-test-backend-job:
   stage: backend
   image: python:3.12-slim
   cache:
@@ -29,7 +29,7 @@ unit-test-bakcend-job:
     - python test/test_trafficlightapprox.py
     - echo "Congratulations test_trafficlightapprox.py passed."
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "push"'
+    #- if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   
 unit-test-frontend-job:
@@ -42,8 +42,8 @@ unit-test-frontend-job:
     - source venv/bin/activate
     - python test/test_geocoding_utils.py
     - echo "Congratulations test_geocoding_utils.py passed."
-#    - python test/test_get_objects.py
-#    - echo "Congratulations test_get_objects.py passed."  
+    - python test/test_get_objects.py
+    - echo "Congratulations test_get_objects.py passed."  
 #    - python test/test_trafficlights.py
 #    - echo "Congratulations test_trafficlights.py passed." 
     #- python test/test_navigation.py

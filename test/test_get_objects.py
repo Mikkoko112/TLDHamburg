@@ -26,7 +26,7 @@ class TestGetMarker(unittest.TestCase):
         for r, e in zip(result, expected_result):
             self.assertEqual(len(r.children), len(e.children))  # Compare children lengths
             self.assertEqual(r.position, e.position)
-            self.assertEqual(r.children[0].text, e.children[0].text)  # Compare Tooltip text
+            self.assertEqual(r.children[0], e.children[0])  # Compare Tooltip text
 
     #def test_get_trafficlights(lights):
         # Setup

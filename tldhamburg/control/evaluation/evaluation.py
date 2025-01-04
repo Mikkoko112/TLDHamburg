@@ -3,6 +3,8 @@
 to define a new function, follow the template.
 '''
 from .trafficlightapprox import TrafficLightApprox
+from tldhamburg.backend.DataFetcher import DataFetcher
+from tldhamburg.backend.Things import Things
 
 def getMinTrafficLights(routeListDict:dict)->int:
     routeList = routeListDict["features"]
@@ -41,14 +43,27 @@ def getMinAvgRedTime(routeListDict: dict, support_points: int = 20) -> int:
         trafficLights = route["properties"]["trafficlights"]["features"]
         routeWeight = 0
         for light in trafficLights:
-            light_id = int(light["properties"]["id"])
-            green, red = TrafficLightApprox.mean_light_phases(light_id, support_points)
-            # We use r²/(r+g) as an estimate of dimension "Time".
-            # We want to weight lights with longer red phases more heavily,
-            # but also take into account how fast they will switch to green.
-            # The formula r(r/(r+g)) is a natural result of this idea.
-            redRatio = (red*red)/(green+red)
-            routeWeight += redRatio
+            trafficLightsId = int(light["properties"]["id"])
+            fetcher=DataFetcher()
+            fetcher.fetch_data(params={"$filter":f"@iot.id eq {trafficLightsId}","$expand":"Thing"})
+            
+            try:
+                id=fetcher.get_data()[0]["Thing"]["@iot.id"]
+                #green, red = TrafficLightApprox.mean_light_phases(light_id, support_points)
+                meanOutput = TrafficLightApprox.mean_light_phases(id, support_points)
+                green,red = meanOutput[0],meanOutput[1]
+                
+                # We use r²/(r+g) as an estimate of dimension "Time".
+                # We want to weight lights with longer red phases more heavily,
+                # but also take into account how fast they will switch to green.
+                # The formula r(r/(r+g)) is a natural result of this idea.
+                redRatio = (red*red)/(green+red)
+                routeWeight += redRatio
+            
+            except TypeError as e:
+                
+                print("Could not load data from",light)
+            
         if routeWeight < minWeight:
             minIndex = i
             minWeight = routeWeight

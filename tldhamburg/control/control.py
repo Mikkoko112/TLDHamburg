@@ -146,12 +146,36 @@ class RoutePlanner:
                 
                 msToKmhConvert   = 3.6
 
-                timeTillSwitch=(nextSwitch-now).total_seconds()            
+                timeTillSwitch   =(nextSwitch-now).total_seconds()            
 
-                meanSpeed        = (totalDistance/timeTillSwitch)*msToKmhConvert
-                print(f"{meanSpeed}km/h")
-                if meanSpeed     > self.maxSpeed:
-                    return meanSpeed
+                meanMaxSpeed     = (totalDistance/timeTillSwitch)*msToKmhConvert
+                
+                print(f"{meanMaxSpeed} km/h")
+                
+                if meanMaxSpeed  <= self.maxSpeed:
+                    #This is maybe unnecessary if the next switch to a green is 
+                    #always red
+
+                    for searchForRed in range(1,1000):
+                        nextRedSwitch,nextRedPhase = next(gen)
+                        
+                        if nextRedPhase == "red":
+                            timeTillRedSwitch = (nextRedSwitch-now).total_seconds()            
+
+                            meanMinSpeed = (totalDistance/timeTillRedSwitch)*msToKmhConvert
+                            print([
+                                meanMaxSpeed,
+                                meanMinSpeed
+                            ])
+                            return {
+                                "max_speed":meanMaxSpeed,
+                                "min_speed":meanMinSpeed
+                            }
+                    
+                    return {
+                                "max_speed":meanMaxSpeed,
+                                "min_speed":"Could not find a red signal"
+                            }
             
                 i += 1
 
@@ -253,6 +277,7 @@ class RoutePlanner:
         '''
         
         route = routeList.copy()
+        #value = evaluation.getMinAvgRedTime(routeList)
         value = evaluation.getMinTrafficLights(routeList)
         #removes every other route and preserve the structure of a GeoJson file.
         route["features"] = [routeList["features"][value]]
@@ -275,7 +300,7 @@ class RoutePlanner:
         '''
         
         if "max_speed" in options.keys():
-            self.maxSpeed  = int(options(["max_speed"])) 
+            self.maxSpeed  = int(options["max_speed"]) 
         else: 
             self.maxSpeed = "Get  average speed from road"
         

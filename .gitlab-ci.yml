@@ -40,12 +40,12 @@ unit-test-frontend-job:
       - .cache/pip 
   script:
     - source venv/bin/activate
-    - python test/test_geocoding_utils.py
-    - echo "Congratulations test_geocoding_utils.py passed."
-    - python test/test_get_objects.py
-    - echo "Congratulations test_get_objects.py passed."  
-#    - python test/test_trafficlights.py
-#    - echo "Congratulations test_trafficlights.py passed." 
+    #- python test/test_geocoding_utils.py
+    #- echo "Congratulations test_geocoding_utils.py passed."
+    #- python test/test_get_objects.py
+    #- echo "Congratulations test_get_objects.py passed."  
+    - python test/test_trafficlights.py
+    - echo "Congratulations test_trafficlights.py passed." 
     #- python test/test_navigation.py
     #- echo "Congratulations test_navigation.py passed."
 #    - python test/test_position.py

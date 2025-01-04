@@ -14,7 +14,7 @@ before_script:
   - export SHAPELY_USE_CUSTOM_GEOS=0 
   - pip install .
 
-unit-test-job:
+unit-test-bakcend-job:
   stage: backend
   image: python:3.12-slim
   cache:
@@ -31,6 +31,8 @@ unit-test-job:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  
+unit-test-frontend-job:
   stage: frontend
   image: python:3.12-slim
   cache:
@@ -52,7 +54,7 @@ unit-test-job:
     - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
-API_availability_job:
+API_availability_backend-job:
   stage: backend
   image: python:3.12-slim
   cache:
@@ -66,7 +68,7 @@ API_availability_job:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
-API_availability_job:
+API_availability_frontend-job:
   stage: frontend
   image: python:3.12-slim
   cache:

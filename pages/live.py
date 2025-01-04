@@ -1,5 +1,5 @@
 import dash
-from dash import no_update, ctx, callback, dcc
+from dash import no_update, ctx, callback, dcc, html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
@@ -34,22 +34,28 @@ def layout(**kwargs):
     return dbc.Container(children = [
     dcc.Store(id='data-navigate-live', data=""), 
     navbar_live(),
-    data_live()
+    data_live(),
+    dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Loading..."), close_button=False),
+                dbc.ModalBody(html.Div([dbc.Spinner(size="lg")], 
+                                       className="centered-spinner",)),
+            ],
+            id="loadingscreen-live",
+            is_open=False,
+            backdrop="static",
+            centered=True,
+        ),
     ],
     fluid = True, # remove the margins
     className="demo-live-container",
-    id = "loadingscreen-live"
 )
 
 @callback(
     Output('data-navigate-live', 'data'),
     Input('data-navigate-live', 'data'),  # Dummy input to trigger on app load
     running=[
-        (Output("loadingscreen-live", "children"), [dcc.Loading(children=[navbar_live(),
-            data_live()],type="default")], [dcc.Store(id='data-navigate', data="1"),  
-            navbar_live(),
-            data_live()
-            ],),                                    
+        (Output("loadingscreen-live", "is_open"), True, False)                                    
     ],
 )
 def load_data_on_init(dummy_data):

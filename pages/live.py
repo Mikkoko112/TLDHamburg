@@ -25,10 +25,6 @@ external_stylesheets = [
     dbc.themes.BOOTSTRAP,
 ]
 
-# it will show the map with the markers and the Overview
-#pos = Position() # Create a Position object
-#navigate = Navigation() # Create a Navigation object
-
 # Main layout
 def layout(**kwargs): 
     return dbc.Container(children = [
@@ -83,7 +79,6 @@ def load_data_on_init(dummy_data):
     Output("start-button-live", "disabled", allow_duplicate=True),# True: disables the start button if no route is given
     Output("start-button-live", "n_clicks", allow_duplicate=True),
     Output("tab-2-live","disabled"),             # enables the Overview tab
-    Output("instruction-overview-live","children",allow_duplicate=True),  # list all instruction 
 
     [State("startpunkt-live","value"),
      State("endpunkt-live","value"),
@@ -134,7 +129,6 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks, start_button):
                     True,
                     0,
                     no_update,
-                    no_update,
                     )
             
             #get route from control
@@ -144,7 +138,6 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks, start_button):
                 navigate.create_route([start_lon,start_lat], [end_lon, end_lat],False)
             pos.set_pos(lat=start_lat, lon=start_lon)
             pos.set_pos(lat=start_lat, lon=start_lon)
-            #navigate.start_navigation(pos)
 
             return (is_valid_start, 
                     not is_valid_start, 
@@ -157,11 +150,6 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks, start_button):
                     False,
                     0,
                     False,
-                    (dbc.Table.from_dataframe(pd.DataFrame(
-                            {
-                                "in ... metern": navigate.remaining_nav_instr_distances,
-                                "Anweisung": navigate.remaining_nav_instr_texts,
-                            }), striped=True, bordered=True, hover=True)), 
                     )
     return (no_update, 
             no_update, 
@@ -172,7 +160,6 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks, start_button):
             no_update, 
             no_update, 
             True,
-            no_update,
             no_update,
             no_update,
             )
@@ -201,18 +188,25 @@ def store_map_view(center):
     State("route-layer-live", "data"),
     State("map-store-live", "data"), # center of user-location
     Input("start-button-live", "n_clicks"),
+    Input("route-button-live", "n_clicks"),
 
     prevent_initial_call=True
 )
-def show_instructions(data, store, n_clicks):
+def show_instructions(data, store, n_clicks, route):
     # return values
     picture = ""
     text = ""
     progress_value = 0
     remaining_instructions = ""
     speed_limit_text = "Maximal erlaubte Geschwindigkeit: -"
-    
-    if n_clicks == 1 and (data and store != None):
+    button_id = ctx.triggered_id
+    if button_id == "route-button-live":
+        remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
+                {
+                    "in ... metern": navigate.remaining_nav_instr_distances,
+                    "Anweisung": navigate.remaining_nav_instr_texts,
+                }), striped=True, bordered=True, hover=True)) 
+    elif n_clicks == 1 and (data and store != None):
         # update position
         lat = store["lat"]
         lon = store["lng"]

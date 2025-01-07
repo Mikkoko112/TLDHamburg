@@ -99,44 +99,55 @@ class RoutePlanner:
         than the given maximum speed. 
         '''
         
-        trafficLightPos = -1
-        for trafficLight in self.routeData["features"][0]["properties"]["trafficlights"]["features"]:
-            print(trafficLight)
-            if trafficLight["properties"]["id"] == trafficLightsId:
-                trafficLightPos =  trafficLight["properties"]["way-point"]
-                break
-        
+        def getTrafficLightIndex(routeData,trafficLightsId):
+
+            trafficLightPos = -1
+            for trafficLight in routeData["features"][0]["properties"]["trafficlights"]["features"]:
+                print(trafficLight)
+                if trafficLight["properties"]["id"] == trafficLightsId:
+                    trafficLightPos =  trafficLight["properties"]["way-point"]
+                    break
+            return trafficLightPos
+
+
+
+        trafficLightPos = getTrafficLightIndex(self.routeData,trafficLightsId)
+
         if trafficLightPos == -1:
             print("Traffic light could not be found in the route")
             return -1
-        #this need to be fixed to a generator
+        
         
         i = 0
         
         totalDistance  = sum([self._distBetweenPoints(p1,p1+1) 
                             for p1 in range(routePoint,trafficLightPos)])
 
-        if self.maxSpeed == "Get speed from road":
-            sumOfSpeeds   = sum([
-                        self.routeData["features"]["properties"]["speeds"][p1]["maxspeed"] 
+        if self.maxSpeed is None:
+            ''' sumOfSpeeds   = sum([
+                        self.routeData["features"][0]["properties"]["speeds"][p1]["maxspeed"] 
                         for p1 in range(routePoint,trafficLightPos)
-                        ])
-            
-            self.maxSpeed = sumOfSpeeds/(abs(trafficLightPos-routePoint))
+                        ])'''
+            sumOfSpeeds = []
+            for i in range(routePoint,trafficLightPos):
+                allSpeeds = self.routeData["features"][0]["properties"]["speeds"]
+                for speed in allSpeeds:
+                    if speed["way_points"][0] <= i <= speed["way_points"][1]:
+                        sumOfSpeeds.append(speed["maxspeed"])
+            self.maxSpeed = sum(sumOfSpeeds)/(abs(trafficLightPos-routePoint))
 
         print("_calcSpeed:",trafficLightPos,totalDistance,self.maxSpeed)
         
-        print([func for func in dir(tlapp.TrafficLightApprox) if callable(getattr(tlapp.TrafficLightApprox, func)) and not func.startswith("__")])
-
         fetcher=DataFetcher()
         fetcher.fetch_data(params={"$filter":f"@iot.id eq {trafficLightsId}","$expand":"Thing"})
         id=fetcher.get_data()[0]["Thing"]["@iot.id"]
-
+        print(id,trafficLightsId)
         gen = tlapp.TrafficLightApprox.approx_next_switch_generator(id)
         
         
         now                       = dtime.fromtimestamp(time.time(),
                                                     tz=datetime.timezone.utc)
+        msToKmhConvert   = 3.6
         for i in range(1,1000):
             nextSwitch,nextPhase = next(gen)
 
@@ -144,7 +155,7 @@ class RoutePlanner:
 
             if nextPhase == "green":
                 
-                msToKmhConvert   = 3.6
+               
 
                 timeTillSwitch   =(nextSwitch-now).total_seconds()            
 
@@ -302,7 +313,7 @@ class RoutePlanner:
         if "max_speed" in options.keys():
             self.maxSpeed  = int(options["max_speed"]) 
         else: 
-            self.maxSpeed = "Get  average speed from road"
+            self.maxSpeed = None
         
 
         data               = self._getData(options["coordinates"])

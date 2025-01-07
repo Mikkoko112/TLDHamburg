@@ -1,6 +1,7 @@
 #!/usr/bin/env Python3
 import requests
 import json
+import time
 import igraph
 from math import sqrt,acos,inf,degrees,pi
 from tldhamburg.control.routeplanning.fetchRoutes import getRouteFromGraph
@@ -126,14 +127,14 @@ def getBestPrimarySignal(possibleSignals,conjId:str="0")->str:
     for i,item in enumerate(possibleSignals):
         
         values = item[1]+item[2]
-        if conjId == testName:
-            print(item[0],values)
+        '''if conjId == testName:
+            print(item[0],values)'''
         if values < smallestError:
             outPrimarySignal = item[0]
             smallestError = values
     
-    if conjId == testName:
-        print(outPrimarySignal,smallestError)
+    #if conjId == testName:
+    #    print(outPrimarySignal,smallestError)
 
     return outPrimarySignal
 
@@ -170,13 +171,13 @@ def getRouteTrafficLights(route:list, conjFile:dict,conjList:list,vectorization:
             if all([tr[0] for tr in check]):
 
                         
-                if name == testName:
-                    print(primarySignalName)
-                    print("Incoord",route[pointIndex[ 0]-1])
-                    print("Outcoord",route[pointIndex[-1]+1])
-                    print("vectors",vecIn,vecOut)
-                    print("degrees",degIn,degOut)
-                    print("primary degrees",primarydegIn,primarydegOut)
+                #if name == testName:
+                #    print(primarySignalName)
+                #    print("Incoord",route[pointIndex[ 0]-1])
+                #    print("Outcoord",route[pointIndex[-1]+1])
+                #    print("vectors",vecIn,vecOut)
+                #    print("degrees",degIn,degOut)
+                #    print("primary degrees",primarydegIn,primarydegOut)
     
 
                 allPossiblePrimarysignal.append([primarySignalName,
@@ -230,7 +231,9 @@ def getTrafficLightsRoute(routeList:dict,test:bool=False)->dict:
         pureRoute = purifyRoute(routeList,index=i)
         
         conjList = sortNodeToConjunction(pureRoute,conjDict)
+        
         trafficLightsList = getRouteTrafficLights(pureRoute,conjDict,conjList,vectorization)
+        
         if test:
             dic = {"wayPoints":pureRoute,
            "conjList":conjList,
@@ -238,6 +241,7 @@ def getTrafficLightsRoute(routeList:dict,test:bool=False)->dict:
             with open("tldhamburg/control/maps/mappingTest.json","w") as file:
                 json.dump(dic,file,indent=4)
             exit(1)
+        
         jsonData = generateGeoJsonData(trafficLightsList,conjList)
         
         routeList["features"][i]["properties"]["trafficlights"] = jsonData

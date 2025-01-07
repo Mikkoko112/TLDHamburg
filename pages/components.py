@@ -356,12 +356,6 @@ def data_demo():
                         dl.Circle(id="position", center=(0,0), radius=10),
                         dl.LayerGroup(id="start-end-layer"),
                         dl.LayerGroup(id="tl-route-layer"),
-                       # dl.LocateControl(locateOptions={'enableHighAccuracy': True, 
-                       #         "setView": False, 
-                       #         "watch": True, 
-                       #         "maxZoom": 17,
-                       #         },
-                       #         showCompass = False),
                         dl.ScaleControl(position="bottomleft", imperial=False), #shows the scala 
                         dl.FullScreenControl()
                         ], 
@@ -394,7 +388,8 @@ def data_demo():
 def data_live():
     return dbc.Row([
                 dbc.Col([
-                    dcc.Store(id='map-store-live', data=None),  # Store to keep the map zoom level
+                    dcc.Store(id='map-store-live', data={"center": [53.549573,9.953330], "zoom": 10}),  # Store to keep the map zoom level
+                    dcc.Store(id='center-store-live', data=None),  # Store to keep the map zoom level
                     dl.Map(id = "map-live", center=[53.549573,9.953330], zoom=10,
                     children=[
                         dl.TileLayer(),
@@ -430,7 +425,15 @@ def data_live():
                                     disabled=True,
                                     id="tab-2-live")
                         ], active_tab="tab-1-live",
-                    ))              
+                    )),
+                dbc.Modal(
+                    [
+                        dbc.ModalHeader(dbc.ModalTitle("Information")),
+                        dbc.ModalBody("Um die Navigation zu starten, nähern Sie sich bitte der Route"),
+                    ],
+                    id="start-navigation-modal",
+                    is_open=False,
+                ),        
             ],
             className="left-container", 
         )

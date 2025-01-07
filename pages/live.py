@@ -28,7 +28,8 @@ external_stylesheets = [
 # Main layout
 def layout(**kwargs): 
     return dbc.Container(children = [
-    dcc.Store(id='data-navigate-live', data=""), 
+    dcc.Store(id="data-navigate-live", data=""), 
+    dcc.Store(id="start-navigation-bool", data=False),
     navbar_live(),
     data_live(),
     dbc.Modal(
@@ -76,13 +77,18 @@ def load_data_on_init(dummy_data):
     Output("start-end-layer-live", "children"),  # load start and end point into the map
     Output("route-layer-live", "data"),          # load route (geojson) into the map
     Output("tl-route-layer-live", "children"),  # load traffic lights into the map
-    Output("start-button-live", "disabled", allow_duplicate=True),# True: disables the start button if no route is given
+    Output("start-button-live", "disabled"),# True: disables the start button if no route is given
     Output("start-button-live", "n_clicks", allow_duplicate=True),
     Output("tab-2-live","disabled"),             # enables the Overview tab
+    Output("start-navigation-modal", "is_open"),
+    Output("start-navigation-bool", "data"),
+    Output('map-live', 'viewport'),                  # change view of the map
 
     [State("startpunkt-live","value"),
      State("endpunkt-live","value"),
      State("bike-switch-live", "value"),
+     State('map-store-live', 'data'),
+     State("center-store-live", "data"), # center of user-location
      Input("route-button-live", "n_clicks"),
      Input("start-button-live", "n_clicks"),
      ],
@@ -94,12 +100,20 @@ def load_data_on_init(dummy_data):
     ],
     prevent_initial_call=True
 )
-def check_validity(starttext, endtext, bicycle_mode, n_clicks, start_button): 
+def check_validity(starttext, endtext, bicycle_mode, route_store, user_store, n_clicks, start_n_clicks): 
     marker = [{"id": "departure", "lat": 53.5975929, "lon": 9.9318831},
                   {"id": "destination", "lat": 53.5524079, "lon": 10.0084222}]
     button_id = ctx.triggered_id
+    startNavigation = False
+    view = no_update
     if button_id == "start-button-live":
-        navigate.start_navigation(pos) 
+        # update position
+        lat = user_store["lat"]
+        lon = user_store["lng"]
+        #print(f"lat:{lat}, lon:{lon}")
+        pos.set_pos(lat, lon)
+        startNavigation = navigate.start_navigation(pos)
+        view = route_store             
     else:    
         if starttext or endtext: 
             is_valid_start = True
@@ -129,6 +143,9 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks, start_button):
                     True,
                     0,
                     no_update,
+                    startNavigation,
+                    no_update,
+                    no_update
                     )
             
             #get route from control
@@ -136,8 +153,7 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks, start_button):
                 navigate.create_route([start_lon,start_lat], [end_lon, end_lat],True)
             else:
                 navigate.create_route([start_lon,start_lat], [end_lon, end_lat],False)
-            pos.set_pos(lat=start_lat, lon=start_lon)
-            pos.set_pos(lat=start_lat, lon=start_lon)
+            #pos.set_pos(lat=start_lat, lon=start_lon)
 
             return (is_valid_start, 
                     not is_valid_start, 
@@ -150,6 +166,9 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks, start_button):
                     False,
                     0,
                     False,
+                    startNavigation,
+                    no_update,
+                    no_update
                     )
     return (no_update, 
             no_update, 
@@ -159,40 +178,55 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks, start_button):
             no_update, 
             no_update, 
             no_update, 
-            True,
             no_update,
             no_update,
+            no_update,
+            not startNavigation,
+            startNavigation,
+            view
             )
 
 # stores the data of the View for the whole route 
 @callback(
     Output('map-store-live', 'data'),
-    Input('map-live', 'center'),
+    Input('route-layer-live', 'data'),
+    State('map-live', 'center'),
+    State("map-live", "zoom"),
 )
-def store_map_view(center):
-    print(center)
-    return center
+def store_map_view(data, center, zoom):
+    if data is not None:
+        return {'center': center, 'zoom': zoom}
+    return no_update
+
+# stores the center data of the View for the position 
+@callback(
+    Output('center-store-live', 'data'),
+    Input('map-live', 'center'),
+    State("map-live", "zoom")
+)
+def store_map_view(center, zoom):
+    if zoom >= 14:
+        return center
+    return no_update
 
 # go through the steps of the route with the start/next button
 # progress shows in the progressbar
 @callback(
     Output("route-picture-live", "src"),             # change picture for instruction
-    Output("route-instruction-live", "children"),    # change text for instruction
-    Output("map-live", "viewport"),                  # change view of the map
+    Output("route-instruction-live", "children"),    # change text for instruction           
     Output("progress-live", "value"),                # change progress value 
     Output("instruction-overview-live","children"),  # list all instruction still left
     Output("speed-limit-live", "children"),          # change the speed limit 
-    #Output("start-button-live", "disabled"),
-    #Output("start-button-live", "n_clicks"),
 
     State("route-layer-live", "data"),
-    State("map-store-live", "data"), # center of user-location
+    Input("center-store-live", "data"), # center of user-location
+    State("start-navigation-bool", "data"), # if the person is near the route
     Input("start-button-live", "n_clicks"),
     Input("route-button-live", "n_clicks"),
 
     prevent_initial_call=True
 )
-def show_instructions(data, store, n_clicks, route):
+def show_instructions(data, user_store, start_navigation_bool, n_clicks, _):
     # return values
     picture = ""
     text = ""
@@ -200,18 +234,18 @@ def show_instructions(data, store, n_clicks, route):
     remaining_instructions = ""
     speed_limit_text = "Maximal erlaubte Geschwindigkeit: -"
     button_id = ctx.triggered_id
-    if button_id == "route-button-live":
+    if button_id == "route-button-live" or (data and user_store != None):
         remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
                 {
                     "in ... metern": navigate.remaining_nav_instr_distances,
                     "Anweisung": navigate.remaining_nav_instr_texts,
                 }), striped=True, bordered=True, hover=True)) 
-    elif n_clicks == 1 and (data and store != None):
+    elif start_navigation_bool and (data and user_store != None):
         # update position
-        lat = store["lat"]
-        lon = store["lng"]
+        lat = user_store["lat"]
+        lon = user_store["lng"]
         pos.set_pos(lat, lon)
-        #print(f"{lat},{lon}")
+        navigate.update_route(pos)
         picture = dash.get_relative_path(f"/assets/{navigate.current_nav_instr_picture}")
         text = f"In {navigate.remaining_distance}m: {navigate.current_nav_instr_text}"
         #store = dict(center=geocoding_utils.convert_to_lat_lon(navigate.way_points[navigate.current_way_point_index]), zoom=18, transition = "setView")
@@ -236,9 +270,9 @@ def show_instructions(data, store, n_clicks, route):
             picture = dash.get_relative_path(f"/assets/goal.png")
             text = "You arrived at your destination" 
         
-    return (picture, text, store, 
+    return (picture, text, #user_store, 
             progress_value, remaining_instructions,
-            speed_limit_text,)
+            speed_limit_text)
 
 # change trafficlight picture
 @callback(

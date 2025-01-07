@@ -21,7 +21,7 @@ class Navigation:
     _route = None            # of class Route
     departure = None
     destination = None
-    start_navigating = True # changed to True
+    start_navigating = True 
     route_deviation_tolerance = 100 # in meters
 
     geojson = None          # actual content of geojson file
@@ -228,7 +228,7 @@ class Navigation:
         waypoints_lon_lat = []
         for lat, lon in waypoints_lat_lon:
             waypoints_lon_lat.append([lon, lat])
-        print(f"len waypoint: {len(waypoints_lat_lon)}")
+        #print(f"len waypoint: {len(waypoints_lat_lon)}")
         return waypoints_lat_lon, waypoints_lon_lat
 
     def _init_speed_limits(self):
@@ -236,7 +236,7 @@ class Navigation:
         maxspeeds_dict = {}
         for step in maxspeeds:
             maxspeeds_dict[step["way_points"][1]] = step["maxspeed"]
-        print(f"speeds_dict: {maxspeeds_dict}")
+        #print(f"speeds_dict: {maxspeeds_dict}")
         return maxspeeds_dict
 
     def _init_traffic_lights(self):
@@ -273,7 +273,7 @@ class Navigation:
         nearest = (lon, lat)
         # print(f"nearest: {nearest}")
         distance = geopy.distance.geodesic(current, nearest).meters
-
+        print(distance)
         on_route = distance <= self.route_deviation_tolerance
         if on_route == False:
             logging.info(f"distance to route: {distance}, tolerance: {self.route_deviation_tolerance}\n\tcurrent Position: {lat, lon}\n\tnearest point: {nearest_way_point}")
@@ -406,13 +406,16 @@ class Navigation:
         toggles navigation to start if sensible
         requires position to be within 'route_deviation_tolerance'
         """
-        if self.start_navigating == True:
-            pass
+        #if self.start_navigating == True:
+        #    pass
         if self.is_on_route(position) == False:
-            raise Exception("To start navigating, please come near the route")
+            #raise Exception("To start navigating, please come near the route")
+            self.start_navigating = False
+            return False
         else:
             self.start_navigating = True
             self.update_route(position)
+            return True
 
     def _update_status_bar(self):
         tl_keys = list(self.trafficlights.keys())

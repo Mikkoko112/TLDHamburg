@@ -116,7 +116,7 @@ def navbar_demo():
                     id="bike-switch",
                     label=html.A(children=[
                             html.Img(id = "bike-picture", src=dash.get_relative_path(f"/assets/bike.png"), height=30)]),
-                    value=False,
+                    value=False, className="flex-bikemode-container",
                 ),
                 dbc.Tooltip(
                     "Fahrradmodus: beim Fahrradmodus wird die maximale Geschwindigkeit"
@@ -150,7 +150,7 @@ def navbar_live():
                     id="bike-switch-live",
                     label=html.A(children=[
                             html.Img(id = "bike-picture", src=dash.get_relative_path(f"/assets/bike.png"), height=30)]),
-                    value=False,
+                    value=False, className="flex-bikemode-container",
                 ),
                 dbc.Tooltip(
                     "Fahrradmodus: beim Fahrradmodus wird die maximale Geschwindigkeit"
@@ -254,7 +254,7 @@ def control_live(current_speed):
                     width = "auto",
             ),
         ],
-       className=".flex-container-control"
+       className="flex-container-control"
 )
 
 # says how fast you should drive
@@ -272,7 +272,7 @@ def speed_recommendation_demo(necessary_speed):
                         "um\t",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
                         "\tzu erreichen"],),
-                    ),
+                    ),className="speed-recommendation-container",
                 ),
             dbc.Col(
                 html.Div([
@@ -294,7 +294,7 @@ def speed_recommendation_live(necessary_speed):
                         "um\t",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
                         "\tzu erreichen"],),
-                    ),
+                    ), className="speed-recommendation-container",
                 ),
             dbc.Col(
                 html.Div([
@@ -542,7 +542,7 @@ def card_right():
             ]
         )    
     ],
-   className="card-container",
+    className="card-container",
     id="right-card",
 )  
 
@@ -550,8 +550,8 @@ def card_right():
 def components_startseite():
     return dbc.Row(children=[
         dbc.Col(info()), #Include information text 
-        dbc.Col(card_left()), # Include the cards
-        dbc.Col(card_right()),
+        dbc.Col(children=[html.Div(children=[card_left(),card_right()], 
+                                   className="card-components-container")]), # Include the cards
         dbc.Col(contributors()),
     ], 
     className="startseite-components-container",

@@ -10,7 +10,12 @@
     align-items: center; /* Entspricht align="center" */
 }
 
+.flex-bikemode-container {
+    height: 3vh; /* Höhe */
+}
+
 .navbar-container {
+    display: flex; /* Flexbox für das Flex-Verhalten */
     text-decoration: none; /* Entfernt die Unterstreichung von Text */
     align-items: center; /* Entspricht align="center" */
     margin: 0; /* Entspricht g-0 (nuller Abstand) */
@@ -42,11 +47,14 @@
     margin-bottom: 1rem;
 }
 
+.speed-recommendation-container{
+    font-size: 28px; 
+}
+
 .tl-container {
     display: flex;               /* Aktiviert das Flexbox-Layout */
     width: 7vw;                 /* Setzt die Breite auf 7% der Viewport-Breite */
     height: 24vh;               /* Setzt die Höhe auf 25% der Viewport-Höhe */
-    /*margin-left: 4rem;*/
     margin-bottom: 1rem;
 }
 
@@ -89,21 +97,31 @@
 }
 
 .info-container-right {
-    width: 14rem;                  /* Breite auf 15rem setzen */
-    height: 46rem;               /* Höhe auf 44.7rem setzen */
+    width: 14rem;                  /* Breite auf 14rem setzen */
+    height: 46rem;               /* Höhe auf 46rem setzen */
     margin-right: 0.5rem;            /* Rechter Außenabstand von 20px */
     margin-top: 7px;               /* Oberer Außenabstand von 7px */
-}
-
-.card-container {
-    width: 27rem;
-    height: 43rem;               /* Höhe auf 44.7rem setzen */
 }
 
 .startseite-components-container {
     align-items: center;
     display: flex;                 /* Aktiviert das Flexbox-Layout */
+    flex-wrap: wrap;           /* Allow columns to wrap on smaller screens */
     justify-content: flex-start; /* Horizontale Ausrichtung nach links */
+    margin: 0; /* Adjust margins to prevent outer spacing issues */
+}
+
+.card-container {
+    border: none !important; /* Remove border */
+    box-shadow: none !important; /* Remove box-shadow if any */
+    display: flex;              /* Activate flexbox layout for card container */
+    width: 25rem;               /* Full width for better fit */
+    height: auto;              /* Allow height to adjust */         
+}
+
+.card-components-container{
+    display: flex;              /* Activate flexbox layout for card container */
+    flex-direction: row;       /* Stack card elements horizontally */ 
 }
 
 .demo-live-container{
@@ -125,3 +143,125 @@
     align-items: center;
     height: 100%;
 }
+
+/* Responsive Styles for not Fullscreen */
+@media (max-width: 1380px) {
+    
+    .instruction-container, .speed-recommendation-container{
+        font-size: 20px; /* Reduce the font size */
+    }
+
+    .flex-container-top{
+        height: 24vh;   
+    }
+
+    .flex-container-control {
+        margin-left: 0.2rem; /* Adjust margin to fit better */
+    }
+
+    .progress-container {
+        height: 1.5vw; /* Adjust height for smaller screens */
+    }
+
+    .overview-container {
+        height: auto; /* Allow height to adjust */
+        padding: 1rem; /* Add padding for better touch targets */
+    }
+
+    .info-container-left,
+    .info-container-right {
+        width: 100%; /* Full width on smaller screens */
+        height: auto; /* Allow height to adjust */
+        margin: 0; /* Remove margins to fit better */
+    }
+
+    .startseite-components-container {
+        display: flex;   
+        flex-direction: column; /* Stack components vertically */
+    }
+
+    .card-container {
+        display: flex;              /* Activate flexbox layout for card container */
+        flex-direction: row;       /* Stack card elements horizontally */
+        width: 27rem;               /* Full width for better fit */
+        height: auto;              /* Allow height to adjust */
+    }
+
+}
+
+/* Take additional adjustments for smaller screens */
+@media (max-width: 1200px) {
+    .flex-searchbar-container {
+        flex-direction: column; /* Stack inputs and button vertically */
+        height: auto; /* Allow height to adjust */
+    }
+
+    .flex-searchbar-container .col {
+        width: 100%; /* Make each column full width */
+        margin-bottom: 0.5rem; /* Space between rows */
+    }
+
+    .flex-bikemode-container {
+        height: 3vh; /* Höhe */
+    }
+
+    .navbar-container {
+        display: flex; /* Flexbox für das Flex-Verhalten */
+        text-decoration: none; /* Entfernt die Unterstreichung von Text */
+        align-items: center; /* Entspricht align="center" */
+        margin: 0; /* Entspricht g-0 (nuller Abstand) */
+        padding-left: 0.5rem;
+    }
+
+    .flex-container-top {
+        flex-direction: column; /* Stack elements vertically */
+        height: auto; /* Allow height to adjust */
+    }
+
+    .flex-container-bottom {
+        flex-direction: column; /* Stack items vertically */
+        gap: 0.5rem; /* Reduce gap for smaller screens */
+    }
+
+    .instruction-container, .speed-recommendation-container {
+        font-size: 18px; /* Further reduce font size */
+    }
+
+    .navbar-container {
+        font-size: 14px; /* Further reduce font size */
+    }
+
+    .flex-container-bottom {
+        gap: 0.25rem; /* Further reduce gap */
+    }
+
+    .progress-container {
+        height: 1vw; /* Further reduce height */
+    }
+}
+
+
+/*
+.navbar-container {
+    padding-left: 0.3rem; /* Keep padding but adjust if needed 
+    font-size: 16px; /* Reduce the font size for smaller screens 
+}
+
+.flex-searchbar-container {
+    height: 2vh; /* Höhe 
+    margin-top: 0.5rem; /* Adjust top margin for spacing 
+    margin-bottom: 0.5rem; /* Adjust bottom margin for spacing 
+}
+
+/* Make search bar elements smaller 
+.flex-searchbar-container input[type="text"] {
+    width: 80%; /* Set to 80% of its container 
+    height: 30px; /* Set a smaller height 
+    font-size: 14px; /* Adjust font size 
+}
+
+.flex-searchbar-container button {
+    height: 40px; /* Match button height to input 
+    font-size: 14px; /* Adjust button font size 
+}
+*/

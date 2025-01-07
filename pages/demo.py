@@ -130,11 +130,13 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks):
                     )
             
             #get route from control
+            navigate.update_bicycle_mode(bicycle_mode)
             if bicycle_mode is True:
-                navigate.create_route([start_lon,start_lat], [end_lon, end_lat],True)
+                navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
             else:
-                navigate.create_route([start_lon,start_lat], [end_lon, end_lat],False)
+                navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
             pos.set_pos(lat=start_lat, lon=start_lon)
+
             return (is_valid_start, 
                     not is_valid_start, 
                     is_valid_end, 
@@ -189,6 +191,7 @@ def store_map_view(data, zoom, center):
     Output("instruction-overview","children"),  # list all instruction still left
     Output("speed-limit", "children"),          # change the speed limit 
     Output("position", "center"),               # change current position 
+    Output("speed-recommendation", "children"), # change speed recommendation
 
     Input("start-next-button", "n_clicks"),
     Input("prev-button", "n_clicks"),
@@ -214,6 +217,13 @@ def show_instructions(n_clicks, prev, restart, route, store):
     prev_nclicks = 0
     remaining_instructions = ""
     speed_limit_text = "Maximal erlaubte Geschwindigkeit: -"
+    speed_recommendation_text = ["fahre mindestens\t",
+                        html.Span("-", style={"color": "green"}),
+                        "\tkm/h,", 
+                        html.Br(),
+                        "um\t",
+                        html.Span("grün", style={"color": "green", "white-space": "pre"}),
+                        "\tzu erreichen"]
 
     if button_id == "route-button":
         remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
@@ -263,6 +273,13 @@ def show_instructions(n_clicks, prev, restart, route, store):
                         }), striped=True, bordered=True, hover=True))
 
         speed_limit_text = f"Maximal erlaubte Geschwindigkeit: {navigate.current_speed_limit}"
+        speed_recommendation_text = ["fahre mindestens\t",
+                        html.Span(f"{navigate.current_recommended_speed}", style={"color": "green"}),
+                        "\tkm/h,", 
+                        html.Br(),
+                        "um\t",
+                        html.Span("grün", style={"color": "green", "white-space": "pre"}),
+                        "\tzu erreichen"] 
         # first step: prev button disabled 
         if n_clicks == 1:
             text = f"{navigate.current_nav_instr_text}"
@@ -279,15 +296,24 @@ def show_instructions(n_clicks, prev, restart, route, store):
     return (n_clicks, button_text, picture, text, store, 
             toggle_prev_button, toggle_startnext_button, toggle_restart_button,
             progress_value, prev_nclicks, remaining_instructions,
-            speed_limit_text, pos.get_pos("lonlat"),)
+            speed_limit_text, pos.get_pos("lonlat"), 
+            speed_recommendation_text)
 
 # change trafficlight picture
 @callback(
     Output("tl-picture","src"),
-    Input("tl-picture","src")
+    Input("start-next-button", "n_clicks"),
+    prevent_initial_call=True
 )
-def tl_pic(src):
-    if src == "":
+def tl_pic(n_clicks):
+    if navigate.status_next_tl == "":
+        return dash.get_relative_path(f"/assets/tf_off.png")
+    #status = trafficlight.get_status()
+    elif navigate.status_next_tl == "red":
+        return dash.get_relative_path(f"/assets/tf_red.png") 
+    elif navigate.status_next_tl == "yellow":
+        return dash.get_relative_path(f"/assets/tf_yellow.png")
+    elif navigate.status_next_tl == "green":
         return dash.get_relative_path(f"/assets/tf_off.png")
     return no_update
 

@@ -54,6 +54,9 @@ class Navigation:
     next_next_tl = None
 
     bicycle_mode = False
+
+    current_recommended_speed = None # speed recommened 
+    status_next_tl = "" # status for the next trafficlight 
         
     def __init__(self, path=f"{Path.cwd()}/schnittstelle"):
         self._path = path
@@ -275,7 +278,7 @@ class Navigation:
         nearest = (lon, lat)
         # print(f"nearest: {nearest}")
         distance = geopy.distance.geodesic(current, nearest).meters
-        print(distance)
+        #print(distance)
         on_route = distance <= self.route_deviation_tolerance
         if on_route == False:
             logging.info(f"distance to route: {distance}, tolerance: {self.route_deviation_tolerance}\n\tcurrent Position: {lat, lon}\n\tnearest point: {nearest_way_point}")
@@ -401,6 +404,9 @@ class Navigation:
         print(f"nextPhaseTime = {nextPhaseTime}")
         print(f"rapidUpdate = {rapidUpdate}")
         print(f"speed = {speed}")
+        pass
+    
+    def _update_recommended_Speed(self, trafficLightsId:str,routePoint:int):
         pass
 
     def start_navigation(self, position:Position):
@@ -544,7 +550,6 @@ class Navigation:
     
     def update_bicycle_mode(self, bicycle_mode:bool):
         self.bicycle_mode = bicycle_mode
-        return self.bicycle_mode
         
 
 

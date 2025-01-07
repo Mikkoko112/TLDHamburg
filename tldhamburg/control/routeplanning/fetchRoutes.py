@@ -13,6 +13,7 @@ import requests
 import json
 import igraph
 import math
+import time
 from geopy import distance
 from timeit import default_timer as timer
 from tldhamburg.control.routeplanning.angle_at_intersection import is_left_turn_tolerance as leftTurn
@@ -95,7 +96,7 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                                            _target=int(vector["nodeid"][0]))
                     distancefromBefore = edge["length"][0]
                     if edge["maxspeed"][0] != "None" and edge["maxspeed"][0] is not None:
-                        print(edge)
+                        
                         maxSpeed = int(edge["maxspeed"][0])
                     else:
                         maxSpeed = 50
@@ -270,13 +271,17 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
     first,last = getFirstLast(coordsStartEnd,graph)
     
     #This uses the inbuilt function to generate every shortest route.
+    print("Generate path on graph")
+    start_time = time.time()
     all_paths = graph.get_all_shortest_paths(first,to=last)
+    print(f"--- {time.time()-start_time} s---")
     
     #This converts the route into the afformentioned nodes
     coordRoutes = convertToCoordinateRoute(all_paths,graph)
     
     #This generates the GeoJson file for the route
     geoJsonRoutes = generateGeoJsonFile(coordRoutes,graph)
+    
     
     return geoJsonRoutes
 

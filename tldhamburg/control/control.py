@@ -17,6 +17,9 @@ from tldhamburg.control.routeplanning import fetchRoutes as fetcher
 from tldhamburg.control.evaluation  import evaluation
 from tldhamburg.control.evaluation import trafficlightapprox as tlapp
 from tldhamburg.control.routeplanning import routing 
+from tldhamburg.backend.DBMaintainer import DBMaintainer
+import sqlite3
+
 import igraph
 import json
 from datetime import datetime as dtime
@@ -58,9 +61,11 @@ class RoutePlanner:
 
     def _casperEval(self,trafficLightsId:str):
         status,nextPhase,nextPhaseTime,rapidUpdate = 0,0,0,False
+        
         fetcher=DataFetcher()
         fetcher.fetch_data(params={"$filter":f"@iot.id eq {trafficLightsId}","$expand":"Thing"})
         id=fetcher.get_data()[0]["Thing"]["@iot.id"]
+
         switchTime,nextPhase=tlapp.TrafficLightApprox.approx_next_switch(id)
         status="green" if nextPhase=="red" else "red"
         zeitAktuell=dtime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
@@ -103,7 +108,7 @@ class RoutePlanner:
 
             trafficLightPos = -1
             for trafficLight in routeData["features"][0]["properties"]["trafficlights"]["features"]:
-                print(trafficLight)
+                #print(trafficLight)
                 if trafficLight["properties"]["id"] == trafficLightsId:
                     trafficLightPos =  trafficLight["properties"]["way-point"]
                     break
@@ -124,10 +129,7 @@ class RoutePlanner:
                             for p1 in range(routePoint,trafficLightPos)])
 
         if self.maxSpeed is None:
-            ''' sumOfSpeeds   = sum([
-                        self.routeData["features"][0]["properties"]["speeds"][p1]["maxspeed"] 
-                        for p1 in range(routePoint,trafficLightPos)
-                        ])'''
+            
             sumOfSpeeds = []
             for i in range(routePoint,trafficLightPos):
                 allSpeeds = self.routeData["features"][0]["properties"]["speeds"]
@@ -141,7 +143,12 @@ class RoutePlanner:
         fetcher=DataFetcher()
         fetcher.fetch_data(params={"$filter":f"@iot.id eq {trafficLightsId}","$expand":"Thing"})
         id=fetcher.get_data()[0]["Thing"]["@iot.id"]
-        print(id,trafficLightsId)
+        
+        
+
+
+        
+        #print(id,trafficLightsId)
         gen = tlapp.TrafficLightApprox.approx_next_switch_generator(id)
         
         
@@ -161,7 +168,7 @@ class RoutePlanner:
 
                 meanMaxSpeed     = (totalDistance/timeTillSwitch)*msToKmhConvert
                 
-                print(f"{meanMaxSpeed} km/h")
+                #print(f"{meanMaxSpeed} km/h")
                 
                 if meanMaxSpeed  <= self.maxSpeed:
                     #This is maybe unnecessary if the next switch to a green is 
@@ -174,10 +181,7 @@ class RoutePlanner:
                             timeTillRedSwitch = (nextRedSwitch-now).total_seconds()            
 
                             meanMinSpeed = (totalDistance/timeTillRedSwitch)*msToKmhConvert
-                            print([
-                                meanMaxSpeed,
-                                meanMinSpeed
-                            ])
+                            
                             return {
                                 "max_speed":meanMaxSpeed,
                                 "min_speed":meanMinSpeed
@@ -222,8 +226,9 @@ class RoutePlanner:
         
         This function is still work in progress.
         '''
+        print("Get status")
         status,nextPhase,nextPhaseTime,rapidUpdate,speed = 0,0,0,False,-1
-        
+        start_time = time.time()
         if isinstance(trafficLightsId, list):
             out = []
             for elem in trafficLightsId:
@@ -236,12 +241,15 @@ class RoutePlanner:
             return out
         elif isinstance(trafficLightsId,str):
             tfLID,status,nextPhase,nextPhaseTime,rapidUpdate = self._casperEval(trafficLightsId)
-
+            
             if currentPositionID == -1:
                 return status,nextPhase,nextPhaseTime,rapidUpdate
             else:
                 speed = self._calcSpeed(trafficLightsId,currentPositionID)
+                print(f"--- {time.time()-start_time} s---")
                 return status,nextPhase,nextPhaseTime,rapidUpdate,speed
+                
+            
             #return self._casperEval(trafficLightsId)
             #return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
 
@@ -310,28 +318,41 @@ class RoutePlanner:
                 and traffic light data.
         '''
         
+        print("Generating Route")
+        start_time = time.time()
         if "max_speed" in options.keys():
             self.maxSpeed  = int(options["max_speed"]) 
         else: 
             self.maxSpeed = None
         
-
+        print("Get Route from Graph")
+        startTempTime = time.time()
         data               = self._getData(options["coordinates"])
+        
+        print(f"--- {time.time()-startTempTime} s---")
+        print()
+        
+        print("Get Traffic")
+        startTempTime = time.time()
         trafficLightRoutes = routing.getTrafficLightsRoute(data)
+        print(f"--- {time.time()-startTempTime} s---")
+        
         self.routeData     = self._getBestRoute(trafficLightRoutes)
         
-        
+        print(f"--- {time.time()-start_time} s---")
         self.safeRoute()
     
     def _initMapData(self):
         '''
         This sets up the graph data.
         '''
+        print("Loading Mapdata")
+        start_time = time.time()
         with open("tldhamburg/control/optionsfile.json","r") as file:
             options = json.load(file)
     
         self.graph = igraph.load("tldhamburg/control/{}".format(options["importantData"]["GraphData"]))
-
+        print(f"--- {time.time()-start_time} s---")
 
     def __init__(self,path:str):
         self.path = path

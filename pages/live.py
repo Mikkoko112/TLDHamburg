@@ -108,12 +108,13 @@ def check_validity(starttext, endtext, bicycle_mode, route_store, user_store, n_
     view = no_update
     if button_id == "start-button-live":
         # update position
-        lat = user_store["lat"]
-        lon = user_store["lng"]
+        lon = user_store["lat"]
+        lat = user_store["lng"]
         #print(f"lat:{lat}, lon:{lon}")
         pos.set_pos(lat, lon)
         startNavigation = navigate.start_navigation(pos)
-        view = route_store             
+        if startNavigation is False:
+            view = route_store             
     else:    
         if starttext or endtext: 
             is_valid_start = True
@@ -150,10 +151,10 @@ def check_validity(starttext, endtext, bicycle_mode, route_store, user_store, n_
             
             #get route from control
             if bicycle_mode is True:
-                navigate.create_route([start_lon,start_lat], [end_lon, end_lat],True)
+                navigate.update_bicycle_mode(bicycle_mode)
+                navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
             else:
-                navigate.create_route([start_lon,start_lat], [end_lon, end_lat],False)
-            #pos.set_pos(lat=start_lat, lon=start_lon)
+                navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
 
             return (is_valid_start, 
                     not is_valid_start, 
@@ -240,7 +241,7 @@ def show_instructions(data, user_store, start_navigation_bool, n_clicks, _):
                     "in ... metern": navigate.remaining_nav_instr_distances,
                     "Anweisung": navigate.remaining_nav_instr_texts,
                 }), striped=True, bordered=True, hover=True)) 
-    elif start_navigation_bool and (data and user_store != None):
+    if start_navigation_bool and (data and user_store != None):
         # update position
         lat = user_store["lat"]
         lon = user_store["lng"]

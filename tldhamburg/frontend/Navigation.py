@@ -52,16 +52,18 @@ class Navigation:
     current_progress_next_tl = None # progress to next traffic light
     next_tl = None          # Trafficlight Object
     next_next_tl = None
+
+    bicycle_mode = False
         
     def __init__(self, path=f"{Path.cwd()}/schnittstelle"):
         self._path = path
         self._route = RoutePlanner(self._path)
     
-    def create_route(self, departure:list, destination:list, bicycle_mode:bool):
+    def create_route(self, departure:list, destination:list):
         # instruct creation of route
         self.departure = departure
         self.destination = destination
-        if bicycle_mode is True:
+        if self.bicycle_mode is True:
            nav_coordinates = {"coordinates": [departure,destination],
                               "maxspeed": 20} 
         else:
@@ -539,6 +541,10 @@ class Navigation:
         self.current_position.set_pos(lat, lon)
         self.update_route(self.current_position)
         return lat, lon
+    
+    def update_bicycle_mode(self, bicycle_mode:bool):
+        self.bicycle_mode = bicycle_mode
+        return self.bicycle_mode
         
 
 

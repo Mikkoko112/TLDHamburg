@@ -208,7 +208,7 @@ def next_turn_live():
 
 # buttons for clicking through the route in the demo page
 # also shows the maximal speed allowed
-def control_demo(current_speed):
+def control_demo():
     return dbc.Row(
         children= [
             dbc.Col(
@@ -228,7 +228,8 @@ def control_demo(current_speed):
             ),
             dbc.Col(
                     dbc.ListGroup([
-                        dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="speed-limit"),
+                        dbc.ListGroupItem("Maximal erlaubte Geschwindigkeit: -", 
+                                          id="speed-limit"),
                         ],
                     ), 
                     width = "auto",
@@ -238,7 +239,7 @@ def control_demo(current_speed):
 )
 
 # shows the maximal speed allowed - live
-def control_live(current_speed):
+def control_live():
     return dbc.Row(
         children= [
             dbc.Col(
@@ -248,7 +249,8 @@ def control_live(current_speed):
             ),
             dbc.Col(
                     dbc.ListGroup([
-                            dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="speed-limit-live"),
+                            dbc.ListGroupItem("Maximal erlaubte Geschwindigkeit: -", 
+                                              id="speed-limit-live"),
                         ],
                     ), 
                     width = "auto",
@@ -262,21 +264,21 @@ def control_live(current_speed):
 # picture of a traffic light 
 # standard: off
 # can be changed to green, yellow and red
-def speed_recommendation_demo(necessary_speed): 
+def speed_recommendation_demo(): 
     return dbc.Row(children=
             [dbc.Col(
                 html.Div(html.P(["fahre mindestens\t",
-                        html.Span(f"{necessary_speed}", style={"color": "green"}),
+                        html.Span("-", style={"color": "green"}),
                         "\tkm/h,", 
                         html.Br(),
                         "um\t",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                        "\tzu erreichen"],),
+                        "\tzu erreichen"], id="speed-recommendation"),
                     ),className="speed-recommendation-container",
                 ),
             dbc.Col(
                 html.Div([
-                    html.Img(id = "tl-picture", src="")
+                    html.Img(id = "tl-picture", src=dash.get_relative_path(f"/assets/tf_off.png"))
                 ],
                 className="tl-container",
                 ),
@@ -284,21 +286,21 @@ def speed_recommendation_demo(necessary_speed):
         className="flex-container-bottom",
     )
 
-def speed_recommendation_live(necessary_speed): 
+def speed_recommendation_live(): 
     return dbc.Row(children=
             [dbc.Col(
                 html.Div(html.P(["fahre mindestens\t",
-                        html.Span(f"{necessary_speed}", style={"color": "green"}),
+                        html.Span("-", style={"color": "green"}),
                         "\tkm/h,", 
                         html.Br(),
                         "um\t",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                        "\tzu erreichen"],),
+                        "\tzu erreichen"], id="speed-recommendation-live"),
                     ), className="speed-recommendation-container",
                 ),
             dbc.Col(
                 html.Div([
-                    html.Img(id = "tl-picture-live", src="")
+                    html.Img(id = "tl-picture-live", src=dash.get_relative_path(f"/assets/tf_off.png"))
                 ],
                 className="tl-container",
                 ),
@@ -368,8 +370,8 @@ def data_demo():
                             dbc.Col(children= 
                                 [
                                 next_turn_demo(),
-                                control_demo("-"),
-                                speed_recommendation_demo("-"),
+                                control_demo(),
+                                speed_recommendation_demo(),
                                 progress_demo()
                                 ],
                             ), 
@@ -413,8 +415,8 @@ def data_live():
                             dbc.Col(children= 
                                 [
                                 next_turn_live(),
-                                control_live("-"),
-                                speed_recommendation_live("-"),
+                                control_live(),
+                                speed_recommendation_live(),
                                 progress_live()
                                 ],
                             ), 

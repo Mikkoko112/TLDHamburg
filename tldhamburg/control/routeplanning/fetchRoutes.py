@@ -270,11 +270,9 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
     #This gets the nearest starting node and the nearest finish node.
     first,last = getFirstLast(coordsStartEnd,graph)
     
-    #This uses the inbuilt function to generate every shortest route.
-    print("Generate path on graph")
-    start_time = time.time()
+    #This uses the built in function to generate every shortest route.
     all_paths = graph.get_all_shortest_paths(first,to=last)
-    print(f"--- {time.time()-start_time} s---")
+    
     
     #This converts the route into the afformentioned nodes
     coordRoutes = convertToCoordinateRoute(all_paths,graph)

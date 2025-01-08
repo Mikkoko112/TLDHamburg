@@ -62,15 +62,19 @@ class RoutePlanner:
     def _casperEval(self,trafficLightsId:str):
         status,nextPhase,nextPhaseTime,rapidUpdate = 0,0,0,False
         
-        fetcher=DataFetcher()
-        fetcher.fetch_data(params={"$filter":f"@iot.id eq {trafficLightsId}","$expand":"Thing"})
-        id=fetcher.get_data()[0]["Thing"]["@iot.id"]
+       
+        id = int(trafficLightsId)
+        
+        output=tlapp.TrafficLightApprox.approx_next_switch(id)
+        if output is None:
+            return trafficLightsId,9,9,0,False
 
-        switchTime,nextPhase=tlapp.TrafficLightApprox.approx_next_switch(id)
+        switchTime,nextPhase = output
         status="green" if nextPhase=="red" else "red"
         zeitAktuell=dtime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
         nextPhaseTime=(switchTime-zeitAktuell).total_seconds()
         return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
+        
         #why is this?
         thing=Things([id])
         zyklusDaten=thing.get_cycle_second_observations(2,True)[id]
@@ -138,17 +142,9 @@ class RoutePlanner:
                         sumOfSpeeds.append(speed["maxspeed"])
             self.maxSpeed = sum(sumOfSpeeds)/(abs(trafficLightPos-routePoint))
 
-        print("_calcSpeed:",trafficLightPos,totalDistance,self.maxSpeed)
-        
-        fetcher=DataFetcher()
-        fetcher.fetch_data(params={"$filter":f"@iot.id eq {trafficLightsId}","$expand":"Thing"})
-        id=fetcher.get_data()[0]["Thing"]["@iot.id"]
-        
         
 
-
-        
-        #print(id,trafficLightsId)
+        id = int(trafficLightsId)
         gen = tlapp.TrafficLightApprox.approx_next_switch_generator(id)
         
         
@@ -158,14 +154,9 @@ class RoutePlanner:
         for i in range(1,1000):
             nextSwitch,nextPhase = next(gen)
 
-
-
             if nextPhase == "green":
                 
-               
-
-                timeTillSwitch   =(nextSwitch-now).total_seconds()            
-
+                timeTillSwitch   = (nextSwitch-now).total_seconds()   
                 meanMaxSpeed     = (totalDistance/timeTillSwitch)*msToKmhConvert
                 
                 #print(f"{meanMaxSpeed} km/h")
@@ -226,9 +217,8 @@ class RoutePlanner:
         
         This function is still work in progress.
         '''
-        print("Get status")
+        #print("Get status")
         status,nextPhase,nextPhaseTime,rapidUpdate,speed = 0,0,0,False,-1
-        start_time = time.time()
         if isinstance(trafficLightsId, list):
             out = []
             for elem in trafficLightsId:
@@ -242,11 +232,11 @@ class RoutePlanner:
         elif isinstance(trafficLightsId,str):
             tfLID,status,nextPhase,nextPhaseTime,rapidUpdate = self._casperEval(trafficLightsId)
             
-            if currentPositionID == -1:
+            if currentPositionID == -1 or status == 9:
                 return status,nextPhase,nextPhaseTime,rapidUpdate
             else:
                 speed = self._calcSpeed(trafficLightsId,currentPositionID)
-                print(f"--- {time.time()-start_time} s---")
+                #print(f"--- {time.time()-start_time} s---")
                 return status,nextPhase,nextPhaseTime,rapidUpdate,speed
                 
             
@@ -318,28 +308,18 @@ class RoutePlanner:
                 and traffic light data.
         '''
         
-        print("Generating Route")
-        start_time = time.time()
         if "max_speed" in options.keys():
             self.maxSpeed  = int(options["max_speed"]) 
         else: 
             self.maxSpeed = None
         
-        print("Get Route from Graph")
-        startTempTime = time.time()
         data               = self._getData(options["coordinates"])
         
-        print(f"--- {time.time()-startTempTime} s---")
-        print()
-        
-        print("Get Traffic")
         startTempTime = time.time()
         trafficLightRoutes = routing.getTrafficLightsRoute(data)
-        print(f"--- {time.time()-startTempTime} s---")
         
         self.routeData     = self._getBestRoute(trafficLightRoutes)
         
-        print(f"--- {time.time()-start_time} s---")
         self.safeRoute()
     
     def _initMapData(self):

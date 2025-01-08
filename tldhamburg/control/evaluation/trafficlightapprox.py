@@ -222,6 +222,10 @@ class TrafficLightApprox:
         mean_time_red = result["mean_red_phase"]
         mean_red_ci = result["mean_red_phase_ci"]
 
+        if np.isnan(mean_time_green) or np.isnan(mean_time_red):
+            print("No mean time found for Thing({})".format(thing_id))
+            return None 
+
         for time_stamp, signal in observations:
             if signal == 3:  # if current_color == green
                 time = datetime.fromisoformat(time_stamp)
@@ -284,8 +288,9 @@ class TrafficLightApprox:
         try:
             observations = thing.get_primary_signal_observations(4, True)[thing_id]
         except KeyError:
+            
             print(f"No Observations found for Thing({thing_id})")
-            return
+            return None
 
         time_green, time_red = TrafficLightApprox.mean_light_phases(
             thing_id=thing_id, support_points=32

@@ -46,11 +46,14 @@ def getMinAvgRedTime(routeListDict: dict, support_points: int = 20) -> int:
             trafficLightsId = int(light["properties"]["id"])
             fetcher=DataFetcher()
             fetcher.fetch_data(params={"$filter":f"@iot.id eq {trafficLightsId}","$expand":"Thing"})
-            
+            if fetcher.get_data() is None:
+                continue
             try:
                 id=fetcher.get_data()[0]["Thing"]["@iot.id"]
                 #green, red = TrafficLightApprox.mean_light_phases(light_id, support_points)
                 meanOutput = TrafficLightApprox.mean_light_phases(id, support_points)
+                if meanOutput is None:
+                    continue
                 green,red = meanOutput[0],meanOutput[1]
                 
                 # We use r²/(r+g) as an estimate of dimension "Time".

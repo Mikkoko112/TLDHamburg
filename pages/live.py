@@ -95,8 +95,8 @@ def load_data_on_init(dummy_data):
      running=[
         (Output("route-button-live", "disabled"), True, False),
         (Output("route-button-live", "children"), [dbc.Spinner(size="sm"), " Loading..."], "Route"),
-        (Output("map-live", "center"), [53.549573,9.953330],[53.549573,9.953330]), # during loading for the new route zoom out
-        (Output("map-live", "zoom"),10,10),                                        # to not have a problem with viewing bound 
+        #(Output("map-live", "center"), [53.549573,9.953330],[53.549573,9.953330]), # during loading for the new route zoom out
+        #(Output("map-live", "zoom"),10,10),                                        # to not have a problem with viewing bound 
     ],
     prevent_initial_call=True
 )
@@ -219,6 +219,8 @@ def store_map_view(center, zoom):
     Output("instruction-overview-live","children"),  # list all instruction still left
     Output("speed-limit-live", "children"),          # change the speed limit 
     Output("speed-recommendation-live", "children"), # change speed recommendation
+    Output("route-layer-live", "data", allow_duplicate=True),          # load route (geojson) into the map
+    Output("tl-route-layer-live", "children", allow_duplicate=True),  # load traffic lights into the map
 
     State("route-layer-live", "data"),
     Input("center-store-live", "data"), # center of user-location
@@ -249,7 +251,8 @@ def show_instructions(data, user_store, start_navigation_bool, n_clicks, _):
                     "in ... metern": navigate.remaining_nav_instr_distances,
                     "Anweisung": navigate.remaining_nav_instr_texts,
                 }), striped=True, bordered=True, hover=True)) 
-    if start_navigation_bool and (data and user_store != None):
+    if start_navigation_bool:
+        #print("start!")
         # update position
         lat = user_store["lat"]
         lon = user_store["lng"]
@@ -287,7 +290,8 @@ def show_instructions(data, user_store, start_navigation_bool, n_clicks, _):
         
     return (picture, text, #user_store, 
             progress_value, remaining_instructions,
-            speed_limit_text, speed_recommendation_text)
+            speed_limit_text, speed_recommendation_text, navigate.geojson, 
+                    get_objects.get_trafficlights(navigate.get_all_trafficlight_coordinates()),)
 
 # change trafficlight picture
 @callback(

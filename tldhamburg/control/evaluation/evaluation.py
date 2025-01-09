@@ -1,15 +1,18 @@
-
-'''
+"""
 to define a new function, follow the template.
-'''
-from .trafficlightapprox import TrafficLightApprox
-from tldhamburg.backend.DataFetcher import DataFetcher
-from tldhamburg.backend.Things import Things
+"""
 
-def getMinTrafficLights(routeListDict:dict)->int:
+import sys
+from tldhamburg.backend.DataFetcher import DataFetcher
+from .trafficlightapprox import TrafficLightApprox
+
+
+def getMinTrafficLights(routeListDict: dict) -> int:
+    """Find the route with the least number of traffic lights.
+    This is a testing-prototype and shoudl not be used."""
     routeList = routeListDict["features"]
-    minCount,idx = 0,0
-    for i,route in enumerate(routeList):
+    minCount, idx = 0, 0
+    for i, route in enumerate(routeList):
         trafficLights = route["properties"]["trafficlights"]["features"]
         if minCount == 0:
             minCount = len(trafficLights)
@@ -18,6 +21,7 @@ def getMinTrafficLights(routeListDict:dict)->int:
             minCount = len(trafficLights)
             idx = i
     return idx
+
 
 def getMinAvgRedTime(routeListDict: dict, support_points: int = 20) -> int:
     """
@@ -44,31 +48,37 @@ def getMinAvgRedTime(routeListDict: dict, support_points: int = 20) -> int:
         routeWeight = 0
         for light in trafficLights:
             trafficLightsId = int(light["properties"]["id"])
-            fetcher=DataFetcher()
-            fetcher.fetch_data(params={"$filter":f"@iot.id eq {trafficLightsId}","$expand":"Thing"})
-            
+            fetcher = DataFetcher()
+            fetcher.fetch_data(
+                params={"$filter": f"@iot.id eq {trafficLightsId}", "$expand": "Thing"}
+            )
+            if fetcher.get_data() is None:
+                continue
             try:
-                id=fetcher.get_data()[0]["Thing"]["@iot.id"]
-                #green, red = TrafficLightApprox.mean_light_phases(light_id, support_points)
+                id = fetcher.get_data()[0]["Thing"]["@iot.id"]
+                # green, red = TrafficLightApprox.mean_light_phases(light_id, support_points)
                 meanOutput = TrafficLightApprox.mean_light_phases(id, support_points)
-                green,red = meanOutput[0],meanOutput[1]
-                
+                if meanOutput is None:
+                    continue
+                green, red = meanOutput[0], meanOutput[1]
+
                 # We use r²/(r+g) as an estimate of dimension "Time".
                 # We want to weight lights with longer red phases more heavily,
                 # but also take into account how fast they will switch to green.
                 # The formula r(r/(r+g)) is a natural result of this idea.
-                redRatio = (red*red)/(green+red)
+                redRatio = (red * red) / (green + red)
                 routeWeight += redRatio
-            
-            except TypeError as e:
-                
-                print("Could not load data from",light)
-            
+            except TypeError:
+                print(f"Could not load data from {light}:")
+                sys.exc_info()
+
         if routeWeight < minWeight:
             minIndex = i
             minWeight = routeWeight
     # if minIndex is still -1 here, then something went wrong.
     if minIndex == -1:
-        raise RuntimeError(f"getMinAvgRedTime({routeList}, {support_points}) error:\n"
-                           "All routes in the input dictionary have infinite wait-time estimates.")
+        raise RuntimeError(
+            f"getMinAvgRedTime({routeList}, {support_points}) error:\n"
+            "All routes in the input dictionary have infinite wait-time estimates."
+        )
     return minIndex

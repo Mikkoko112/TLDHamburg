@@ -161,7 +161,7 @@ class RoutePlanner:
                 
                 #print(f"{meanMaxSpeed} km/h")
                 
-                if meanMaxSpeed  <= self.maxSpeed:
+                if 0<=meanMaxSpeed  <= self.maxSpeed:
                     #This is maybe unnecessary if the next switch to a green is 
                     #always red
 
@@ -183,7 +183,6 @@ class RoutePlanner:
                                 "min_speed":"Could not find a red signal"
                             }
             
-                i += 1
 
         print("No speed could be calculated")
         return -1
@@ -286,8 +285,8 @@ class RoutePlanner:
         '''
         
         route = routeList.copy()
-        #value = evaluation.getMinAvgRedTime(routeList)
-        value = evaluation.getMinTrafficLights(routeList)
+        value = evaluation.getMinAvgRedTime(routeList)
+        #value = evaluation.getMinTrafficLights(routeList)
         #removes every other route and preserve the structure of a GeoJson file.
         route["features"] = [routeList["features"][value]]
         return route

@@ -378,19 +378,22 @@ class Navigation:
         status 'green': use min speed necessary to cross trafficlight before change
         status 'red': use max speed to avoid stopping at the traffic light
         """
-        if color == "green":
-            recommended = speed["min_speed"]
-        elif color == "red":
-            recommended = speed["max_speed"]
+        if speed == -1:
+            recommended = "-"
         else:
-            recommended = 0
+            if color == "green":
+                recommended = speed["min_speed"]
+            elif color == "red":
+                recommended = speed["max_speed"]
+            else:
+                recommended = 0
 
-        if recommended > self.current_speed_limit:
-            recommended = self.current_speed_limit
-        elif recommended < 0:
-            recommended = 0
+            if recommended > self.current_speed_limit:
+                recommended = self.current_speed_limit
+            elif recommended < 0:
+                recommended = 0
 
-        recommended = round(recommended, ndigits=0)
+            recommended = round(recommended, ndigits=0)
         self.current_recommended_speed = recommended
         return recommended
 
@@ -455,7 +458,8 @@ class Navigation:
         self.current_position = position
         if self.is_on_route(position) == False:
             lat, lon = position.get_pos()
-            departure = [lat, lon]
+            departure = [lat, lon][::-1]
+            print(departure)
             logging.info(f"creating new route, \n\tstarting at {departure},\n\tdestination: {self.destination}")
             self.create_route(departure, destination=self.destination)
             self.start_navigating = True
@@ -501,7 +505,7 @@ class Navigation:
         if self.next_tl is not None:
             self._update_trafficlight(self.next_tl)
         else:
-            self._update_recommended_Speed(color=None, speed=0)
+            self._update_recommended_speed(color=None, speed=0)
             self.status_next_tl = ""
 
         # progress-bar. 

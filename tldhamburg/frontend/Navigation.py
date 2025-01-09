@@ -68,7 +68,7 @@ class Navigation:
         self.destination = destination
         if self.bicycle_mode is True:
            nav_coordinates = {"coordinates": [departure,destination],
-                              "maxspeed": 20} 
+                              "max_speed": 20} 
         else:
             nav_coordinates = {"coordinates": [departure,destination]}
         self._route.generateRoute(nav_coordinates)
@@ -370,7 +370,7 @@ class Navigation:
             self._update_recommended_speed(color,speed)
 
         # TODO ausbauen
-        print(f"id = {trafficlight.things_id}, status = {color}, nextPhase = {nextPhase}, nextPhaseTime = {nextPhaseTime}, rapidUpdate = {rapidUpdate}, speed = {speed}")
+        #print(f"id = {trafficlight.things_id}, status = {color}, nextPhase = {nextPhase}, nextPhaseTime = {nextPhaseTime}, rapidUpdate = {rapidUpdate}, speed = {speed}")
     
     def _update_recommended_speed(self, color, speed):
         """

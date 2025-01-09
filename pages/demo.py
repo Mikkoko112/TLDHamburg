@@ -306,7 +306,7 @@ def show_instructions(n_clicks, prev, restart, route, store):
     prevent_initial_call=True
 )
 def tl_pic(n_clicks):
-    if navigate.status_next_tl == "":
+    if navigate.status_next_tl == "" or "9":
         return dash.get_relative_path(f"/assets/tf_off.png")
     #status = trafficlight.get_status()
     elif navigate.status_next_tl == "red":

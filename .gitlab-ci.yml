@@ -36,7 +36,7 @@ unit-test-frontend-job:
   stage: frontend
   image: python:3.12-slim
   variables:
-    GITLAB_MEMORY_LIMIT: "2g" 
+    GITLAB_MEMORY_LIMIT: 2G
   cache:
     paths:
       - .cache/pip

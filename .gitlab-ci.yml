@@ -29,7 +29,7 @@ unit-test-backend-job:
     - python test/test_trafficlightapprox.py
     - echo "Congratulations test_trafficlightapprox.py passed."
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "push"'
+   # - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   
 unit-test-frontend-job:
@@ -37,7 +37,9 @@ unit-test-frontend-job:
   image: python:3.12-slim
   cache:
     paths:
-      - .cache/pip 
+      - .cache/pip
+  variables:
+    GITLAB_MEMORY_LIMIT: "2g" 
   script:
     - source venv/bin/activate
     - python test/test_geocoding_utils.py

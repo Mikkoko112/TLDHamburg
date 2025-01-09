@@ -14,26 +14,20 @@ class TestNavigation(unittest.TestCase):
         mock_navigation = MagicMock()
         self.navigate._route = mock_navigation
 
-        # mock_route_class = MagicMock(spec=RoutePlanner)
-        # mock_route_class.return_value = None
-        
-        # self.navigate = Navigation(path=f"{Path.cwd()}/test")
         mock_navigation.generateRoute.return_value = None 
-        
-        # mock_route_planner = MagicMock(spec=RoutePlanner)
-        # mock_route_planner.generateRoute.return_value = None
         
         with open(f"{Path.cwd()}/test/test_route.geojson", "r") as f:
             route_planner_data = json.load(f)
 
         self.navigate._init_route_geojson = MagicMock(return_value=route_planner_data)
+
+        speed = {'max_speed': 12.009, 'min_speed': 8.987}
+        data = ("green", "red", 12, False, speed)
+        self.navigate._route.getUpdateOnTrafficLight = MagicMock(return_value=data)
         
         departure = [9.93146705627441, 53.5978164672852]
         destination = [10.008599281311, 53.5522041320801]
         self.navigate.create_route(departure, destination)
-        # print(f"traff_dict:{self.navigate.trafficlights}")
-        # mock_trafficlight = MagicMock()
-        # self.navigate._init_traffic_lights = {163: None, 270: None, 274: <tldhamburg.frontend.trafficlights.Trafficlight object at 0x109268a50>, 287: <tldhamburg.frontend.trafficlights.Trafficlight object at 0x108d529e0>, 291: <tldhamburg.frontend.trafficlights.Trafficlight object at 0x108f2f130>, 292: <tldhamburg.frontend.trafficlights.Trafficlight object at 0x108f2f9b0>, 312: <tldhamburg.frontend.trafficlights.Trafficlight object at 0x108fbf450>, 337: <tldhamburg.frontend.trafficlights.Trafficlight object at 0x108f32f30>}
 
     def test_init_route_geojson(self):
         # method being mocked
@@ -74,7 +68,6 @@ class TestNavigation(unittest.TestCase):
         lat2 = 9.93146725627441
         lon2 = 53.5978164872852
         expected = 3.508068361854152e-09
-        # expected = [3.50806836e-09, 3.49083307e-09, 1.74541652e-08]
         result = self.navigate._haversine_approx(lat1, lon1, lat2, lon2)
         self.assertEqual(result, expected)
 
@@ -112,21 +105,33 @@ class TestNavigation(unittest.TestCase):
         tl1, tl2 = self.navigate._get_impending_two_trafficlights()
         tl1_result = tl1.things_id
         tl2_result = tl2.things_id
-        # print(f"tl1_result:{tl1_result}")
-        # print(f"tl2_result:{tl2_result}")
         expected1 = "21245"
         expected2 = "1663"
         self.assertEqual(tl1_result, expected1)
         self.assertEqual(tl2_result, expected2)
 
-    # TODO
-    def test_update_trafficlight(self):
-        pass
+    def test_update_trafficlight(self):        
+        mock_trafficlight = MagicMock(spec=Trafficlight)
+        self.navigate.next_tl = mock_trafficlight
+        mock_trafficlight.things_id = "9515"
+        mock_trafficlight.set_status.return_value = "green"
+
+        self.navigate._update_trafficlight(mock_trafficlight)
+
+        result = self.navigate.status_next_tl
+        expected = "green"
+        self.assertEqual(result, expected)
+
+    def test_update_recommended_speed(self):
+        status = "green"
+        speed = {'max_speed': 12.009, 'min_speed': 8.987}
+        result = self.navigate._update_recommended_speed(status, speed)
+        expected = 9
+        self.assertEqual(result, expected)
 
     def test_start_navigation(self):
         mock_position = MagicMock(spec=Position)
         mock_position.get_pos.return_value = self.navigate.way_points[28]
-        # self.navigate.update_route(mock_position)
         result = self.navigate.start_navigation(mock_position)
         expected = True
         self.assertEqual(result, expected)
@@ -145,7 +150,6 @@ class TestNavigation(unittest.TestCase):
 
     def test_get_all_trafficlight_coordinates(self):
         result = self.navigate.get_all_trafficlight_coordinates()
-        # print(f"trafficlight_coordinates:{result}")
         expected = [[9.96050834655762, 53.5804214477539], [9.98281192779541, 53.5654144287109], [9.98375606536865, 53.5646362304688], [9.98733520507812, 53.5626258850098], [9.98937606811523, 53.5615921020508], [9.98944473266602, 53.5615539550781], [9.99171829223633, 53.5594062805176], [9.99848079681396, 53.5575904846191]]
         self.assertEqual(result, expected)
     
@@ -155,78 +159,10 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_update_bicycle_mode(self):
-        result = self.navigate.update_bicycle_mode(True)
+        self.navigate.update_bicycle_mode(True)
+        result = self.navigate.bicycle_mode
         expected = True
         self.assertEqual(result, expected)
 
-
-
 if __name__ == "__main__":
     unittest.main()
-
-
-#     def setUp(self):
-#         # Setup
-
-#         # Create a mock geojson route
-#         path = f"{Path.cwd().parent}/schnittstelle"
-#         with open(f"{path}/route.geojson", "rw") as f:
-#             f.dump(mock_route_geojson.raw)
-
-
-#         self.pos = Position()
-#         self.navigate = Navigation(path=path)
-#         self.test_routes = [
-#             #[[9.98373,53.564093], [9.974259,53.567634]],
-#             [[9.927325,53.597382], [9.931858,53.598495]]
-#         ]
-
-    
-#     def test_iterate_along_route(self):
-#         for test_route in self.test_routes:
-#             departure, destination = test_route
-#             self.navigate.create_route(departure, destination)
-#             for i in range(0, len(self.navigate.way_points)):
-#                 if i == 0:
-#                     self.navigate.start_navigation(self.pos)
-#                     # Valid navigation texts
-#                     for navigation_text in self.navigate.remaining_nav_instr_texts:
-#                         with self.assertWarns(UserWarning):
-#                             if " None" in navigation_text:
-#                                 warnings.warn(
-#                                     f"Navigation text contains 'None': {navigation_text}",
-#                                     UserWarning
-#                                 )
-#                 lat, lon = self.navigate.way_points[i]
-#                 self.pos.set_pos(lat,lon)
-#                 self.navigate.update_route(self.pos)
-
-#                 # check data is in valid ranges
-#                 logging.info(f"current waypoint index: {self.navigate.current_way_point_index}")
-
-#                 # number of waypoints is correct
-#                 result = self.navigate.current_way_point_index <= len(self.navigate.way_points)-1
-#                 self.assertEqual(result, True)
-
-#                 # speed limits are in certain range
-#                 # TODO unbegrenzt auf Autobahnen, was ist der Rückgabewert?
-#                 result = ((self.navigate.current_speed_limit <= 130
-#                         or self.navigate.current_speed_limit == "unlimited")
-#                         and self.navigate.current_speed_limit is not None)
-#                 self.assertEqual(result, True)
-
-#                 # distance calculation returns positive numbers
-#                 result = (self.navigate.remaining_distance >= 0 
-#                     and self.navigate.remaining_distance <= 999999 
-#                     and self.navigate.remaining_distance is not None)
-#                 self.assertEqual(result, True)
-
-#                 # progress bar has values between 0 and 1,
-#                 value = self.navigate.current_progress_next_tl
-#                 result = value >= 0 
-#                 if result == True:
-#                     result = value <= 1
-#                     # value == 1 can only occure at a traffic light
-#                     if value == 1:
-#                         result = self.navigate.current_way_point_index in list(self.navigate.trafficlights.items())
-#                 self.assertEqual(result, True)

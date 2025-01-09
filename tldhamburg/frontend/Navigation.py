@@ -360,20 +360,22 @@ class Navigation:
         Updates the status of the Trafficlight object and updates the speed
         recommendation if trafficlight is the next one 
         """
+        # TODO umbauen
         # color,_,_,_,speed
         color,nextPhase,nextPhaseTime,rapidUpdate,speed= (        
             self._route.getUpdateOnTrafficLight(trafficlight.things_id, self.current_way_point_index))
         set_color = trafficlight.set_status(color)
         if trafficlight == self.next_tl:
             self.status_next_tl = set_color
-            self._update_recommended_Speed(color,speed)
-  
+            self._update_recommended_speed(color,speed)
+
+        # TODO ausbauen
         print(f"id = {trafficlight.things_id}, status = {color}, nextPhase = {nextPhase}, nextPhaseTime = {nextPhaseTime}, rapidUpdate = {rapidUpdate}, speed = {speed}")
     
-    def _update_recommended_Speed(self, color, speed):
+    def _update_recommended_speed(self, color, speed):
         """
         Updates recommended speed in km/h
-        status 'green': use min speed necessary to cross trafficlight before turn
+        status 'green': use min speed necessary to cross trafficlight before change
         status 'red': use max speed to avoid stopping at the traffic light
         """
         if color == "green":

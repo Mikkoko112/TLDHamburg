@@ -131,10 +131,7 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks):
             
             #get route from control
             navigate.update_bicycle_mode(bicycle_mode)
-            if bicycle_mode is True:
-                navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
-            else:
-                navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
+            navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
             pos.set_pos(lat=start_lat, lon=start_lon)
 
             return (is_valid_start, 
@@ -273,13 +270,22 @@ def show_instructions(n_clicks, prev, restart, route, store):
                         }), striped=True, bordered=True, hover=True))
 
         speed_limit_text = f"Maximal erlaubte Geschwindigkeit: {navigate.current_speed_limit}"
-        speed_recommendation_text = ["fahre mindestens\t",
-                        html.Span(f"{navigate.current_recommended_speed}", style={"color": "green"}),
-                        "\tkm/h,", 
-                        html.Br(),
-                        "um\t",
-                        html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                        "\tzu erreichen"] 
+        if navigate.status_next_tl == "green":
+            speed_recommendation_text = ["fahre mindestens\t",
+                            html.Span(f"{navigate.current_recommended_speed}", style={"color": "green"}),
+                            "\tkm/h,", 
+                            html.Br(),
+                            "um\t",
+                            html.Span("grün", style={"color": "green", "white-space": "pre"}),
+                            "\tzu erreichen"] 
+        elif navigate.status_next_tl == "red":
+            speed_recommendation_text = ["fahre maximal\t",
+                            html.Span(f"{navigate.current_recommended_speed}", style={"color": "green"}),
+                            "\tkm/h,", 
+                            html.Br(),
+                            "um\t",
+                            html.Span("grün", style={"color": "green", "white-space": "pre"}),
+                            "\tzu erreichen"]  
         # first step: prev button disabled 
         if n_clicks == 1:
             text = f"{navigate.current_nav_instr_text}"
@@ -303,17 +309,22 @@ def show_instructions(n_clicks, prev, restart, route, store):
 @callback(
     Output("tl-picture","src"),
     Input("start-next-button", "n_clicks"),
+    Input("restart-button", "n_clicks"),
+    Input("route-button", "n_clicks"),
     prevent_initial_call=True
 )
-def tl_pic(n_clicks):
-    if navigate.status_next_tl == "":
-        return dash.get_relative_path(f"/assets/tf_off.png")
-    #status = trafficlight.get_status()
-    elif navigate.status_next_tl == "red":
-        return dash.get_relative_path(f"/assets/tf_red.png") 
-    elif navigate.status_next_tl == "yellow":
-        return dash.get_relative_path(f"/assets/tf_yellow.png")
-    elif navigate.status_next_tl == "green":
-        return dash.get_relative_path(f"/assets/tf_off.png")
+def tl_pic(n_clicks, restart, route):
+    button_id = ctx.triggered_id
+    if button_id == "restart-button" or button_id == "route-button":
+        return dash.get_relative_path(f"/assets/tf_off.png") 
+    if n_clicks > 0:
+        if navigate.status_next_tl == "":
+            return dash.get_relative_path(f"/assets/tf_off.png")
+        elif navigate.status_next_tl == "red":
+            return dash.get_relative_path(f"/assets/tf_red.png") 
+        elif navigate.status_next_tl == "yellow":
+            return dash.get_relative_path(f"/assets/tf_yellow.png")
+        elif navigate.status_next_tl == "green":
+            return dash.get_relative_path(f"/assets/tf_green.png")
     return no_update
 

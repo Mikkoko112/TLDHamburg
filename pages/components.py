@@ -247,6 +247,11 @@ def control_live():
                             disabled=True),
                 width = "auto",
             ),
+            #dbc.Col(
+            #    dbc.Button("Gesamtroute", id = "overview-button-live", color="secondary", 
+            #                disabled=True),
+            #    width = "auto",
+            #),
             dbc.Col(
                     dbc.ListGroup([
                             dbc.ListGroupItem("Maximal erlaubte Geschwindigkeit: -", 
@@ -417,7 +422,7 @@ def data_live():
                                 next_turn_live(),
                                 control_live(),
                                 speed_recommendation_live(),
-                                progress_live()
+                                progress_live(),
                                 ],
                             ), 
                             label="Instruktion", tab_id="tab-1-live", 
@@ -431,11 +436,25 @@ def data_live():
                 dbc.Modal(
                     [
                         dbc.ModalHeader(dbc.ModalTitle("Information")),
-                        dbc.ModalBody("Um die Navigation zu starten, nähern Sie sich bitte der Route"),
+                        dbc.ModalBody("Um die Navigation zu starten, nähern Sie sich bitte der Route."),
                     ],
                     id="start-navigation-modal",
                     is_open=False,
-                ),        
+                ),
+                dbc.Modal(
+                    [
+                        dbc.ModalHeader(dbc.ModalTitle("Information")),
+                        dbc.ModalBody("Um die Navigation zu starten, müssen Sie die Standortfreigabe aktivieren."),
+                    ],
+                    id="start-freigabe-modal",
+                    is_open=False,
+                ),
+                # Hidden button for programmatic clicking
+                #html.Button('Get GPS', id='get-gps-button', n_clicks=0), #style={'display': 'none'}),
+                # Store components to store latitude and longitude
+                #html.Div(children="hello",id='store-latitude',),#style={'display': 'none'}),
+                #html.Div(id='store-longitude',),#style={'display': 'none'}), 
+                #html.Div(id="get-gps"),
             ],
             className="left-container", 
         )

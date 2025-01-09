@@ -22,7 +22,7 @@ class Navigation:
     departure = None
     destination = None
     start_navigating = True 
-    route_deviation_tolerance = 100 # in meters
+    route_deviation_tolerance = 200 # in meters
 
     geojson = None          # actual content of geojson file
     
@@ -51,12 +51,12 @@ class Navigation:
     
     current_progress_next_tl = None # progress to next traffic light
     next_tl = None          # Trafficlight Object
+    status_next_tl = "" # status for the next trafficlight 
+    current_recommended_speed = None # speed recommened 
     next_next_tl = None
 
     bicycle_mode = False
 
-    current_recommended_speed = None # speed recommened 
-    status_next_tl = "" # status for the next trafficlight 
         
     def __init__(self, path=f"{Path.cwd()}/schnittstelle"):
         self._path = path
@@ -68,7 +68,7 @@ class Navigation:
         self.destination = destination
         if self.bicycle_mode is True:
            nav_coordinates = {"coordinates": [departure,destination],
-                              "maxspeed": 20} 
+                              "max_speed": 20} 
         else:
             nav_coordinates = {"coordinates": [departure,destination]}
         self._route.generateRoute(nav_coordinates)
@@ -170,9 +170,6 @@ class Navigation:
             else:
                 distance_integral.append(distance_integral[i-1] + distance)
             last_point = next_point
-            # print(f"distance at point {i}: {distance_integral[i]}")
-        # print(f"distance integral: {distance_integral}")
-        # print(f"total distance: {distance_integral[-1]}")
         total_distance = distance_integral[-1]
         
         total_duration = 0
@@ -218,8 +215,6 @@ class Navigation:
                     # print(f"last: {distance_integral[i-1]} add {distance_per_waypoint} = {distance_integral[i]} (at pos {i})")
         """
             
-        # print(f"len waypoints = {len(self.way_points)}")
-        # print(f"len integral = {len(distance_integral)}")
         # if len(self.way_points) == len(distance_integral):
         self.distance_integral = distance_integral
         # self.duration_integral = duration_integral
@@ -233,7 +228,6 @@ class Navigation:
         waypoints_lon_lat = []
         for lat, lon in waypoints_lat_lon:
             waypoints_lon_lat.append([lon, lat])
-        #print(f"len waypoint: {len(waypoints_lat_lon)}")
         return waypoints_lat_lon, waypoints_lon_lat
 
     def _init_speed_limits(self):
@@ -241,7 +235,6 @@ class Navigation:
         maxspeeds_dict = {}
         for step in maxspeeds:
             maxspeeds_dict[step["way_points"][1]] = step["maxspeed"]
-        #print(f"speeds_dict: {maxspeeds_dict}")
         return maxspeeds_dict
 
     def _init_traffic_lights(self):
@@ -262,23 +255,17 @@ class Navigation:
         out: bool(on_route)
         Adjust tolerance in settings 'route_deviation_tolerance'
         """
-        # print(f"fct. is_on_route()")
         # determine nearest point within route
         lat, lon = current_position.get_pos()
         point = Point(lat, lon)
-        # print(f"point we are looking for: {point}")
         route = LineString(self.way_points)
-        # print(f"nearest_points: {nearest_points(route, point)}")
         nearest_way_point = nearest_points(route, point)[0]
         
         # determine min distance to route
         current = (lon, lat)
-        # print(f"current: {current}")
         lat, lon = nearest_way_point.x, nearest_way_point.y
         nearest = (lon, lat)
-        # print(f"nearest: {nearest}")
         distance = geopy.distance.geodesic(current, nearest).meters
-        #print(distance)
         on_route = distance <= self.route_deviation_tolerance
         if on_route == False:
             logging.info(f"distance to route: {distance}, tolerance: {self.route_deviation_tolerance}\n\tcurrent Position: {lat, lon}\n\tnearest point: {nearest_way_point}")
@@ -287,36 +274,17 @@ class Navigation:
     
     def _haversine_approx(self, lat1, lon1, lat2, lon2):
         """
-        Approximate haversine formula for distance between two points.
+        Approximate distance between two points using haversine formular.
         """
         x = (lon2 - lon1) * (pi / 180.0)  
         y = (lat2 - lat1) * (pi / 180.0)  
         return (x ** 2 + y ** 2) ** 0.5  
-
-    # TODO ausbauen wenn nicht mehr verwendet.
-    def _get_current_waypoint_index2(self):
-        """use cartesian grid to determine nearest waypoint"""
-        lat, lon = self.current_position.get_pos()
-        point = Point(lat, lon)
-        route = LineString(self.way_points)
-        nearest_way_point = nearest_points(route, point)[0]
-        lat, lon = nearest_way_point.x, nearest_way_point.y
-        print(f"lat, lon: ({lat},{lon})")
-        # print(f"fct. _get_current_waypoint_index()\nnearest_way_point on route: {nearest_way_point}")
-        for i, (lat, lon) in enumerate(self.way_points):
-            if Point(lat, lon) == nearest_way_point:
-                return i
-        logging.error(f"Could not determine current waypoint index.\n\tcurrent position: {self.current_position.get_pos()},\n\tnearest waypoint: {nearest_way_point}")
-        return None
     
     def _get_current_waypoint_index(self):
-        """use cartesian grid to determine nearest waypoint"""
+        """determine nearest waypoint"""
         lat, lon = self.current_position.get_pos()
         distances = np.array([self._haversine_approx(lat, lon, lat_wp, lon_wp) for lat_wp, lon_wp in self.way_points])
-        # print(f"distances: {distances}")
         nearest = np.argmin(distances)
-        # print(f"waypoint: {nearest}")
-        # nearest = min(self.way_points, key=lambda wp: self._haversine_approx(lat, lon, wp[0], wp[1]))
         return nearest
 
     def _get_current_navigation_instruction_key(self):
@@ -324,20 +292,12 @@ class Navigation:
         determines next navigation instruction key
         based on the current waypoint index
         """
-        # print(f"fct. _get_current_navigation_instruction_key()")
         keys_list = list(self.navigation_instructions.keys())
-        # print(f"keys_list: {keys_list}")
-        # print(f"current_way_point_index: {self.current_way_point_index}")
-        # print(f"keys_list: {keys_list}")
-        # if self.current_way_point_index in keys_list:
-        #     key = self.current_way_point_index
-        # else:
         idx = bisect_right(keys_list, self.current_way_point_index)
         try:
             key = keys_list[idx]
         except (ValueError, IndexError): # if there is no further instruction, use last.
             key = keys_list[idx-1]
-        # print(f"key: {key}")
         return key
     
     def load_navigation_instruction(self, key):
@@ -395,29 +355,54 @@ class Navigation:
         else:
             return None, None
         
-    # TODO
     def _update_trafficlight(self, trafficlight:Trafficlight):
-        status,nextPhase,nextPhaseTime,rapidUpdate,speed = (        
-            self._route.getUpdateOnTrafficLight(trafficlight.things_id, """self.current_way_point_index"""))
-        print(f"status = {status}")
-        print(f"nextPhase = {nextPhase}")
-        print(f"nextPhaseTime = {nextPhaseTime}")
-        print(f"rapidUpdate = {rapidUpdate}")
-        print(f"speed = {speed}")
-        pass
+        """
+        Updates the status of the Trafficlight object and updates the speed
+        recommendation if trafficlight is the next one 
+        """
+        # TODO umbauen
+        # color,_,_,_,speed
+        color,nextPhase,nextPhaseTime,rapidUpdate,speed= (        
+            self._route.getUpdateOnTrafficLight(trafficlight.things_id, self.current_way_point_index))
+        set_color = trafficlight.set_status(color)
+        if trafficlight == self.next_tl:
+            self.status_next_tl = set_color
+            self._update_recommended_speed(color,speed)
+
+        # TODO ausbauen
+        #print(f"id = {trafficlight.things_id}, status = {color}, nextPhase = {nextPhase}, nextPhaseTime = {nextPhaseTime}, rapidUpdate = {rapidUpdate}, speed = {speed}")
     
-    def _update_recommended_Speed(self, trafficLightsId:str,routePoint:int):
-        pass
+    def _update_recommended_speed(self, color, speed):
+        """
+        Updates recommended speed in km/h
+        status 'green': use min speed necessary to cross trafficlight before change
+        status 'red': use max speed to avoid stopping at the traffic light
+        """
+        if speed == -1:
+            recommended = "-"
+        else:
+            if color == "green":
+                recommended = speed["min_speed"]
+            elif color == "red":
+                recommended = speed["max_speed"]
+            else:
+                recommended = 0
+
+            if recommended > self.current_speed_limit:
+                recommended = self.current_speed_limit
+            elif recommended < 0:
+                recommended = 0
+
+            recommended = round(recommended, ndigits=0)
+        self.current_recommended_speed = recommended
+        return recommended
 
     def start_navigation(self, position:Position):
         """
         toggles navigation to start if sensible
         requires position to be within 'route_deviation_tolerance'
         """
-        #if self.start_navigating == True:
-        #    pass
         if self.is_on_route(position) == False:
-            #raise Exception("To start navigating, please come near the route")
             self.start_navigating = False
             return False
         else:
@@ -426,6 +411,7 @@ class Navigation:
             return True
 
     def _update_status_bar(self):
+        """shows progress in percent to next trafficlight"""
         tl_keys = list(self.trafficlights.keys())
         if self.current_way_point_index in tl_keys: # we are at a traffic light
             next_reference_waypoint = self.current_way_point_index
@@ -433,7 +419,6 @@ class Navigation:
         else:
             try:
                 tl_right_idx = bisect_right(tl_keys, self.current_way_point_index)
-                # print(f"right ref: {tl_right_idx}")
                 next_reference_waypoint = tl_keys[tl_right_idx]
             except (ValueError, IndexError): # we have passed all traffic lights on our route
                 tl_right_idx = None
@@ -447,25 +432,17 @@ class Navigation:
             try:
                 last_reference_waypoint = tl_keys[tl_right_idx - 1]
             except (ValueError, IndexError, TypeError): 
-                # print("dude, this should not happen")
                 last_reference_waypoint = None
             
-        # print(f"our position: {self.current_way_point_index}")
-        # print(f"last ref index: {last_reference_waypoint}, next ref: {next_reference_waypoint}")
-
         if (last_reference_waypoint is not None) and (next_reference_waypoint is not None):
             distance = next_reference_waypoint - last_reference_waypoint
-            # print(f"num_waypoints: {num_waypoints}")
             progress = self.current_way_point_index - last_reference_waypoint
-            # print(f"progress (in way_points): {progress}")
             if distance != 0: # measured in waypoints
                 rel_progress = round(progress / distance, 2)
-                # print(f"measured progress {progress / distance}, rounded: {rel_progress}")
             else:
                 rel_progress = 1 # no distance -> we are at the location we are heading for
         else: 
             rel_progress = 0 # at least one of the reference points cannot be determined
-        # print(f"progress: {rel_progress}")
         return rel_progress
 
     def update_route(self, position:Position):
@@ -481,7 +458,8 @@ class Navigation:
         self.current_position = position
         if self.is_on_route(position) == False:
             lat, lon = position.get_pos()
-            departure = [lat, lon]
+            departure = [lat, lon][::-1]
+            print(departure)
             logging.info(f"creating new route, \n\tstarting at {departure},\n\tdestination: {self.destination}")
             self.create_route(departure, destination=self.destination)
             self.start_navigating = True
@@ -501,9 +479,6 @@ class Navigation:
              )
         
         # distance to next direction
-        # print(f"distance integral: {self.distance_integral}, len: {len(self.distance_integral)}")
-        # print(f"distance to next direction: cur_nav_instr_key-1 = {cur_nav_instr_key-1}, current_way_point_index = {self.current_way_point_index}")
-        # print(f"remaining = {self.distance_integral[cur_nav_instr_key-1]} minus {self.distance_integral[self.current_way_point_index]}")
         self.remaining_distance = round((self.distance_integral[cur_nav_instr_key-1] 
                                         - self.distance_integral[self.current_way_point_index]))
 
@@ -522,22 +497,28 @@ class Navigation:
         self.remaining_nav_instr_texts = remaining_nav_instr_texts
         self.remaining_nav_instr_distances = remaining_nav_instr_distances
 
-        # determine next two trafficlights next_tl and next_next_tl
-        self.next_tl, self.next_next_tl = self._get_impending_two_trafficlights()
-
         # determine current speed limit
         self.current_speed_limit = self._get_current_speed_limit()
+
+        # determine next two trafficlights next_tl and next_next_tl
+        self.next_tl, self.next_next_tl = self._get_impending_two_trafficlights()
+        if self.next_tl is not None:
+            self._update_trafficlight(self.next_tl)
+        else:
+            self._update_recommended_speed(color=None, speed=0)
+            self.status_next_tl = ""
 
         # progress-bar. 
         self.current_progress_next_tl = self._update_status_bar()       
 
     def get_all_trafficlight_coordinates(self):
+        """use to plot trafficlights on map"""
         trafficlight_positions = list(self.trafficlights.items())
         return [list(self.way_points[point]) for point,_ in trafficlight_positions]
             
     def demo_n_clicks(self, nclicks):
         """
-        Use on demo page only.
+        Use on demo page only!
         Represents how many clicks have been made on the next-button representing the progress along the route.
         """
         try:

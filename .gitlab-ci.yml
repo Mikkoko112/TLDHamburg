@@ -35,9 +35,11 @@ unit-test-backend-job:
 unit-test-frontend-job:
   stage: frontend
   image: python:3.12-slim
+  #variables: 
+    #GITLAB_MEMORY_LIMIT: "8g"  
   cache:
     paths:
-      - .cache/pip 
+      - .cache/pip
   script:
     - source venv/bin/activate
     - python test/test_geocoding_utils.py

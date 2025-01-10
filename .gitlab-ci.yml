@@ -46,7 +46,7 @@ unit-test-backend-job:
     - python test/testRouting.py
     - python test/testSquareCount.py
     - python test/testVectorGenerator.py
-    rules:
+  rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   

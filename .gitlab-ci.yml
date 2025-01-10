@@ -33,7 +33,7 @@ unit-test-backend-job:
     - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   
-unit-test-backend-job:
+unit-test-control-job:
   stage: control
   image: python:3.12-slim
   cache:

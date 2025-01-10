@@ -218,7 +218,7 @@ def control_demo():
             ),
             dbc.Col(
                 dbc.Button("Start", id = "start-next-button", color="secondary", 
-                            disabled=True),
+                            disabled=True, n_clicks=0),
                 width = "auto",
             ),
             dbc.Col(
@@ -287,7 +287,14 @@ def speed_recommendation_demo():
                 ],
                 className="tl-container",
                 ),
-            )],
+            ),
+            dbc.Tooltip(
+                    "Hier wird der Ampelstatus angezeigt.",
+                    target="tl-picture",
+                    id="tl-picture-tooltip",
+                    placement="right",
+                ),
+            ],
         className="flex-container-bottom",
     )
 
@@ -309,7 +316,14 @@ def speed_recommendation_live():
                 ],
                 className="tl-container",
                 ),
-            )],
+            ),
+            dbc.Tooltip(
+                    "Hier wird der Ampelstatus angezeigt.",
+                    target="tl-picture-live",
+                    id="tl-picture-tooltip-live",
+                    placement="right",
+                ),
+            ],
         className="flex-container-bottom",
     )
           

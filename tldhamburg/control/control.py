@@ -67,13 +67,16 @@ class RoutePlanner:
         
         output=tlapp.TrafficLightApprox.approx_next_switch(id)
         
-        if output is None or output[0] < 0:
+        if output is None:
             return trafficLightsId,9,9,0,False
 
         switchTime,nextPhase = output
         status="green" if nextPhase=="red" else "red"
         zeitAktuell=dtime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
         nextPhaseTime=(switchTime-zeitAktuell).total_seconds()
+        if nextPhaseTime < 0: 
+            return trafficLightsId,9,9,0,False
+        
         return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
         
         #why is this?

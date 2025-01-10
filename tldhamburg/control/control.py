@@ -66,7 +66,8 @@ class RoutePlanner:
         id = int(trafficLightsId)
         
         output=tlapp.TrafficLightApprox.approx_next_switch(id)
-        if output is None:
+        
+        if output is None or output[0] < 0:
             return trafficLightsId,9,9,0,False
 
         switchTime,nextPhase = output
@@ -285,8 +286,8 @@ class RoutePlanner:
         '''
         
         route = routeList.copy()
-        value = evaluation.getMinAvgRedTime(routeList)
-        #value = evaluation.getMinTrafficLights(routeList)
+        #value = evaluation.getMinAvgRedTime(routeList)
+        value = evaluation.getMinTrafficLights(routeList)
         #removes every other route and preserve the structure of a GeoJson file.
         route["features"] = [routeList["features"][value]]
         return route

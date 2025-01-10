@@ -285,7 +285,7 @@ def show_instructions(data, start_navigation_bool, user_store, n_clicks, _):
     Input("route-button-live", "n_clicks"),
     prevent_initial_call=True
 )
-def tl_pic(data):
+def tl_pic(data, n_clicks):
     button_id = ctx.triggered_id
     if button_id == "route-button-live":
         return dash.get_relative_path(f"/assets/tf_off.png") 

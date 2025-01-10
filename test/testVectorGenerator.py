@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
 
-from vectorGenerator import generateVector,getCentroid,getDegree
+from tldhamburg.control.script.VectorGenerator import generateVector,getCentroid,getDegree
 from math import radians,sin,cos,degrees,sqrt
 
 def testVectorGeneration(): #i need to implement way more test cases here
-    print("Vectorgenerator test started")
+    print("Vektorgenerator test started")
     print("-test norming")
     main = [0,0]
     centroid = [[8,
             9]]
-    vec = generateVector(main,centroid)
+    vec = generateVektor(main,centroid)
     length = vec[0]**2+vec[1]**2
     if length >= 1+0.01 or  length <= 1-0.01:
-        print("Normalization did not work.")
+        print("Normalisation did not work.")
         exit(1)
     print("-passed normation test")
     main = [0.0,100.0]
     centroid = [[0.0,1.0]]
     out = [0,1]
-    vec = generateVector(main,centroid)
+    vec = generateVektor(main,centroid)
     if not all(ve == ou for ve,ou in zip(vec,out)):
-        print("There is something wrong with the vectorGenerator")
+        print("There is something wrong with the vekt Generator")
         exit(1)
-    print("Vector generator test passed")
+    print("Vektorgenerator test passed")
 
 def testCentroid():
     testcases = [

@@ -2,7 +2,7 @@
 import json 
 
 def testCountOfThings(options:dict):
-    with open(f"..{options["importantData"]["thingsLoc"]}","r") as file:
+    with open(f"tldhamburg/control/{options["importantData"]["thingsLoc"]}","r") as file:
         originalData = json.load(file)
     # with open(f"..{options["importantData"]["conjunctionData"]}","r") as file:
     #     jointData = json.load(file)
@@ -32,9 +32,9 @@ def testCountOfThings(options:dict):
     print(left)
 
 def testMeanAndOrig(options:dict):
-    with open(f"..{options["importantData"]["thingsLoc"]}","r") as file:
+    with open(f"tldhamburg/control/{options["importantData"]["thingsLoc"]}","r") as file:
         originalData = json.load(file)
-    with open(f"..{options["importantData"]["meanValueData"]}","r") as file:
+    with open(f"tldhamburg/control/{options["importantData"]["meanValueData"]}","r") as file:
         meanData = json.load(file)
 
     
@@ -50,9 +50,9 @@ def testMeanAndOrig(options:dict):
     print(leftoutThings)
 
 def checkPrimarySignalCountOfDict(options:dict):
-    with open(f"..{options["importantData"]["thingsLoc"]}","r") as file:
+    with open(f"tldhamburg/control/{options["importantData"]["thingsLoc"]}","r") as file:
         originalData = json.load(file)
-    with open(f"conjunctionDict.json","r") as file:
+    with open(f"tldhamburg/control/data/conjunctionDict.json","r") as file:
         conjDict = json.load(file)
     
     leftoutThings = []
@@ -71,9 +71,9 @@ def checkPrimarySignalCountOfDict(options:dict):
     print(len(left))     
 
 def testVectorGenerator(options:dict):
-    with open(f"vectorizationOnMeanPointInvert.json","r") as file:
+    with open(f"tldhamburg/control/vectorizationOnMeanPointInvert.json","r") as file:
         vec = json.load(file)
-    with open(f"..{options["importantData"]["thingsLoc"]}","r") as file:
+    with open(f"tldhamburg/control/{options["importantData"]["thingsLoc"]}","r") as file:
         originalData = json.load(file)
 
     missing = originalData.keys() - vec.keys()
@@ -81,10 +81,10 @@ def testVectorGenerator(options:dict):
     print(len(missing))
 
 def testCleanedCoordAverage(options:dict):
-    with open(f"cleanedCoorsAverage.json","r") as file:
+    with open(f"tldhamburg/control/data/cleanedCoorsAverage.json","r") as file:
         points = json.load(file)
 
-    with open(f"..{options["importantData"]["thingsLoc"]}","r") as file:
+    with open(f"tldhamburg/control/data/{options["importantData"]["thingsLoc"]}","r") as file:
         originalData = json.load(file) 
 
     missing = originalData.keys() - points.keys()
@@ -94,12 +94,12 @@ def testCleanedCoordAverage(options:dict):
 
 
 if __name__ == "__main__":
-    with open("../optionsfile.json","r") as file:
+    with open("tldhamburg/control/data/optionsfile.json","r") as file:
         options = json.load(file)
-    #testMeanAndOrig(options)
-    #testCountOfThings(options)
+    testMeanAndOrig(options)
+    testCountOfThings(options)
     checkPrimarySignalCountOfDict(options)
-    #testVectorGenerator(options)
-    #testCleanedCoordAverage(options)
+    testVectorGenerator(options)
+    testCleanedCoordAverage(options)
     print("SquareCountTest passd")
 

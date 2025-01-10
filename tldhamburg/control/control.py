@@ -232,7 +232,7 @@ class RoutePlanner:
             tfLID,status,nextPhase,nextPhaseTime,rapidUpdate = self._casperEval(trafficLightsId)
             
             if currentPositionID == -1 or status == 9:
-                return status,nextPhase,nextPhaseTime,rapidUpdate
+                return status,nextPhase,nextPhaseTime,rapidUpdate,speed
             else:
                 speed = self._calcSpeed(trafficLightsId,currentPositionID)
                 #print(f"--- {time.time()-start_time} s---")

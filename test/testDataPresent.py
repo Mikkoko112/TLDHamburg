@@ -10,7 +10,7 @@ def testIfDataIsThere():
     filesInData = os.listdir("tldhamburg/control/data")
     for fileName,path in options["importantData"].items():
         if not path.split("/")[2] in filesInData:
-            print("{} is missing at locataion:{}".format(fileName,path.split("/")[2]))
+            print("{} is missing at locataion:{}".format(fileName,path))
             exit(1)
     print("Datatest passed")
 

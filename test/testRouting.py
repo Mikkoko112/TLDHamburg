@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from tldhamburg.control.routplaning.routing import inbound,inDegreeOffset,lanesOverlape,getBestPrimarySignal
-from tldhamburg.control.routplaning.routing import getDegree,generateVektorPoint
+from tldhamburg.control.routeplaning.routing import inbound,inDegreeOffset,lanesOverlape,getBestPrimarySignal
+from tldhamburg.control.routeplaning.routing import getDegree,generateVektorPoint
 from math import degrees
 
 def testInbound():

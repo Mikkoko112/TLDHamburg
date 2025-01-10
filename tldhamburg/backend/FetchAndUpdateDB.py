@@ -9,16 +9,12 @@ dfetcher.fetch_data(endpoint="Things", params=params)
 print("Fetching data is completed successfully!")
 # Iterate over each fetched data entry to insert into the database
 for data in dfetcher.data:
-    # =========================
-    # Process and Insert into Things Table
-    # =========================
     thing_id = int(data.get("@iot.id"))
     # Retrieve the properties dictionary
     # Extract connectionID and trafficLightsID, defaulting to 0 if missing
     properties = data.get("properties")
     connection_id = int(properties.get("connectionID", 0))
     traffic_lights_id = int(properties.get("trafficLightsID", 0))
-
     things_data = [
         (
             thing_id,
@@ -27,9 +23,6 @@ for data in dfetcher.data:
         )
     ]
     DBMaintainer.insert_things(things_data)
-
-    # =========================
-    # Process and Insert into Datastreams Table
     # =========================
     # Retrieve the list of Datastreams associated with the Thing
     datastreams = data.get("Datastreams")

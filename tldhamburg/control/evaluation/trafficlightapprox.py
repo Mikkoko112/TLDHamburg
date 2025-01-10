@@ -44,13 +44,14 @@ class TrafficLightApprox:
     ) -> Tuple[int, int] | dict:
         """
         Calculates the mean, and optionally the standard deviation and confidence intervals,
-        of red and green phases based on signal observations for a given Thing.
+        of red and green phases based on primary signal observations for a given Thing.
 
-        This function analyzes the signal observations of a traffic light (Thing) to determine
-        the durations of red and green phases. If requested it computes statistical measures.
+        This function analyzes the primary signal observations of a traffic light, based on a Thing ID,
+        to determine the durations of red and green phases. If requested it computes statistical measures,
+        such as standard deviation and/or condifidence intervals.
 
         Args:
-            thing_id (int): Identifier for the Thing (traffic light).
+            thing_id (int): Thing ID
             support_points (int): Number of support points required (minimum 8).
                 Determines how many recent observations to fetch.
             std_dev (bool, optional): If set to True, the function also returns the standard deviations
@@ -161,15 +162,17 @@ class TrafficLightApprox:
         confidence_level: float = 0.95,
     ):
         """
-        Approximates the next switch time and color for a specified traffic light (Thing).
+        Approximates the next switch time and color for a specified traffic light
+        (primary signal) of a given Thing ID.
 
         This function estimates when the next color change (from green to red or red to green)
-        will occur for a given traffic light based on recent signal observations. It utilizes
+        will occur for a given traffic light based on recent primary signal observations of
+        a given Thing ID. It utilizes
         the mean durations of green and red phases, and optionally provides confidence intervals
         for these estimates.
 
         Args:
-            thing_id (int): Identifier for the Thing (traffic light).
+            thing_id (int): Thing ID.
             confidence_intervals (bool, optional): If set to True, the function also returns
                 the lower and upper bounds of the confidence interval for the estimated switch time.
                 Defaults to False.
@@ -224,7 +227,7 @@ class TrafficLightApprox:
 
         if np.isnan(mean_time_green) or np.isnan(mean_time_red):
             print("No mean time found for Thing({})".format(thing_id))
-            return None 
+            return None
 
         for time_stamp, signal in observations:
             if signal == 3:  # if current_color == green
@@ -273,7 +276,8 @@ class TrafficLightApprox:
     @staticmethod
     def approx_next_switch_generator(thing_id: int):
         """
-        Generator that yields the next switch times for a given Thing ID.
+        Generator that yields the next switch times of a primary singal (traffic light)
+        for a given Thing ID.
 
         Example:
             >>> gen = approx_next_switch_generator(2)
@@ -288,7 +292,7 @@ class TrafficLightApprox:
         try:
             observations = thing.get_primary_signal_observations(4, True)[thing_id]
         except KeyError:
-            
+
             print(f"No Observations found for Thing({thing_id})")
             return None
 

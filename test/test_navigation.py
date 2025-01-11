@@ -3,10 +3,10 @@ from unittest.mock import MagicMock, patch, mock_open
 from tldhamburg.frontend.Navigation import Navigation
 from tldhamburg.frontend.position import Position
 from tldhamburg.frontend.trafficlights import Trafficlight
-from tldhamburg.control.control import RoutePlanner
+#from tldhamburg.control.control import RoutePlanner
 from pathlib import Path
-import numpy as np
-import warnings
+#import numpy as np
+#import warnings
 
 class TestNavigation(unittest.TestCase):
     def setUp(self):

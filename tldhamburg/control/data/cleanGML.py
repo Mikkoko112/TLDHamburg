@@ -1,5 +1,10 @@
 import igraph
 
+'''
+This file was made to pro
+
+'''
+
 remove = [
     "access", 
     "area" ,
@@ -27,7 +32,19 @@ remove = [
     "useq",
     "vseq"
 ]
-
+removeSecond=[
+    "busway",
+    "highway",
+    "lanes",
+    "motorcar",
+    "motorroad",
+    "motorvehicle",
+    "overtaking",
+    "ref",
+    "junction",
+    "passingplaces",
+    "service"
+]
 removeVs = [
     "changeset",
     "visible",
@@ -35,16 +52,13 @@ removeVs = [
     "timestamp"
 ]
 
-removeNodeIds = [
-    0
-]
 
 if __name__ == "__main__":
-    graph = igraph.load("hamburg.gml")
-    for rm in remove:
+    graph = igraph.load("shHamburg.gml")
+    for rm in removeSecond:
         del graph.es[rm]
 
-    for rm in removeVs:
-        del graph.vs[rm]
+    #for rm in removeVs:
+    #    del graph.vs[rm]
     
-    graph.write_gml("shHamburg.gml")
+    graph.write_gml("shHamburgRemoveSecond.gml")

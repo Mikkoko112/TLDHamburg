@@ -80,7 +80,6 @@ def load_data_on_init(dummy_data):
     Output("tl-route-layer", "children"),  # load traffic lights into the map
     Output("start-next-button", "disabled", allow_duplicate=True),# True: disables the start/next button if no route is given
     Output("tab-2","disabled"),             # enables the Overview tab
-    Output("instruction-overview","children", allow_duplicate=True),  # list all instruction 
     Output("start-next-button", "n_clicks", allow_duplicate=True), # reset n_clicks if calculating new route
 
     [State("startpunkt","value"),
@@ -127,22 +126,14 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks):
                     "",
                     True,
                     no_update,
-                    no_update,
                     0,
                     )
             
             #get route from control
-            if bicycle_mode is True:
-                navigate.create_route([start_lon,start_lat], [end_lon, end_lat],True)
-            else:
-                navigate.create_route([start_lon,start_lat], [end_lon, end_lat],False)
+            navigate.update_bicycle_mode(bicycle_mode)
+            navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
             pos.set_pos(lat=start_lat, lon=start_lon)
-            remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
-                {
-                    "in ... metern": navigate.remaining_nav_instr_distances,
-                    "Anweisung": navigate.remaining_nav_instr_texts,
-                }), striped=True, bordered=True, hover=True)) 
-            print(get_objects.get_marker(marker))
+
             return (is_valid_start, 
                     not is_valid_start, 
                     is_valid_end, 
@@ -153,7 +144,6 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks):
                     get_objects.get_trafficlights(navigate.get_all_trafficlight_coordinates()),  
                     False,
                     False,
-                    remaining_instructions,
                     0,
                     )
     return (False, 
@@ -164,7 +154,6 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks):
             no_update, 
             no_update, 
             no_update, 
-            no_update,
             no_update,
             no_update,
             no_update,
@@ -196,18 +185,20 @@ def store_map_view(data, zoom, center):
     Output("restart-button", "disabled"),       # True: disables the restart button
     Output("progress", "value"),                # change progress value 
     Output("prev-button", "n_clicks"),          #
-    Output("instruction-overview","children", allow_duplicate=True),  # list all instruction still left
+    Output("instruction-overview","children"),  # list all instruction still left
     Output("speed-limit", "children"),          # change the speed limit 
     Output("position", "center"),               # change current position 
+    Output("speed-recommendation", "children"), # change speed recommendation
 
     Input("start-next-button", "n_clicks"),
     Input("prev-button", "n_clicks"),
     Input("restart-button", "n_clicks"),
+    Input("route-button", "n_clicks"),
     State("map-store", "data"),
 
     prevent_initial_call=True
 )
-def show_instructions(n_clicks, prev, restart, store):
+def show_instructions(n_clicks, prev, restart, route, store):
     button_id = ctx.triggered_id
     
     # return values
@@ -223,9 +214,22 @@ def show_instructions(n_clicks, prev, restart, store):
     prev_nclicks = 0
     remaining_instructions = ""
     speed_limit_text = "Maximal erlaubte Geschwindigkeit: -"
+    speed_recommendation_text = ["fahre mindestens\t",
+                        html.Span("-", style={"color": "green"}),
+                        "\tkm/h,", 
+                        html.Br(),
+                        "um\t",
+                        html.Span("grün", style={"color": "green", "white-space": "pre"}),
+                        "\tzu erreichen"]
 
+    if button_id == "route-button":
+        remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
+                        {
+                            "in ... metern": navigate.remaining_nav_instr_distances,
+                            "Anweisung": navigate.remaining_nav_instr_texts,
+                        }), striped=True, bordered=True, hover=True))
     # restart the route instructions and picture
-    if button_id == "restart-button":
+    elif button_id == "restart-button":
         n_clicks = 0
         picture = ""
         # update pos with the new waypoint
@@ -266,6 +270,22 @@ def show_instructions(n_clicks, prev, restart, store):
                         }), striped=True, bordered=True, hover=True))
 
         speed_limit_text = f"Maximal erlaubte Geschwindigkeit: {navigate.current_speed_limit}"
+        if navigate.status_next_tl == "green":
+            speed_recommendation_text = ["fahre mindestens\t",
+                            html.Span(f"{navigate.current_recommended_speed}", style={"color": "green"}),
+                            "\tkm/h,", 
+                            html.Br(),
+                            "um\t",
+                            html.Span("grün", style={"color": "green", "white-space": "pre"}),
+                            "\tzu erreichen"] 
+        elif navigate.status_next_tl == "red":
+            speed_recommendation_text = ["fahre maximal\t",
+                            html.Span(f"{navigate.current_recommended_speed}", style={"color": "green"}),
+                            "\tkm/h,", 
+                            html.Br(),
+                            "um\t",
+                            html.Span("grün", style={"color": "green", "white-space": "pre"}),
+                            "\tzu erreichen"]  
         # first step: prev button disabled 
         if n_clicks == 1:
             text = f"{navigate.current_nav_instr_text}"
@@ -282,15 +302,29 @@ def show_instructions(n_clicks, prev, restart, store):
     return (n_clicks, button_text, picture, text, store, 
             toggle_prev_button, toggle_startnext_button, toggle_restart_button,
             progress_value, prev_nclicks, remaining_instructions,
-            speed_limit_text, pos.get_pos("lonlat"),)
+            speed_limit_text, pos.get_pos("lonlat"), 
+            speed_recommendation_text)
 
 # change trafficlight picture
 @callback(
     Output("tl-picture","src"),
-    Input("tl-picture","src")
+    Input("start-next-button", "n_clicks"),
+    Input("restart-button", "n_clicks"),
+    Input("route-button", "n_clicks"),
+    prevent_initial_call=True
 )
-def tl_pic(src):
-    if src == "":
-        return dash.get_relative_path(f"/assets/tf_off.png")
+def tl_pic(n_clicks, restart, route):
+    button_id = ctx.triggered_id
+    if button_id == "restart-button" or button_id == "route-button":
+        return dash.get_relative_path(f"/assets/tf_off.png") 
+    if n_clicks > 0:
+        if navigate.status_next_tl == "":
+            return dash.get_relative_path(f"/assets/tf_off.png")
+        elif navigate.status_next_tl == "red":
+            return dash.get_relative_path(f"/assets/tf_red.png") 
+        elif navigate.status_next_tl == "yellow":
+            return dash.get_relative_path(f"/assets/tf_yellow.png")
+        elif navigate.status_next_tl == "green":
+            return dash.get_relative_path(f"/assets/tf_green.png")
     return no_update
 

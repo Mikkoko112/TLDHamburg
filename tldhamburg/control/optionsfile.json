@@ -3,8 +3,8 @@
     "importantData":{
         "meanValueData":"/data/cleanedCoorsAverage.json",
         "thingsLoc":"/data/thingsLoc.json",
-        "vectorData":"/data/vectorisationOnMeanPointInvert.json",
-        "conjunctionData":"/data/conjcuntionMean.json",
+        "vectorData":"/data/vectorizationOnMeanPointInvert.json",
+        "conjunctionData":"/data/conjunctionsMean.json",
         "cleanedConjunctionData":"/data/conjunctionsJoint.json",
         "allFetchAreas":"/data/fetchAreasFullData.json",
         "GraphData":"/data/shHamburg.gml",

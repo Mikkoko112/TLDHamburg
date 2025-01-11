@@ -116,7 +116,7 @@ def navbar_demo():
                     id="bike-switch",
                     label=html.A(children=[
                             html.Img(id = "bike-picture", src=dash.get_relative_path(f"/assets/bike.png"), height=30)]),
-                    value=False,
+                    value=False, className="flex-bikemode-container",
                 ),
                 dbc.Tooltip(
                     "Fahrradmodus: beim Fahrradmodus wird die maximale Geschwindigkeit"
@@ -150,7 +150,7 @@ def navbar_live():
                     id="bike-switch-live",
                     label=html.A(children=[
                             html.Img(id = "bike-picture", src=dash.get_relative_path(f"/assets/bike.png"), height=30)]),
-                    value=False,
+                    value=False, className="flex-bikemode-container",
                 ),
                 dbc.Tooltip(
                     "Fahrradmodus: beim Fahrradmodus wird die maximale Geschwindigkeit"
@@ -208,7 +208,7 @@ def next_turn_live():
 
 # buttons for clicking through the route in the demo page
 # also shows the maximal speed allowed
-def control_demo(current_speed):
+def control_demo():
     return dbc.Row(
         children= [
             dbc.Col(
@@ -228,7 +228,8 @@ def control_demo(current_speed):
             ),
             dbc.Col(
                     dbc.ListGroup([
-                        dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="speed-limit"),
+                        dbc.ListGroupItem("Maximal erlaubte Geschwindigkeit: -", 
+                                          id="speed-limit"),
                         ],
                     ), 
                     width = "auto",
@@ -238,7 +239,7 @@ def control_demo(current_speed):
 )
 
 # shows the maximal speed allowed - live
-def control_live(current_speed):
+def control_live():
     return dbc.Row(
         children= [
             dbc.Col(
@@ -246,15 +247,21 @@ def control_live(current_speed):
                             disabled=True),
                 width = "auto",
             ),
+            #dbc.Col(
+            #    dbc.Button("Gesamtroute", id = "overview-button-live", color="secondary", 
+            #                disabled=True),
+            #    width = "auto",
+            #),
             dbc.Col(
                     dbc.ListGroup([
-                            dbc.ListGroupItem(f"Maximal erlaubte Geschwindigkeit: {current_speed}", id="speed-limit-live"),
+                            dbc.ListGroupItem("Maximal erlaubte Geschwindigkeit: -", 
+                                              id="speed-limit-live"),
                         ],
                     ), 
                     width = "auto",
             ),
         ],
-       className=".flex-container-control"
+       className="flex-container-control"
 )
 
 # says how fast you should drive
@@ -262,21 +269,21 @@ def control_live(current_speed):
 # picture of a traffic light 
 # standard: off
 # can be changed to green, yellow and red
-def speed_recommendation_demo(necessary_speed): 
+def speed_recommendation_demo(): 
     return dbc.Row(children=
             [dbc.Col(
                 html.Div(html.P(["fahre mindestens\t",
-                        html.Span(f"{necessary_speed}", style={"color": "green"}),
+                        html.Span("-", style={"color": "green"}),
                         "\tkm/h,", 
                         html.Br(),
                         "um\t",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                        "\tzu erreichen"],),
-                    ),
+                        "\tzu erreichen"], id="speed-recommendation"),
+                    ),className="speed-recommendation-container",
                 ),
             dbc.Col(
                 html.Div([
-                    html.Img(id = "tl-picture", src="")
+                    html.Img(id = "tl-picture", src=dash.get_relative_path(f"/assets/tf_off.png"))
                 ],
                 className="tl-container",
                 ),
@@ -284,21 +291,21 @@ def speed_recommendation_demo(necessary_speed):
         className="flex-container-bottom",
     )
 
-def speed_recommendation_live(necessary_speed): 
+def speed_recommendation_live(): 
     return dbc.Row(children=
             [dbc.Col(
                 html.Div(html.P(["fahre mindestens\t",
-                        html.Span(f"{necessary_speed}", style={"color": "green"}),
+                        html.Span("-", style={"color": "green"}),
                         "\tkm/h,", 
                         html.Br(),
                         "um\t",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                        "\tzu erreichen"],),
-                    ),
+                        "\tzu erreichen"], id="speed-recommendation-live"),
+                    ), className="speed-recommendation-container",
                 ),
             dbc.Col(
                 html.Div([
-                    html.Img(id = "tl-picture-live", src="")
+                    html.Img(id = "tl-picture-live", src=dash.get_relative_path(f"/assets/tf_off.png"))
                 ],
                 className="tl-container",
                 ),
@@ -356,12 +363,6 @@ def data_demo():
                         dl.Circle(id="position", center=(0,0), radius=10),
                         dl.LayerGroup(id="start-end-layer"),
                         dl.LayerGroup(id="tl-route-layer"),
-                       # dl.LocateControl(locateOptions={'enableHighAccuracy': True, 
-                       #         "setView": False, 
-                       #         "watch": True, 
-                       #         "maxZoom": 17,
-                       #         },
-                       #         showCompass = False),
                         dl.ScaleControl(position="bottomleft", imperial=False), #shows the scala 
                         dl.FullScreenControl()
                         ], 
@@ -374,8 +375,8 @@ def data_demo():
                             dbc.Col(children= 
                                 [
                                 next_turn_demo(),
-                                control_demo("-"),
-                                speed_recommendation_demo("-"),
+                                control_demo(),
+                                speed_recommendation_demo(),
                                 progress_demo()
                                 ],
                             ), 
@@ -394,7 +395,8 @@ def data_demo():
 def data_live():
     return dbc.Row([
                 dbc.Col([
-                    dcc.Store(id='map-store-live', data=None),  # Store to keep the map zoom level
+                    dcc.Store(id='map-store-live', data={"center": [53.549573,9.953330], "zoom": 10}),  # Store to keep the map zoom level
+                    dcc.Store(id='center-store-live', data=None),  # Store to keep the map zoom level
                     dl.Map(id = "map-live", center=[53.549573,9.953330], zoom=10,
                     children=[
                         dl.TileLayer(),
@@ -418,9 +420,9 @@ def data_live():
                             dbc.Col(children= 
                                 [
                                 next_turn_live(),
-                                control_live("-"),
-                                speed_recommendation_live("-"),
-                                progress_live()
+                                control_live(),
+                                speed_recommendation_live(),
+                                progress_live(),
                                 ],
                             ), 
                             label="Instruktion", tab_id="tab-1-live", 
@@ -430,7 +432,29 @@ def data_live():
                                     disabled=True,
                                     id="tab-2-live")
                         ], active_tab="tab-1-live",
-                    ))              
+                    )),
+                dbc.Modal(
+                    [
+                        dbc.ModalHeader(dbc.ModalTitle("Information")),
+                        dbc.ModalBody("Um die Navigation zu starten, nähern Sie sich bitte der Route."),
+                    ],
+                    id="start-navigation-modal",
+                    is_open=False,
+                ),
+                dbc.Modal(
+                    [
+                        dbc.ModalHeader(dbc.ModalTitle("Information")),
+                        dbc.ModalBody("Um die Navigation zu starten, müssen Sie die Standortfreigabe aktivieren."),
+                    ],
+                    id="start-freigabe-modal",
+                    is_open=False,
+                ),
+                # Hidden button for programmatic clicking
+                #html.Button('Get GPS', id='get-gps-button', n_clicks=0), #style={'display': 'none'}),
+                # Store components to store latitude and longitude
+                #html.Div(children="hello",id='store-latitude',),#style={'display': 'none'}),
+                #html.Div(id='store-longitude',),#style={'display': 'none'}), 
+                #html.Div(id="get-gps"),
             ],
             className="left-container", 
         )
@@ -542,7 +566,7 @@ def card_right():
             ]
         )    
     ],
-   className="card-container",
+    className="card-container",
     id="right-card",
 )  
 
@@ -550,8 +574,8 @@ def card_right():
 def components_startseite():
     return dbc.Row(children=[
         dbc.Col(info()), #Include information text 
-        dbc.Col(card_left()), # Include the cards
-        dbc.Col(card_right()),
+        dbc.Col(children=[html.Div(children=[card_left(),card_right()], 
+                                   className="card-components-container")]), # Include the cards
         dbc.Col(contributors()),
     ], 
     className="startseite-components-container",

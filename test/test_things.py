@@ -8,7 +8,6 @@ class TestFetchCoordinates(unittest.TestCase):
         # Setup
         ids = [2, 3, 18760]
         things = Things(ids)
-
         # Create a mock FETCHER
         mock_fetcher = MagicMock()
         things.FETCHER = mock_fetcher
@@ -67,11 +66,9 @@ class TestFetchCoordinates(unittest.TestCase):
 
         # Set side effect for fetch_data mock
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
-
         # Call the method under test
         things._fetch_coordinates()
         result = things.coordinates
-
         # Expected result
         excepted_result = {
             2: [
@@ -90,7 +87,6 @@ class TestFetchCoordinates(unittest.TestCase):
                 [[9.9869255, 53.5475913]],
             ],
         }
-
         # Assert
         self.assertEqual(result, excepted_result)
 
@@ -98,7 +94,6 @@ class TestFetchCoordinates(unittest.TestCase):
         # Setup
         ids = [2, 3, 18760]
         things = Things(ids)
-
         # Create a mock FETCHER
         mock_fetcher = MagicMock()
         things.FETCHER = mock_fetcher
@@ -121,7 +116,6 @@ class TestFetchCoordinates(unittest.TestCase):
 
         # Set side effect for fetch_data mock
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
-
         # Call the method under test
         with patch("logging.error") as mock_logging_error:
             things._fetch_coordinates()
@@ -139,7 +133,6 @@ class TestFetchCoordinates(unittest.TestCase):
         # Setup
         ids = [2, 3, 18760]
         things = Things(ids)
-
         # Create a mock FETCHER
         mock_fetcher = MagicMock()
         things.FETCHER = mock_fetcher
@@ -162,7 +155,6 @@ class TestFetchCoordinates(unittest.TestCase):
 
         # Set side effect for fetch_data mock
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
-
         # Call the method under test
         with patch("logging.error") as mock_logging_error:
             things._fetch_coordinates()
@@ -181,7 +173,6 @@ class TestFetchPrimarySignalEndpointIds(unittest.TestCase):
     def test_fetch_primary_signal_endpoint_ids(self):
         ids = [2, 3, 18760]
         things = Things(ids)
-
         # Create a mock FETCHER
         mock_fetcher = MagicMock()
         things.FETCHER = mock_fetcher
@@ -231,21 +222,17 @@ class TestFetchPrimarySignalEndpointIds(unittest.TestCase):
 
         # Set side effect for fetch_data mock
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
-
         # Call the method under test
         things._fetch_primary_signal_endpoint_ids()
         result = things.primary_signal_endpoint_ids
-
         # Expected result
         expected_result = {2: 15, 3: 6, 18760: 70477}
-
         # Assert
         self.assertEqual(result, expected_result)
 
     def test_fetch_primary_signal_endpoint_ids_no_datastream(self):
         ids = [2, 3, 18760]
         things = Things(ids)
-
         # Create a mock FETCHER
         mock_fetcher = MagicMock()
         things.FETCHER = mock_fetcher
@@ -268,7 +255,6 @@ class TestFetchPrimarySignalEndpointIds(unittest.TestCase):
 
         # Set side effect for fetch_data mock
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
-
         with patch("logging.error") as mock_logging_error:
             things._fetch_primary_signal_endpoint_ids()
             result = things.primary_signal_endpoint_ids
@@ -284,11 +270,9 @@ class TestFetchPrimarySignalEndpointIds(unittest.TestCase):
     def test_fetch_primary_signal_endpoint_ids_no_primary_signal_datastream(self):
         ids = [2, 3, 18760]
         things = Things(ids)
-
         # Create a mock FETCHER
         mock_fetcher = MagicMock()
         things.FETCHER = mock_fetcher
-
         # Create a mock FETCHER
         mock_fetcher = MagicMock()
         things.FETCHER = mock_fetcher
@@ -326,7 +310,6 @@ class TestFetchPrimarySignalEndpointIds(unittest.TestCase):
 
         # Set side effect for fetch_data mock
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
-
         with patch("logging.error") as mock_logging_error:
             things._fetch_primary_signal_endpoint_ids()
             result = things.primary_signal_endpoint_ids
@@ -344,20 +327,21 @@ class TestFetchPrimarySignalEndpointIds(unittest.TestCase):
 
 class TestLookUpPrimarySignalEndpointIds(unittest.TestCase):
     def test_lookup_primary_signal_endpoint_ids_non_zero(self):
+        # Setting
         ids = [2, 3, 4, 8, 10, 18760]
         things = Things(ids)
         things._lookup_primary_signal_endpoint_ids()
-
+        # Testing
         result = things.primary_signal_endpoint_ids
         expected_result = {2: 15, 3: 6, 4: 19, 8: 14, 10: 4492, 18760: 70773}
-
         self.assertEqual(result, expected_result)
 
     def test_lookup_primary_signal_endpoint_ids_zero(self):
+        # Setting
         ids = [170, 318, 2909, 2910, 3885, 23490, 23504]
         things = Things(ids)
         things._lookup_primary_signal_endpoint_ids()
-
+        # Testing
         result = things.primary_signal_endpoint_ids
         expected_result = {
             170: 0,
@@ -368,16 +352,16 @@ class TestLookUpPrimarySignalEndpointIds(unittest.TestCase):
             23490: 0,
             23504: 0,
         }
-
         self.assertEqual(result, expected_result)
 
 
 class TestLookUpSecondarySignalEndpointIds(unittest.TestCase):
     def test_lookup_secondary_signal_endpoint_ids_non_zero(self):
+        # Setting
         ids = [4, 7, 30, 42, 181, 6519, 8211, 8180]
         things = Things(ids)
         things._lookup_secondary_signal_endpoint_ids()
-
+        # Testing
         result = things.secondary_signal_endpoint_ids
         expected_result = {
             4: 26,
@@ -389,14 +373,14 @@ class TestLookUpSecondarySignalEndpointIds(unittest.TestCase):
             8180: 35348,
             8211: 32212,
         }
-
         self.assertEqual(result, expected_result)
 
     def test_lookup_secondary_signal_endpoint_ids_zero(self):
+        # Setting
         ids = [3, 5, 8, 265, 1044, 1045, 8475, 8479, 18250]
         things = Things(ids)
         things._lookup_secondary_signal_endpoint_ids()
-
+        # Testing
         result = things.secondary_signal_endpoint_ids
         expected_result = {
             3: 0,
@@ -414,9 +398,11 @@ class TestLookUpSecondarySignalEndpointIds(unittest.TestCase):
 
 class TestLookUpAcousticSignalEndpointIds(unittest.TestCase):
     def test_lookup_acoustic_signal_endpoint_ids_non_zero(self):
+        # Setting
         ids = [1151, 1272, 3698, 4442, 4538, 4910, 7099, 13622, 17684, 18620]
         things = Things(ids)
         things._lookup_acoustic_signal_endpoint_ids()
+        # Testing
         result = things.acoustic_signal_endpoints_ids
         excepted_result = {
             1151: 3008,
@@ -433,9 +419,11 @@ class TestLookUpAcousticSignalEndpointIds(unittest.TestCase):
         self.assertEqual(result, excepted_result)
 
     def test_lookup_acoustic_signal_endpoint_ids_zero(self):
+        # Setting
         ids = [1317, 2674, 5026, 6083, 14052, 14511, 14600, 17593, 19293, 21870]
         things = Things(ids)
         things._lookup_acoustic_signal_endpoint_ids()
+        # Testing
         result = things.acoustic_signal_endpoints_ids
         excepted_result = {
             1317: 0,
@@ -454,9 +442,11 @@ class TestLookUpAcousticSignalEndpointIds(unittest.TestCase):
 
 class TestLookUpDetectorCarEndpointIds(unittest.TestCase):
     def test_lookup_detector_car_endpoint_ids_non_zero(self):
+        # Setting
         ids = [1529, 3754, 5846, 6875, 7326, 8323, 12720, 13404, 17694, 21645]
         things = Things(ids)
         things._lookup_detector_car_endpoint_ids()
+        # Testing
         result = things.detector_car_endpoints_ids
         excepted_result = {
             1529: 16353,
@@ -473,9 +463,11 @@ class TestLookUpDetectorCarEndpointIds(unittest.TestCase):
         self.assertEqual(result, excepted_result)
 
     def test_lookup_detector_car_endpoint_ids_zero(self):
+        # Setting
         ids = [245, 449, 811, 1620, 2001, 3534, 4474, 12402, 17209, 19318]
         things = Things(ids)
         things._lookup_detector_car_endpoint_ids()
+        # Testing
         result = things.detector_car_endpoints_ids
         excepted_result = {
             245: 0,
@@ -494,9 +486,11 @@ class TestLookUpDetectorCarEndpointIds(unittest.TestCase):
 
 class TestLookUpDetectorCyclistsEndpointIds(unittest.TestCase):
     def test_lookup_detector_cyclists_endpoint_ids_non_zero(self):
+        # Setting
         ids = [370, 4606, 5789, 6687, 8377, 8960, 14290, 14788, 14929, 19747]
         things = Things(ids)
         things._lookup_detector_cyclists_ids()
+        # Testing
         result = things.detector_cyclists_endpoints_ids
         excepted_result = {
             370: 3415,
@@ -513,9 +507,11 @@ class TestLookUpDetectorCyclistsEndpointIds(unittest.TestCase):
         self.assertEqual(result, excepted_result)
 
     def test_lookup_detector_cyclists_endpoint_ids_zero(self):
+        # Setting
         ids = [978, 1429, 5142, 6324, 6608, 7280, 12021, 19784, 20320, 23525]
         things = Things(ids)
         things._lookup_detector_cyclists_ids()
+        # Testing
         result = things.detector_cyclists_endpoints_ids
         excepted_result = {
             978: 0,
@@ -534,9 +530,11 @@ class TestLookUpDetectorCyclistsEndpointIds(unittest.TestCase):
 
 class TestLookUpDetectorPedestrianEndpointIds(unittest.TestCase):
     def test_lookup_detector_pedestrian_endpoint_ids_non_zero(self):
+        # Setting
         ids = [3136, 3868, 4666, 6804, 9569, 9751, 11937, 17477, 21389, 23401]
         things = Things(ids)
         things._lookup_detector_pedestrian_ids()
+        # Testing
         result = things.detector_pedestrian_endpoints_ids
         excepted_result = {
             3136: 15458,
@@ -553,9 +551,11 @@ class TestLookUpDetectorPedestrianEndpointIds(unittest.TestCase):
         self.assertEqual(result, excepted_result)
 
     def test_lookup_detector_pedestrian_endpoint_ids_zero(self):
+        # Setting
         ids = [2827, 4587, 5776, 7338, 9394, 10903, 13943, 15565, 18069, 18543]
         things = Things(ids)
         things._lookup_detector_pedestrian_ids()
+        # Testing
         result = things.detector_pedestrian_endpoints_ids
         excepted_result = {
             2827: 0,
@@ -574,9 +574,11 @@ class TestLookUpDetectorPedestrianEndpointIds(unittest.TestCase):
 
 class TestLookUpBusPreRequestEndpointIds(unittest.TestCase):
     def test_lookup_bus_pre_request_endpoint_ids_non_zero(self):
+        # Setting
         ids = [110, 255, 797, 6709, 8598, 9083, 9765, 14370, 16262, 23345]
         things = Things(ids)
         things._lookup_bus_pre_request_ids()
+        # Testing
         result = things.bus_pre_request_endpoints_ids
         excepted_result = {
             110: 724,
@@ -593,9 +595,11 @@ class TestLookUpBusPreRequestEndpointIds(unittest.TestCase):
         self.assertEqual(result, excepted_result)
 
     def test_lookup_bus_pre_request_endpoint_ids_zero(self):
+        # Setting
         ids = [1212, 1428, 8597, 8720, 10144, 18340, 19390, 22254, 22335, 23063]
         things = Things(ids)
         things._lookup_bus_pre_request_ids()
+        # Testing
         result = things.bus_pre_request_endpoints_ids
         excepted_result = {
             1212: 0,
@@ -614,9 +618,11 @@ class TestLookUpBusPreRequestEndpointIds(unittest.TestCase):
 
 class TestLookUpBusRequestEndpointIds(unittest.TestCase):
     def test_lookup_bus_request_endpoint_ids_non_zero(self):
+        # Setting
         ids = [4, 311, 1265, 8900, 10514, 10517, 10579, 16954, 18376, 19921]
         things = Things(ids)
         things._lookup_bus_request_ids()
+        # Testing
         result = things.bus_request_endpoints_ids
         excepted_result = {
             4: 74084,
@@ -633,9 +639,11 @@ class TestLookUpBusRequestEndpointIds(unittest.TestCase):
         self.assertEqual(result, excepted_result)
 
     def test_lookup_bus_request_endpoint_ids_zero(self):
+        # Setting
         ids = [2628, 2957, 5778, 6303, 7138, 10313, 12122, 15597, 16766, 19602]
         things = Things(ids)
         things._lookup_bus_request_ids()
+        # Testing
         result = things.bus_request_endpoints_ids
         excepted_result = {
             2628: 0,
@@ -654,9 +662,11 @@ class TestLookUpBusRequestEndpointIds(unittest.TestCase):
 
 class TestLookUpBusCheckoutEndpointIds(unittest.TestCase):
     def test_lookup_bus_checkout_endpoint_ids_non_zero(self):
+        # Setting
         ids = [4, 27, 28, 29, 1145, 1227, 23343, 23362]
         things = Things(ids)
         things._lookup_bus_checkout_ids()
+        # Testing
         result = things.bus_checkout_endpoints_ids
         excepted_result = {
             4: 3,
@@ -671,9 +681,11 @@ class TestLookUpBusCheckoutEndpointIds(unittest.TestCase):
         self.assertEqual(result, excepted_result)
 
     def test_lookup_bus_checkout_endpoint_ids_zero(self):
+        # Setting
         ids = [2, 3, 5, 1084, 1088, 10650, 12219, 23441]
         things = Things(ids)
         things._lookup_bus_checkout_ids()
+        # Testing
         result = things.bus_checkout_endpoints_ids
         excepted_result = {
             2: 0,
@@ -690,9 +702,11 @@ class TestLookUpBusCheckoutEndpointIds(unittest.TestCase):
 
 class TestLookUpSignalProgramEndpointIds(unittest.TestCase):
     def test_lookup_signal_program_endpoint_ids_non_zero(self):
+        # Setting
         ids = [1017, 2680, 8090, 9959, 19022, 21044, 21964, 22307, 22446, 22858]
         things = Things(ids)
         things._lookup_signal_program_endpoint_ids()
+        # Testing
         result = things.signal_program_endpoints_ids
         excepted_result = {
             1017: 6466,
@@ -709,9 +723,11 @@ class TestLookUpSignalProgramEndpointIds(unittest.TestCase):
         self.assertEqual(result, excepted_result)
 
     def test_lookup_signal_program_endpoint_ids_zero(self):
+        # Setting
         ids = [2664, 2907, 6321, 8540, 9139, 9680, 9681, 12614, 12634, 23500]
         things = Things(ids)
         things._lookup_signal_program_endpoint_ids()
+        # Testing
         result = things.signal_program_endpoints_ids
         excepted_result = {
             2664: 0,
@@ -730,9 +746,11 @@ class TestLookUpSignalProgramEndpointIds(unittest.TestCase):
 
 class TestLookUpCycleSecondEndpointIds(unittest.TestCase):
     def test_lookup_cycle_second_endpoint_ids_non_zero(self):
+        # Setting
         ids = [445, 2679, 2908, 3283, 3788, 4824, 10413, 20684, 23123, 23535]
         things = Things(ids)
         things._lookup_cycle_second()
+        # Testing
         result = things.cycle_second_endpoints_ids
         excepted_result = {
             445: 654,
@@ -749,9 +767,11 @@ class TestLookUpCycleSecondEndpointIds(unittest.TestCase):
         self.assertEqual(result, excepted_result)
 
     def test_lookup_cycle_second_endpoint_ids_zero(self):
+        # Setting
         ids = [2577, 2664, 3885, 4197, 5839, 8540, 17250, 17880, 21254, 23487]
         things = Things(ids)
         things._lookup_cycle_second()
+        # Testing
         result = things.cycle_second_endpoints_ids
         excepted_result = {
             2577: 0,
@@ -774,7 +794,6 @@ class TestGetTLObservations(unittest.TestCase):
         ids = [2, 3, 18760]
         things = Things(ids)
         things.primary_signal_endpoint_ids = {2: 15, 3: 6, 18760: 70477}
-
         # Create a mock FETCHER
         mock_fetcher = MagicMock()
         things.FETCHER = mock_fetcher
@@ -804,7 +823,6 @@ class TestGetTLObservations(unittest.TestCase):
 
         # Set side effect for fetch_data mock
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
-
         # Call the method under test
         result = things.get_primary_signal_observations(n_obsrvtns=1, phnTime=False)
         # Expected result
@@ -813,7 +831,6 @@ class TestGetTLObservations(unittest.TestCase):
             3: [[2]],
             18760: [[3]],
         }
-
         # Assert
         self.assertEqual(result, expected_result)
 
@@ -854,17 +871,14 @@ class TestGetTLObservations(unittest.TestCase):
 
         # Set side effect for fetch_data mock
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
-
         # Call the method under test
         result = things.get_primary_signal_observations(n_obsrvtns=2, phnTime=True)
-
         # Expected result
         expected_result = {
             2: [["2024-10-27T18:37:55Z", 1], ["2024-10-27T18:37:52Z", 2]],
             3: [["2024-10-27T18:37:55Z", 3], ["2024-10-27T18:37:52Z", 4]],
             18760: [["2024-10-27T18:37:42Z", 5], ["2024-10-27T18:37:39Z", 6]],
         }
-
         # Assert
         self.assertEqual(result, expected_result)
 
@@ -873,7 +887,6 @@ class TestGetTLObservations(unittest.TestCase):
         ids = [2, 3, 18760]
         things = Things(ids)
         things.primary_signal_endpoint_ids = {2: 15, 3: 6, 18760: 70477}
-
         mock_fetcher = MagicMock()
         things.FETCHER = mock_fetcher
 
@@ -884,6 +897,7 @@ class TestGetTLObservations(unittest.TestCase):
                 {"@iot.id": 70477, "Observations": []},
             ]
 
+        # Testing
         mock_fetcher.fetch_data.side_effect = side_effect_fetch_data
         with patch("logging.error") as mock_logging_error:
             result = things.get_primary_signal_observations(n_obsrvtns=1, phnTime=False)

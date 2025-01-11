@@ -66,6 +66,7 @@ class RoutePlanner:
         id = int(trafficLightsId)
         
         output=tlapp.TrafficLightApprox.approx_next_switch(id)
+        
         if output is None:
             return trafficLightsId,9,9,0,False
 
@@ -73,6 +74,9 @@ class RoutePlanner:
         status="green" if nextPhase=="red" else "red"
         zeitAktuell=dtime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
         nextPhaseTime=(switchTime-zeitAktuell).total_seconds()
+        if nextPhaseTime < 0: 
+            return trafficLightsId,9,9,0,False
+        
         return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
         
         #why is this?
@@ -232,7 +236,7 @@ class RoutePlanner:
             tfLID,status,nextPhase,nextPhaseTime,rapidUpdate = self._casperEval(trafficLightsId)
             
             if currentPositionID == -1 or status == 9:
-                return status,nextPhase,nextPhaseTime,rapidUpdate
+                return status,nextPhase,nextPhaseTime,rapidUpdate,speed
             else:
                 speed = self._calcSpeed(trafficLightsId,currentPositionID)
                 #print(f"--- {time.time()-start_time} s---")
@@ -285,8 +289,8 @@ class RoutePlanner:
         '''
         
         route = routeList.copy()
-        value = evaluation.getMinAvgRedTime(routeList)
-        #value = evaluation.getMinTrafficLights(routeList)
+        #value = evaluation.getMinAvgRedTime(routeList)
+        value = evaluation.getMinTrafficLights(routeList)
         #removes every other route and preserve the structure of a GeoJson file.
         route["features"] = [routeList["features"][value]]
         return route

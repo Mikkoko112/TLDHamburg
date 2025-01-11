@@ -44,17 +44,17 @@ def testGetNotes(options:dict):
 
 def checkLength(options:dict):
     
-    with open(f"..{options["importantData"]["allFetchAreas"]}","r") as file:
+    with open(f"tldhamburg/control/{options["importantData"]["allFetchAreas"]}","r") as file:
         coordsBase = json.load(file)
 
-    with open(f"..{options["importantData"]["holeData"]}","r") as file:
+    with open(f"tldhamburg/control/{options["importantData"]["holeData"]}","r") as file:
         coords = json.load(file)
 
     print(len(coordsBase),len(coords))
 
     out = getWrongSquares(coords,coordsBase)
     
-    with open("missingData.json","w") as file:
+    with open("tldhamburg/control/data/missingData.json","w") as file:
         json.dump(out,file,indent=4)
     if (len(out)) > 0: 
         print(f"Test failed there are {len(out)} missing or corrupted squares.")
@@ -63,7 +63,7 @@ def checkLength(options:dict):
 
 
 if __name__ == "__main__":
-    with open("../optionsfile.json","r") as file:
+    with open("tldhamburg/control/optionsfile.json","r") as file:
         options = json.load(file)
     checkLength(options)
     testRoundValue(options)

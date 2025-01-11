@@ -30,7 +30,7 @@ unit-test-backend-job:
     - python test/test_trafficlightapprox.py
     - echo "Congratulations test_trafficlightapprox.py passed."
   rules:
-    #- if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   
 unit-test-control-job:

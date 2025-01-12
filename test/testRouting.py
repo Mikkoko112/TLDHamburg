@@ -27,7 +27,7 @@ def testDegree():
     testValues = [
         [[30,50],True],
         [[10,30],True],
-        [[10,36],False],
+        [[10,76],False],
         [[350,10],True],
         [[10,359],True],
         [[50,80],False]

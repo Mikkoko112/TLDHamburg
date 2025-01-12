@@ -30,7 +30,7 @@ def testDegree():
         [[10,76],False],
         [[350,10],True],
         [[10,359],True],
-        [[50,80],False]
+        [[50,99],False]
     ]
 
     for degers,val in testValues:

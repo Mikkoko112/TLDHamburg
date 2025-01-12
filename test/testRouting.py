@@ -34,7 +34,7 @@ def testDegree():
     ]
 
     for degers,val in testValues:
-        if not inDegreeOffset(degers[0],degers[1]) == val:
+        if not inDegreeOffset(degers[0],degers[1])[0] == val:
             print(f"Degree function has a bug at {degers}")
             exit(1)
     print("Degree test passed")

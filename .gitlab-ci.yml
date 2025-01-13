@@ -45,7 +45,9 @@ unit-test-control-job:
     - python test/testfetchAreas.py
     - python test/testRouting.py
     - python test/testSquareCount.py
-    - python test/testVectorGenerator.py
+    - cd tldhamburg/control/scripts/
+    - python tldhamburg/control/scripts/testVectorGenerator.py
+    - cd ../../../
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'

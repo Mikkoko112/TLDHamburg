@@ -9,7 +9,8 @@ searchTraffic,searchArea = 0.01,1.5
 
 
 nameOfProcessedThing = "../data/cleanedCoorsAverage.json",
-nameOfOutputfile = f"../data/{sys.argv[2]}.json"
+if len(sys.argv) > 3:
+    nameOfOutputfile = f"../data/{sys.argv[2]}.json"
 '''
 
 '''

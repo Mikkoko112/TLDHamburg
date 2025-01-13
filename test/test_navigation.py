@@ -1,12 +1,12 @@
 import unittest, logging, json
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock#, patch, mock_open
 from tldhamburg.frontend.Navigation import Navigation
-from tldhamburg.frontend.position import Position
-from tldhamburg.frontend.trafficlights import Trafficlight
-from tldhamburg.control.control import RoutePlanner
+#from tldhamburg.frontend.position import Position
+#from tldhamburg.frontend.trafficlights import Trafficlight
+#from tldhamburg.control.control import RoutePlanner
 from pathlib import Path
-import numpy as np
-import warnings
+#import numpy as np
+#import warnings
 
 class TestNavigation(unittest.TestCase):
     def setUp(self):
@@ -48,15 +48,17 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(self.navigate.speed_limits, expected)
 
     def test_init_traffic_lights(self):
-        mock_trafficlight = MagicMock(spec=Trafficlight)
-        mock_trafficlight.return_value = None
+        #mock_trafficlight = MagicMock(spec=Trafficlight)
+        #mock_trafficlight.return_value = None
+        
         # Here we will only check if the trafficlights have been initialized with the right key. The use of 'Trafficlight' will be tested later. 
         trafficlight_dict = {163: None, 270: None, 274: None, 287: None, 291: None, 292: None, 312: None, 337: None}
         expected = trafficlight_dict.keys()
         self.assertEqual(self.navigate.trafficlights.keys(), expected)
-    
+
     def test_is_on_route(self):
-        mock_position = MagicMock(spec=Position)
+        #mock_position = MagicMock(spec=Position)
+        mock_position = MagicMock()
         mock_position.get_pos.return_value = (9.93140983581543, 53.5977401733398)
         result = self.navigate.is_on_route(mock_position)
         expected = True
@@ -72,7 +74,8 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_get_current_waypoint_index(self):
-        mock_position = MagicMock(spec=Position)
+        #mock_position = MagicMock(spec=Position)
+        mock_position = MagicMock()
         mock_position.get_pos.return_value = (9.93140983581543, 53.5977401733398)
         self.navigate.update_route(mock_position)
         result = self.navigate._get_current_waypoint_index()
@@ -80,7 +83,8 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(result, expected)
     
     def test_get_current_navigation_instruction_key(self):
-        mock_position = MagicMock(spec=Position)
+        #mock_position = MagicMock(spec=Position)
+        mock_position = MagicMock()
         mock_position.get_pos.return_value = (9.93138122558594, 53.5977058410645)
         self.navigate.update_route(mock_position)
         result = self.navigate._get_current_navigation_instruction_key()
@@ -94,7 +98,8 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_get_current_speed_limit(self):
-        mock_position = MagicMock(spec=Position)
+       # mock_position = MagicMock(spec=Position)
+        mock_position = MagicMock()
         mock_position.get_pos.return_value = self.navigate.way_points[16]
         self.navigate.update_route(mock_position)
         result = self.navigate._get_current_speed_limit()
@@ -111,7 +116,8 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(tl2_result, expected2)
 
     def test_update_trafficlight(self):        
-        mock_trafficlight = MagicMock(spec=Trafficlight)
+        #mock_trafficlight = MagicMock(spec=Trafficlight)
+        mock_trafficlight = MagicMock()
         self.navigate.next_tl = mock_trafficlight
         mock_trafficlight.things_id = "9515"
         mock_trafficlight.set_status.return_value = "green"
@@ -130,14 +136,16 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_start_navigation(self):
-        mock_position = MagicMock(spec=Position)
+        #mock_position = MagicMock(spec=Position)
+        mock_position = MagicMock()
         mock_position.get_pos.return_value = self.navigate.way_points[28]
         result = self.navigate.start_navigation(mock_position)
         expected = True
         self.assertEqual(result, expected)
 
     def test_update_status_bar(self):
-        mock_position = MagicMock(spec=Position)
+        #mock_position = MagicMock(spec=Position)
+        mock_position = MagicMock()
         mock_position.get_pos.return_value = self.navigate.way_points[312]
         self.navigate.update_route(mock_position)
         result = self.navigate._update_status_bar()

@@ -2,6 +2,7 @@ import dash
 from dash import no_update, ctx, callback, dcc, html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
+import dash_leaflet as dl
 
 import pandas as pd
 
@@ -84,6 +85,7 @@ def load_data_on_init(dummy_data):
     [State("startpunkt-live","value"),
      State("endpunkt-live","value"),
      State("bike-switch-live", "value"),
+     State("radioitems-input-live", "value"),
      State("center-store-live", "data"), # center of user-location
      Input("route-button-live", "n_clicks"),
      ],
@@ -93,7 +95,7 @@ def load_data_on_init(dummy_data):
     ],
     prevent_initial_call=True
 )
-def check_validity(starttext, endtext, bicycle_mode, user_store, n_clicks): 
+def check_validity(starttext, endtext, bicycle_mode, route_option, user_store, n_clicks): 
     marker = [{"id": "departure", "lat": 53.5975929, "lon": 9.9318831},
                   {"id": "destination", "lat": 53.5524079, "lon": 10.0084222}]           
     if starttext or endtext: 
@@ -127,9 +129,9 @@ def check_validity(starttext, endtext, bicycle_mode, user_store, n_clicks):
                 )
         
         #get route from control
-        navigate.update_bicycle_mode(bicycle_mode)
+        navigate.update_mode(bicycle_mode, route_option)
         navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
-
+       
         return (is_valid_start, 
                 not is_valid_start, 
                 is_valid_end, 
@@ -159,7 +161,8 @@ def check_validity(starttext, endtext, bicycle_mode, user_store, n_clicks):
 @callback(
     Output('center-store-live', 'data'),
     Input('map-live', 'center'),
-    State("map-live", "zoom")
+    State("map-live", "zoom"),
+    #State("map", "location"),
 )
 def store_map_view(center, zoom):
     if zoom >= 17:

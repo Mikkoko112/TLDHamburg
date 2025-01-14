@@ -2,6 +2,7 @@ import dash
 from dash import no_update, ctx, callback, dcc, html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
+import dash_leaflet as dl
 
 import pandas as pd
 import time
@@ -85,6 +86,7 @@ def load_data_on_init(dummy_data):
     [State("startpunkt","value"),
      State("endpunkt","value"),
      State("bike-switch", "value"),
+     State("radioitems-input", "value"),
      Input("route-button", "n_clicks"),
      ],
      running=[
@@ -95,7 +97,7 @@ def load_data_on_init(dummy_data):
     ],
     prevent_initial_call=True
 )
-def check_validity(starttext, endtext, bicycle_mode, n_clicks): 
+def check_validity(starttext, endtext, bicycle_mode, route_option, n_clicks): 
     marker = [{"id": "departure", "lat": 53.5975929, "lon": 9.9318831},
                   {"id": "destination", "lat": 53.5524079, "lon": 10.0084222}]
     if n_clicks:
@@ -130,7 +132,7 @@ def check_validity(starttext, endtext, bicycle_mode, n_clicks):
                     )
             
             #get route from control
-            navigate.update_bicycle_mode(bicycle_mode)
+            navigate.update_mode(bicycle_mode,route_option)
             navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
             pos.set_pos(lat=start_lat, lon=start_lon)
 
@@ -328,4 +330,3 @@ def tl_pic(n_clicks, restart, route):
         elif navigate.status_next_tl == "green":
             return dash.get_relative_path(f"/assets/tf_green.png"),"Hier wird der Ampelstatus angezeigt."
     return no_update, no_update
-

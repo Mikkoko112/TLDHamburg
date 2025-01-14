@@ -36,7 +36,7 @@ def return_coordinates(address: str, geolocator = Nominatim(user_agent="http")):
     # initialize variables
     lat, lon = None, None
     # parameters for viewbox for hamburg
-    viewbox_hh = [Point(53.781807,9.675926),Point(53.366671,10.426862)]
+    viewbox_hh = [Point(53.7492332458496,9.72316932678223),Point(53.3975448608398,10.3262901306152)]
 
     try:
         geocode_info = geolocator.geocode(query=address, country_codes="de", viewbox=viewbox_hh, bounded=True) 

@@ -281,6 +281,7 @@ def show_instructions(data, start_navigation_bool, user_store, n_clicks, _):
 # change trafficlight picture
 @callback(
     Output("tl-picture-live","src"),
+    Output("tl-picture-tooltip-live", "children"),
     Input("center-store-live", "data"), # center of user-location
     Input("route-button-live", "n_clicks"),
     prevent_initial_call=True
@@ -288,14 +289,14 @@ def show_instructions(data, start_navigation_bool, user_store, n_clicks, _):
 def tl_pic(data, n_clicks):
     button_id = ctx.triggered_id
     if button_id == "route-button-live":
-        return dash.get_relative_path(f"/assets/tf_off.png") 
-    if navigate.status_next_tl == "":
-        return dash.get_relative_path(f"/assets/tf_off.png")
+        return dash.get_relative_path(f"/assets/tf_off.png"),"Hier wird der Ampelstatus angezeigt."
+    if (navigate.status_next_tl == "") or (navigate.status_next_tl == 9):
+        return dash.get_relative_path(f"/assets/tf_off.png"),"Es sind keine Ampeldaten vorhanden."
     elif navigate.status_next_tl == "red":
-        return dash.get_relative_path(f"/assets/tf_red.png") 
+        return dash.get_relative_path(f"/assets/tf_red.png"),"Hier wird der Ampelstatus angezeigt."
     elif navigate.status_next_tl == "yellow":
-        return dash.get_relative_path(f"/assets/tf_yellow.png")
+        return dash.get_relative_path(f"/assets/tf_yellow.png"),"Hier wird der Ampelstatus angezeigt."
     elif navigate.status_next_tl == "green":
-        return dash.get_relative_path(f"/assets/tf_green.png")
-    return no_update
+        return dash.get_relative_path(f"/assets/tf_green.png"),"Hier wird der Ampelstatus angezeigt."
+    return no_update, no_update
 

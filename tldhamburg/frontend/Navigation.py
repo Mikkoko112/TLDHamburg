@@ -459,7 +459,7 @@ class Navigation:
         if self.is_on_route(position) == False:
             lat, lon = position.get_pos()
             departure = [lat, lon][::-1]
-            print(departure)
+            #print(departure)
             logging.info(f"creating new route, \n\tstarting at {departure},\n\tdestination: {self.destination}")
             self.create_route(departure, destination=self.destination)
             self.start_navigating = True

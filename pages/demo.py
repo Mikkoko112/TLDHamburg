@@ -308,6 +308,7 @@ def show_instructions(n_clicks, prev, restart, route, store):
 # change trafficlight picture
 @callback(
     Output("tl-picture","src"),
+    Output("tl-picture-tooltip", "children"),
     Input("start-next-button", "n_clicks"),
     Input("restart-button", "n_clicks"),
     Input("route-button", "n_clicks"),
@@ -316,15 +317,15 @@ def show_instructions(n_clicks, prev, restart, route, store):
 def tl_pic(n_clicks, restart, route):
     button_id = ctx.triggered_id
     if button_id == "restart-button" or button_id == "route-button":
-        return dash.get_relative_path(f"/assets/tf_off.png") 
-    if n_clicks > 0:
-        if navigate.status_next_tl == "":
-            return dash.get_relative_path(f"/assets/tf_off.png")
+        return dash.get_relative_path(f"/assets/tf_off.png"),"Hier wird der Ampelstatus angezeigt."
+    if button_id == "start-next-button" and n_clicks > 0:
+        if (navigate.status_next_tl == "") or (navigate.status_next_tl == 9):
+            return dash.get_relative_path(f"/assets/tf_off.png"),"Es sind keine Ampeldaten vorhanden."
         elif navigate.status_next_tl == "red":
-            return dash.get_relative_path(f"/assets/tf_red.png") 
+            return dash.get_relative_path(f"/assets/tf_red.png"),"Hier wird der Ampelstatus angezeigt."
         elif navigate.status_next_tl == "yellow":
-            return dash.get_relative_path(f"/assets/tf_yellow.png")
+            return dash.get_relative_path(f"/assets/tf_yellow.png"),"Hier wird der Ampelstatus angezeigt."
         elif navigate.status_next_tl == "green":
-            return dash.get_relative_path(f"/assets/tf_green.png")
-    return no_update
+            return dash.get_relative_path(f"/assets/tf_green.png"),"Hier wird der Ampelstatus angezeigt."
+    return no_update, no_update
 

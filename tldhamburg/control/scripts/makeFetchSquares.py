@@ -8,7 +8,9 @@ import sys
 searchTraffic,searchArea = 0.01,1.5
 
 
-nameOfProcessedThing,nameOfOutputfile="../data/cleanedCoorsAverage.json","../data/fetchAreasFullDataRerun.json"
+nameOfProcessedThing = "../data/cleanedCoorsAverage.json",
+if len(sys.argv) > 3:
+    nameOfOutputfile = f"../data/{sys.argv[2]}.json"
 '''
 
 '''

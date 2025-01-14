@@ -289,8 +289,12 @@ class RoutePlanner:
         '''
         
         route = routeList.copy()
-        #value = evaluation.getMinAvgRedTime(routeList)
-        value = evaluation.getMinTrafficLights(routeList)
+        
+        if self.analysisTool == "count":
+            value = evaluation.getMinTrafficLights(routeList)
+        else: 
+            value = evaluation.getMinAvgRedTime(routeList)
+        
         #removes every other route and preserve the structure of a GeoJson file.
         route["features"] = [routeList["features"][value]]
         return route
@@ -304,7 +308,11 @@ class RoutePlanner:
                 "max_speed" : int                      This is the max speed for
                     speed in km/h evaluation _calcSpeed(). If this is not in the 
                     dict the default value is 50 km/h.
-            
+                "static_analysis" : str                 This is the function 
+                    the user choses for the first static route evaluation.
+                    "count" return the route with the least traffic light count.
+                    "phases" returns a route with the least approximates red time.
+                    The default is "phases"
             }
         Output
             -> The output is a GeoJson file with a single route
@@ -316,6 +324,15 @@ class RoutePlanner:
         else: 
             self.maxSpeed = None
         
+        
+        self.analysisTool = "phases"
+
+        if "static_analysis" in options.keys():
+            self.analysisTool  = options["static_analysis"] 
+        
+        
+
+
         data               = self._getData(options["coordinates"])
         
         startTempTime = time.time()

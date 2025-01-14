@@ -160,17 +160,17 @@ def check_validity(starttext, endtext, bicycle_mode, route_option, user_store, n
 # stores the center data of the View for the position 
 @callback(
     Output('center-store-live', 'data'),
+    Output("map-live","dragging"),
     Input('map-live', 'center'),
     State("map-live", "zoom"),
-    #State("map", "location"),
 )
 def store_map_view(center, zoom):
     if zoom >= 17:
         print(f"neuer Standort: {center}")
         print(f"zoom: {zoom}")
-        return center 
+        return center, False 
     print(f"zoom: {zoom}") 
-    return no_update
+    return no_update, True
 
 # go through the steps of the route with the start/next button
 # progress shows in the progressbar

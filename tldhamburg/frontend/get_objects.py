@@ -40,7 +40,6 @@ def get_marker(dep_dest):
     out = []
     for pos in dep_dest:
         marker = dl.Marker(position=[pos['lat'], pos['lon']],
-                           icon=pos['icon'],
                 children=[
                     dl.Tooltip(f"{pos['id']}"),
                 ])

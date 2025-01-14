@@ -190,7 +190,7 @@ def getRouteTrafficLights(route:list, conjFile:dict,conjList:list,vectorization:
     return trafficLights
 
 def generateGeoJsonData(trafficLights:dict,conjList:dict)->dict:
-    def getPointData(conjNodes:list)->list: #needs Change
+    def getPointData(conjNodes:list)->list: 
         return conjNodes[0]
 
     out = {

@@ -33,14 +33,14 @@ else
 fi
 
 if [ -e "../data/conjunctionsJoint.json" ]; then
-    echo "Conjunction data is present."
+    echo "The combined conjunction data is present."
 else
     echo "Combining conjunction data"
     python3 makeBoxcombination.py
 fi
 
 if [ -e "../data/conjunctionDict.json" ]; then
-    echo "The conjunction data is present."
+    echo "The conjunction dict data is present."
 else
     echo "Generating conjunction dict data."
     python3 trafficClass.py

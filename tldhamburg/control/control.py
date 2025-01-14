@@ -238,6 +238,8 @@ class RoutePlanner:
             
             tfLID,status,nextPhase,nextPhaseTime,rapidUpdate = self._casperEval(trafficLightsId)
             
+            #print(tfLID,status,nextPhase,nextPhaseTime,rapidUpdate)
+
             if not trafficLightsId in self.notWorkingPrimarySignals and status == 9:
                 self.notWorkingPrimarySignals.append(trafficLightsId)
 
@@ -352,13 +354,13 @@ class RoutePlanner:
         '''
         This sets up the graph data.
         '''
-        print("Loading Mapdata")
+        #print("Loading Mapdata")
         start_time = time.time()
         with open("tldhamburg/control/optionsfile.json","r") as file:
             options = json.load(file)
     
         self.graph = igraph.load("tldhamburg/control/{}".format(options["importantData"]["GraphData"]))
-        print(f"--- {time.time()-start_time} s---")
+        #print(f"--- {time.time()-start_time} s---")
 
     def __init__(self,path:str):
         self.path = path

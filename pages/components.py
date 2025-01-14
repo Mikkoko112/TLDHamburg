@@ -467,7 +467,7 @@ def data_live():
                     dcc.Store(id='center-store-live', data=None),  # Store to keep the map zoom level
                     dl.Map(id = "map-live", center=[53.549573,9.953330], zoom=10, 
                            zoomControl = False, scrollWheelZoom = False, doubleClickZoom = False,
-                           touchZoom = False, dragging = True,
+                           touchZoom = False, dragging = False,
                     children=[
                         dl.TileLayer(),
                         dl.GeoJSON(id="route-layer-live", data=None, options={"color": "blue"}, zoomToBounds=True),

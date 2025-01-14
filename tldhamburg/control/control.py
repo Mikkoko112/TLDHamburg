@@ -233,8 +233,14 @@ class RoutePlanner:
             
             return out
         elif isinstance(trafficLightsId,str):
+            if trafficLightsId in self.notWorkingPrimarySignals:
+                return 9,9,0,False,-1
+            
             tfLID,status,nextPhase,nextPhaseTime,rapidUpdate = self._casperEval(trafficLightsId)
             
+            if not trafficLightsId in self.notWorkingPrimarySignals and status == 9:
+                self.notWorkingPrimarySignals.append(trafficLightsId)
+
             if currentPositionID == -1 or status == 9:
                 return status,nextPhase,nextPhaseTime,rapidUpdate,speed
             else:
@@ -323,7 +329,7 @@ class RoutePlanner:
             self.maxSpeed  = int(options["max_speed"]) 
         else: 
             self.maxSpeed = None
-        
+        self.notWorkingPrimarySignals = []
         
         self.analysisTool = "phases"
 

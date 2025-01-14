@@ -166,10 +166,14 @@ class TestNavigation(unittest.TestCase):
         expected = (9.93146705627441,53.5978164672852)
         self.assertEqual(result, expected)
 
-    def test_update_bicycle_mode(self):
-        self.navigate.update_bicycle_mode(True)
+    def test_update_mode(self):
+        self.navigate.update_mode(True)
         result = self.navigate.bicycle_mode
         expected = True
+        self.assertEqual(result, expected)
+        self.navigate.route_option("count")
+        result = self.navigate.route_option
+        expected = "count"
         self.assertEqual(result, expected)
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@ def dropdown():
                     active="exact",
                 )
                 for page in dash.page_registry.values()
-        ],
+        ] 
     )                  
 
 # the searchbar with the search field for the start and end location
@@ -51,11 +51,38 @@ def searchbar_demo():
                     width="auto",
                 ),
             dbc.Col(
-                 dbc.Button(
-                    "Route",id="route-button", color="primary", n_clicks=0,
-                    ), 
-                    width = "auto",
+            children=[
+                dbc.ButtonGroup(
+                    [
+                        dbc.Button(
+                            "Route",
+                            id="route-button",
+                            color="primary",
+                            n_clicks=0,
+                        ),
+                        dbc.DropdownMenu(
+                            label="",
+                            color="primary",
+                            align_end=True,
+                            group=True,
+                            children=[
+                                dbc.DropdownMenuItem("Optionen zur Routenberechnung", header=True),
+                                dbc.RadioItems(
+                                    options=[
+                                        {"label": "Ampelschaltung betrachten", "value": "phases"},
+                                        {"label": "Möglichst wenige Ampeln", "value": "count"},
+                                    ],
+                                    value="phases",
+                                    id="radioitems-input",
+                                    inline=False,
+                                    style = {"display": "block", "margin-left": "15px", "margin-right": "15px"},  #Aligns radio items vertically
+                                )
+                            ]
+                        ),
+                    ]
                 ),
+            ]
+        ),
             ],
             className="flex-searchbar-container"
         )
@@ -86,11 +113,38 @@ def searchbar_live():
                     width="auto",
                 ),
             dbc.Col(
-                 dbc.Button(
-                    "Route",id="route-button-live", color="primary", n_clicks=0,
-                    ), 
-                    width = "auto",
+            children=[
+                dbc.ButtonGroup(
+                    [
+                        dbc.Button(
+                            "Route",
+                            id="route-button-live",
+                            color="primary",
+                            n_clicks=0,
+                        ),
+                        dbc.DropdownMenu(
+                            label="",
+                            color="primary",
+                            align_end=True,
+                            group=True,
+                            children=[
+                                dbc.DropdownMenuItem("Optionen zur Routenberechnung", header=True),
+                                dbc.RadioItems(
+                                    options=[
+                                        {"label": "Ampelschaltung betrachten", "value": "phases"},
+                                        {"label": "Möglichst wenige Ampeln", "value": "count"},
+                                    ],
+                                    value="phases",
+                                    id="radioitems-input-live",
+                                    inline=False,
+                                    style = {"display": "block", "margin-left": "15px", "margin-right": "15px"},  #Aligns radio items vertically
+                                )
+                            ]
+                        ),
+                    ]
                 ),
+            ]
+        ),
             ],
             className="flex-searchbar-container"
         )
@@ -411,17 +465,22 @@ def data_live():
                 dbc.Col([
                     dcc.Store(id='map-store-live', data={"center": [53.549573,9.953330], "zoom": 10}),  # Store to keep the map zoom level
                     dcc.Store(id='center-store-live', data=None),  # Store to keep the map zoom level
-                    dl.Map(id = "map-live", center=[53.549573,9.953330], zoom=10,
+                    dl.Map(id = "map-live", center=[53.549573,9.953330], zoom=10, 
+                           zoomControl = False, scrollWheelZoom = False, doubleClickZoom = False,
+                           touchZoom = False, dragging = False,
                     children=[
                         dl.TileLayer(),
                         dl.GeoJSON(id="route-layer-live", data=None, options={"color": "blue"}, zoomToBounds=True),
                         dl.LayerGroup(id="start-end-layer-live"),
                         dl.LayerGroup(id="tl-route-layer-live"),
-                        dl.LocateControl(id="locate-control-live", locateOptions={'enableHighAccuracy': True, 
+                        dl.LocateControl(position="topleft",id="locate-control-live", 
+                                         cacheLocation = True, returnToPrevBounds = True,
+                                locateOptions={'enableHighAccuracy': True, 
                                 "setView": True, 
                                 "watch": True, 
-                                "maxZoom": 17,
-                                }),
+                                "minZoom": 17,
+                                },
+                                ),
                         dl.ScaleControl(position="bottomleft", imperial=False), #shows the scala 
                         dl.FullScreenControl()
                         ], 

@@ -56,7 +56,7 @@ class Navigation:
     next_next_tl = None
 
     bicycle_mode = False
-
+    route_option = "phases"
         
     def __init__(self, path=f"{Path.cwd()}/schnittstelle"):
         self._path = path
@@ -68,9 +68,11 @@ class Navigation:
         self.destination = destination
         if self.bicycle_mode is True:
            nav_coordinates = {"coordinates": [departure,destination],
-                              "max_speed": 20} 
+                              "max_speed": 20,
+                              "static_analysis": self.route_option} 
         else:
-            nav_coordinates = {"coordinates": [departure,destination]}
+            nav_coordinates = {"coordinates": [departure,destination],
+                               "static_analysis": self.route_option}
         self._route.generateRoute(nav_coordinates)
 
         # route is saved as a geojson file. Load it...
@@ -529,8 +531,10 @@ class Navigation:
         self.update_route(self.current_position)
         return lat, lon
     
-    def update_bicycle_mode(self, bicycle_mode:bool):
+    def update_mode(self, bicycle_mode:bool, route_option:str):
         self.bicycle_mode = bicycle_mode
+        self.route_option = route_option
+
         
 
 

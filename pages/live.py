@@ -31,6 +31,11 @@ def layout(**kwargs):
     return dbc.Container(children = [
     dcc.Store(id="data-navigate-live", data=""), 
     dcc.Store(id="start-navigation-bool", data=False),
+    dcc.Interval(
+            id='interval-component',
+            interval=3*1000, # in milliseconds
+            n_intervals=0
+        ),
     navbar_live(),
     data_live(),
     dbc.Modal(
@@ -190,12 +195,16 @@ def store_map_view(center, zoom):
 
     [State("route-layer-live", "data"),
     State("start-navigation-bool", "data"), # if the person is near the route
-    Input("center-store-live", "data"), # center of user-location
+    State("center-store-live", "data"), # center of user-location
+    Input("interval-component", "n_intervals"), # updates every x seconds
     Input("start-button-live", "n_clicks"),
     Input("route-button-live", "n_clicks")],
+    #running=[
+    #    (Output("interval-component", "interval"), 0, 1*1000), 
+    #],
     prevent_initial_call=True
 )
-def show_instructions(data, start_navigation_bool, user_store, n_clicks, _):
+def show_instructions(data, start_navigation_bool, user_store, intervall, n_clicks, _):
     # return values
     picture = ""
     text = ""
@@ -228,7 +237,7 @@ def show_instructions(data, start_navigation_bool, user_store, n_clicks, _):
             # update position
             lon = user_store["lat"]
             lat = user_store["lng"]
-            print(f"lat:{lat}, lon:{lon}")
+            #print(f"lat:{lat}, lon:{lon}")
             pos.set_pos(lat, lon)
             startNavigation = navigate.start_navigation(pos)
             startNavigation_modal = not startNavigation 
@@ -239,10 +248,10 @@ def show_instructions(data, start_navigation_bool, user_store, n_clicks, _):
                     "Anweisung": navigate.remaining_nav_instr_texts,
                 }), striped=True, bordered=True, hover=True)) 
     if startNavigation is True:
-        print("start!")
+        #print("start!")
         # update position
-        lat = user_store["lat"]
-        lon = user_store["lng"]
+        lon = user_store["lat"]
+        lat = user_store["lng"]
         pos.set_pos(lat, lon)
         navigate.update_route(pos)
         picture = dash.get_relative_path(f"/assets/{navigate.current_nav_instr_picture}")

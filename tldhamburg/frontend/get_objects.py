@@ -54,7 +54,6 @@ def get_marker(dep_dest):
                     dl.Tooltip(f"{pos['id']}"),
                 ]) 
         out.append(marker)
-    print(out)
     return out
 '''
 def get_marker_id(ids_list):

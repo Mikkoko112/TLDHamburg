@@ -10,6 +10,7 @@ import geopy.distance
 from shapely.geometry import Point, LineString
 from shapely.ops import nearest_points
 from bisect import bisect_right
+from math import radians, cos, sin, asin, sqrt
 
 class Navigation:
     """
@@ -282,6 +283,23 @@ class Navigation:
         y = (lat2 - lat1) * (pi / 180.0)  
         return (x ** 2 + y ** 2) ** 0.5  
     
+    # def _haversine_approx(self, lat1, lon1, lat2, lon2):
+    #     """
+    #     Calculate the great circle distance in kilometers between two points 
+    #     on the earth (specified in decimal degrees)
+    #     https://stackoverflow.com/questions/4913349/haversine-formula-in-python-bearing-and-distance-between-two-gps-points
+    #     """
+    #     # convert decimal degrees to radians 
+    #     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+
+    #     # haversine formula 
+    #     dlon = lon2 - lon1 
+    #     dlat = lat2 - lat1 
+    #     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    #     c = 2 * asin(sqrt(a)) 
+    #     r = 6371 # Radius of earth in kilometers. Use 3956 for miles. Determines return value units.
+    #     return c * r
+
     def _get_current_waypoint_index(self):
         """determine nearest waypoint"""
         lat, lon = self.current_position.get_pos()
@@ -460,8 +478,8 @@ class Navigation:
         self.current_position = position
         if self.is_on_route(position) == False:
             lat, lon = position.get_pos()
-            departure = [lat, lon][::-1]
-            #print(departure)
+            departure = [lat, lon]
+            #print(f"Navi.py: {departure}")
             logging.info(f"creating new route, \n\tstarting at {departure},\n\tdestination: {self.destination}")
             self.create_route(departure, destination=self.destination)
             self.start_navigating = True

@@ -127,14 +127,10 @@ def getBestPrimarySignal(possibleSignals,conjId:str="0")->str:
     for i,item in enumerate(possibleSignals):
         
         values = item[1]+item[2]
-        '''if conjId == testName:
-            print(item[0],values)'''
         if values < smallestError:
             outPrimarySignal = item[0]
             smallestError = values
     
-    #if conjId == testName:
-    #    print(outPrimarySignal,smallestError)
 
     return outPrimarySignal
 
@@ -147,10 +143,13 @@ def getRouteTrafficLights(route:list, conjFile:dict,conjList:list,vectorization:
         for primarySignalName in conjFile[name]['trafficLights']:
             
             meanofPoints =  vectorization[primarySignalName][1]
-
-            vecIn  = generateVectorPoint(meanofPoints,route[pointIndex[ 0]-1]) 
-            vecOut = generateVectorPoint(meanofPoints,route[pointIndex[-1]+1]) 
-
+            try:
+                vecIn  = generateVectorPoint(meanofPoints,route[pointIndex[ 0]-1]) 
+                vecOut = generateVectorPoint(meanofPoints,route[pointIndex[-1]+1]) 
+            except IndexError:
+                #This needs to be done to catch the cases in which the traffic 
+                #light is directly on the beginning or end of the route
+                continue
             degIn  = degrees(getDegree(vecIn))
             degOut = degrees(getDegree(vecOut))
 

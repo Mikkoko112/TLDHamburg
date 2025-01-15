@@ -2,10 +2,10 @@ from tldhamburg.control.control import RoutePlanner
 import json
 import time
 testDict = {
-    "coordinates":[[9.888370238833252,53.57528346380179],
-                   [10.015506740684149,53.638565650000004 ]],
+    "coordinates":[[9.9885268,53.5573318],
+                   [10.085635385830994,53.558576099999996 ]],
     "max_speed"  : 50,
-    "static_analysis" : "count"
+    "static_analysis" : "phases"
 }
 
 
@@ -18,8 +18,9 @@ def makeKCallsPerSecond(k:int,trafficLightId:str,routeObj):
 
 routeObj = RoutePlanner(".")
 routeObj.generateRoute(testDict)
-start = time.time()
+
+'''start = time.time()
 makeKCallsPerSecond(5,"3440",routeObj)
-print(time.time()-start)
+print(time.time()-start)'''
 del routeObj
 exit()

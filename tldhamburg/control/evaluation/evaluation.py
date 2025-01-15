@@ -22,6 +22,9 @@ def getMinTrafficLights(routeListDict: dict) -> int:
     """
     routeList = routeListDict["features"]
     minCount, idx = -1, 0
+    if len(routeList) == 1: 
+        return 0
+    
     for i, route in enumerate(routeList):
         trafficLights = route["properties"]["trafficlights"]["features"]
         if minCount == -1:
@@ -52,23 +55,23 @@ def getMinAvgRedTime(routeListDict: dict, support_points: int = 20) -> int:
     routeList = routeListDict["features"]
     minIndex = -1
     minWeight = float("inf")
-
+    if len(routeList) == 1: 
+        return 0
+    
     for i, route in enumerate(routeList):
         trafficLights = route["properties"]["trafficlights"]["features"]
         routeWeight = 0
+
         for light in trafficLights:
-            trafficLightsId = int(light["properties"]["id"])
-            fetcher = DataFetcher()
-            fetcher.fetch_data(
-                params={"$filter": f"@iot.id eq {trafficLightsId}", "$expand": "Thing"}
-            )
-            if fetcher.get_data() is None:
-                continue
+            
             try:
-                id = fetcher.get_data()[0]["Thing"]["@iot.id"]
+                
                 # green, red = TrafficLightApprox.mean_light_phases(light_id, support_points)
-                meanOutput = TrafficLightApprox.mean_light_phases(id, support_points)
+                trafficLightID = int(light["properties"]["id"])
+
+                meanOutput = TrafficLightApprox.mean_light_phases(trafficLightID, support_points)
                 if meanOutput is None:
+                    
                     continue
                 green, red = meanOutput[0], meanOutput[1]
 
@@ -91,4 +94,5 @@ def getMinAvgRedTime(routeListDict: dict, support_points: int = 20) -> int:
             f"getMinAvgRedTime({routeList}, {support_points}) error:\n"
             "All routes in the input dictionary have infinite wait-time estimates."
         )
+    
     return minIndex

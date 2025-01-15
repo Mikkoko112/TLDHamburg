@@ -1,6 +1,4 @@
 import dash_leaflet as dl
-import base64
-from tldhamburg.backend.Things import Things
 
 # Function to generate Leaflet Markers based on the status of traffic lights
 def get_trafficlights(lights):
@@ -37,13 +35,26 @@ def get_marker(dep_dest):
     positions = [{"id": "departure", "lat": 53.5975929, "lon": 9.9318831, "icon": dl.Icon(color='red')},
                {"id": "destination", "lat": 53.5524079, "lon": 10.0084222, "icon": dl.Icon(color='white')}]
     """    
+    custom_icon = dict(
+        iconUrl='assets/goal.png',
+        iconSize=[35, 75],
+        iconAnchor=[0, 75],
+        popupAnchor=[-3, -76]
+    )   
     out = []
-    for pos in dep_dest:
-        marker = dl.Marker(position=[pos['lat'], pos['lon']],
+    for i,pos in enumerate(dep_dest):
+        if i == 0:
+            marker = dl.CircleMarker(center=[pos['lat'], pos['lon']], radius=10,color="blue",
                 children=[
                     dl.Tooltip(f"{pos['id']}"),
                 ])
+        elif i == 1:
+            marker = dl.CircleMarker(center=[pos['lat'], pos['lon']],radius=10,color="black",
+                children=[
+                    dl.Tooltip(f"{pos['id']}"),
+                ]) 
         out.append(marker)
+    print(out)
     return out
 '''
 def get_marker_id(ids_list):

@@ -546,13 +546,13 @@ def info():
             html.P([
         "Ziel des Projektes ist es, die Daten des Transparenzportal Hamburgs zur Optimierung von Navigationen zu verwenden. ", 
         "Dabei wird die Navigation von Autos betrachtet. ",
-        "Indem eine Vorhersage der Ampelschaltung ermittelt wird, wird eine Route berechnet, die eine optimale Strecke unter Berücksichtigung der Ampel-schaltung ist. ",
+        "Indem eine Vorhersage der Ampelschaltung ermittelt wird, wird eine Route berechnet, die eine optimale Strecke unter Berücksichtigung der Ampelschaltung ist. ",
         "Als Ausgang werden die letzten aktuellen Daten der Ampeln verwendet und diese für die Berechnung der Vorhersage verwendet. ",
         "Durch eine graphische App-Oberfläche ist eine geeignete Visualisierung vorhanden für den Benutzer.",
         html.Br(),
         html.Br(),
         "Außerdem wird der aktuelle Standort des Nutzers live angezeigt und bei Abwegen der Route, registriert das Programm dies und berechnet anhand der aktuellen Standortdaten eine neue Route. ",
-        "Zusätzliche Informationen, wie von anderen Navigations-anbieter bekannt, wie Geschwindigkeit, ungefähre Gesamtzeit der Strecke und Gesamtentfernung werden dem Nutzer angezeigt für die jeweilige Route."]
+        "Zusätzliche Informationen, wie von anderen Navigationsanbieter bekannt, wie Geschwindigkeit und Gesamtentfernung werden dem Nutzer angezeigt für die jeweilige Route."] #ungefähre Gesamtzeit der Strecke
     ), className="bg-primary bg-opacity-10 text-dark rounded small p-2 info-container-left ")
 
 def contributors():
@@ -600,7 +600,7 @@ def card_left():
                                 "Navigation wird nicht mit Live-Daten verfolgt. "
                                 "Die einzelnen Schritte der Navigation kann einzeln durchgegangen werden. "
                                 "Nicht geeignet für eine richtige Navigation. "
-                                "Dient zur Anschaulichung des Systems.",
+                                "Dient zur Veranschaulichung des Systems.",
                                 className="card-text",
                             ),
                         ],

@@ -17,16 +17,18 @@ class TestGetMarker(unittest.TestCase):
 
         # Expected result
         expected_result = [
-                    dl.Marker(children=[dl.Tooltip('departure')], position=[53.5975929, 9.9318831]),
-                    dl.Marker(children=[dl.Tooltip('destination')], position=[53.5524079, 10.0084222])
+                    dl.CircleMarker(children=[dl.Tooltip('departure')], center=[53.5975929, 9.9318831], color='blue', radius=10),
+                    dl.CircleMarker(children=[dl.Tooltip('destination')], center=[53.5524079, 10.0084222], color='black', radius=10)
                 ]
 
         # Assert
         #self.assertEqual(result, expected_result)
         for r, e in zip(result, expected_result):
             self.assertEqual(len(r.children), len(e.children))  # Compare children lengths
-            self.assertEqual(r.position, e.position)
+            self.assertEqual(r.center, e.center)
             self.assertEqual(r.children[0].children, e.children[0].children)  # Compare Tooltip text
+            self.assertEqual(r.color, e.color)
+            self.assertEqual(r.radius, e.radius)
 
     def test_get_trafficlights(self):
         # Setup

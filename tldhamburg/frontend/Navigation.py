@@ -283,7 +283,7 @@ class Navigation:
     #     y = (lat2 - lat1) * (pi / 180.0)  
     #     return (x ** 2 + y ** 2) ** 0.5  
     
-    def _haversine_approx(self,lon1, lat1, lon2, lat2):
+    def _haversine_approx(self, lat1, lon1, lat2, lon2):
         """
         Calculate the great circle distance in kilometers between two points 
         on the earth (specified in decimal degrees)

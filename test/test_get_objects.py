@@ -28,7 +28,7 @@ class TestGetMarker(unittest.TestCase):
             self.assertEqual(r.center, e.center)
             self.assertEqual(r.children[0].children, e.children[0].children)  # Compare Tooltip text
             self.assertEqual(r.color, e.color)
-            self.assertEqual(r.radius, e.raidus)
+            self.assertEqual(r.radius, e.radius)
 
     def test_get_trafficlights(self):
         # Setup

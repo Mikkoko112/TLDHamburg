@@ -30,6 +30,7 @@ from tldhamburg.backend.DataFetcher import DataFetcher
 from tldhamburg.backend.Things import Things
 
 class RoutePlanner:
+    
     '''
     This class allows the frontend to generate routes wih traffic light data
     and get the approximated future phasedata for primary signals.
@@ -234,13 +235,42 @@ class RoutePlanner:
             return out
         elif isinstance(trafficLightsId,str):
             if trafficLightsId in self.notWorkingPrimarySignals:
+                print(self.notWorkingPrimarySignals)
                 return 9,9,0,False,-1
             
             tfLID,status,nextPhase,nextPhaseTime,rapidUpdate = self._casperEval(trafficLightsId)
             
+
+            
+            #This generate a dict, that holds the last self.lookBackCount amount
+            #of calls this is done to prevent a single 9 status to put the 
+            #traffic light on the black list.
+            if not trafficLightsId in self.lastResults:
+                self.lastResults[trafficLightsId] = {
+                    "results":[],
+                    "index":0
+                }
+            else:
+                if len(self.lastResults[trafficLightsId]["results"]) < self.lookBackCount:
+                    self.lastResults[trafficLightsId]["results"].append(status)
+                else:
+
+                    self.lastResults[trafficLightsId]["results"][
+                        self.lastResults[trafficLightsId]["index"]
+                    ] = status
+
+                    self.lastResults[trafficLightsId]["index"] += 1
+                    self.lastResults[trafficLightsId][
+                        "index"] = self.lastResults[trafficLightsId][
+                        "index"]%self.lookBackCount
+
             #print(tfLID,status,nextPhase,nextPhaseTime,rapidUpdate)
 
-            if not trafficLightsId in self.notWorkingPrimarySignals and status == 9:
+            if (not trafficLightsId in self.notWorkingPrimarySignals  and 
+                len(self.lastResults[trafficLightsId]["results"]) == self.lookBackCount and 
+                all([ 
+                     oldStatus == 9   for oldStatus in self.lastResults[trafficLightsId]["results"]
+                     ])):
                 self.notWorkingPrimarySignals.append(trafficLightsId)
 
             if currentPositionID == -1 or status == 9:
@@ -248,6 +278,7 @@ class RoutePlanner:
             else:
                 speed = self._calcSpeed(trafficLightsId,currentPositionID)
                 #print(f"--- {time.time()-start_time} s---")
+
                 return status,nextPhase,nextPhaseTime,rapidUpdate,speed
                 
             
@@ -332,7 +363,9 @@ class RoutePlanner:
         else: 
             self.maxSpeed = None
         self.notWorkingPrimarySignals = []
-        
+        self.lastResults = {}
+
+
         self.analysisTool = "phases"
 
         if "static_analysis" in options.keys():
@@ -347,7 +380,7 @@ class RoutePlanner:
         trafficLightRoutes = routing.getTrafficLightsRoute(data)
         
         self.routeData     = self._getBestRoute(trafficLightRoutes)
-        
+        self.lookBackCount = 5
         self.safeRoute()
     
     def _initMapData(self):

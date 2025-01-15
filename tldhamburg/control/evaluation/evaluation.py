@@ -8,16 +8,26 @@ from .trafficlightapprox import TrafficLightApprox
 
 
 def getMinTrafficLights(routeListDict: dict) -> int:
-    """Find the route with the least number of traffic lights.
-    This is a testing-prototype and shoudl not be used."""
+    """
+    Input
+        <- routeListDict = ...          This is the list of Routes in form of a
+                GeoJson file.
+
+
+    Output
+        -> idx = int                    This is an index for the route dict.
+
+    This function will return the index of the route with the least traffic
+    lights
+    """
     routeList = routeListDict["features"]
-    minCount, idx = 0, 0
+    minCount, idx = -1, 0
     for i, route in enumerate(routeList):
         trafficLights = route["properties"]["trafficlights"]["features"]
-        if minCount == 0:
+        if minCount == -1:
             minCount = len(trafficLights)
             idx = i
-        if minCount < len(trafficLights):
+        if minCount > len(trafficLights):
             minCount = len(trafficLights)
             idx = i
     return idx

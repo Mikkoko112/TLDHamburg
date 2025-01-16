@@ -90,9 +90,10 @@ def getMinAvgRedTime(routeListDict: dict, support_points: int = 20) -> int:
             minWeight = routeWeight
     # if minIndex is still -1 here, then something went wrong.
     if minIndex == -1:
-        raise RuntimeError(
-            f"getMinAvgRedTime({routeList}, {support_points}) error:\n"
-            "All routes in the input dictionary have infinite wait-time estimates."
-        )
+        return getMinTrafficLights(routeListDict)
+        # raise RuntimeError(
+        #     f"getMinAvgRedTime({routeList}, {support_points}) error:\n"
+        #     "All routes in the input dictionary have infinite wait-time estimates."
+        # )
     
     return minIndex

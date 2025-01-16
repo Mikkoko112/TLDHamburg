@@ -72,7 +72,12 @@ class RoutePlanner:
             return trafficLightsId,9,9,0,False
 
         switchTime,nextPhase = output
+        
+
+        
         status="green" if nextPhase=="red" else "red"
+        
+        
         zeitAktuell=dtime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
         nextPhaseTime=(switchTime-zeitAktuell).total_seconds()
         if nextPhaseTime < 0: 

@@ -216,13 +216,12 @@ def show_instructions(n_clicks, prev, restart, route, store):
     prev_nclicks = 0
     remaining_instructions = ""
     speed_limit_text = "Maximal erlaubte Geschwindigkeit: -"
-    speed_recommendation_text = ["fahre mindestens\t",
-                        html.Span("-", style={"color": "green"}),
-                        "\tkm/h,", 
+    speed_recommendation_text = ["Fahre ",
+                        html.B(" - km/h"), ",",
                         html.Br(),
-                        "um\t",
+                        "um ",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                        "\tzu erreichen"]
+                        " zu erreichen."]
 
     if button_id == "route-button":
         remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
@@ -273,21 +272,23 @@ def show_instructions(n_clicks, prev, restart, route, store):
 
         speed_limit_text = f"Maximal erlaubte Geschwindigkeit: {navigate.current_speed_limit}"
         if navigate.status_next_tl == "green":
-            speed_recommendation_text = ["fahre mindestens\t",
-                            html.Span(f"{navigate.current_recommended_speed}", style={"color": "green"}),
-                            "\tkm/h,", 
+            speed_recommendation_text = ["Fahre ", html.B("mindestens ", style={"color": "green"}),
                             html.Br(),
-                            "um\t",
+                            html.B(f"{navigate.current_recommended_speed} km/h", style={"color": "green"}), 
+                            ",",
+                            html.Br(),
+                            "um ",
                             html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                            "\tzu erreichen"] 
+                            " zu erreichen."] 
         elif navigate.status_next_tl == "red":
-            speed_recommendation_text = ["fahre maximal\t",
-                            html.Span(f"{navigate.current_recommended_speed}", style={"color": "green"}),
-                            "\tkm/h,", 
+            speed_recommendation_text = ["Fahre ", html.B("maximal ", style={"color": "red"}),
                             html.Br(),
-                            "um\t",
+                            html.B(f"{navigate.current_recommended_speed} km/h", style={"color": "red"}), 
+                            ",",
+                            html.Br(),
+                            "um ",
                             html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                            "\tzu erreichen"]  
+                            " zu erreichen."]  
         # first step: prev button disabled 
         if n_clicks == 1:
             text = f"{navigate.current_nav_instr_text}"

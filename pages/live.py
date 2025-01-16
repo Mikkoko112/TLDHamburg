@@ -33,7 +33,7 @@ def layout(**kwargs):
     dcc.Store(id="start-navigation-bool", data=False),
     dcc.Interval(
             id='interval-component',
-            interval=3*1000, # in milliseconds
+            interval=5*1000, # in milliseconds
             n_intervals=0
         ),
     navbar_live(),
@@ -83,7 +83,7 @@ def load_data_on_init(dummy_data):
     Output("start-end-layer-live", "children"),  # load start and end point into the map
     Output("route-layer-live", "data"),          # load route (geojson) into the map
     Output("tl-route-layer-live", "children"),  # load traffic lights into the map
-    Output("start-button-live", "disabled"),# True: disables the start button if no route is given
+    Output("start-button-live", "disabled", allow_duplicate=True),# True: disables the start button if no route is given
     Output("start-button-live", "n_clicks", allow_duplicate=True),
     Output("tab-2-live","disabled"),             # enables the Overview tab
 
@@ -135,6 +135,7 @@ def check_validity(starttext, endtext, bicycle_mode, route_option, user_store, n
         
         #get route from control
         navigate.update_mode(bicycle_mode, route_option)
+        #navigate.start_navigating = False
         navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
        
         return (is_valid_start, 
@@ -192,11 +193,12 @@ def store_map_view(center, zoom):
     Output("start-navigation-modal", "is_open"),
     Output("start-navigation-bool", "data"),
     Output("start-freigabe-modal", "is_open"),
+    Output("start-button-live", "disabled", allow_duplicate=True),# True: disables the start button if no route is given
 
     [State("route-layer-live", "data"),
     State("start-navigation-bool", "data"), # if the person is near the route
-    State("center-store-live", "data"), # center of user-location
-    Input("interval-component", "n_intervals"), # updates every x seconds
+    Input("center-store-live", "data"), # center of user-location
+    #Input("interval-component", "n_intervals"), # updates every x seconds
     Input("start-button-live", "n_clicks"),
     Input("route-button-live", "n_clicks")],
     #running=[
@@ -204,7 +206,7 @@ def store_map_view(center, zoom):
     #],
     prevent_initial_call=True
 )
-def show_instructions(data, start_navigation_bool, user_store, intervall, n_clicks, _):
+def show_instructions(data, start_navigation_bool, user_store, n_clicks, _):
     # return values
     picture = ""
     text = ""
@@ -223,7 +225,10 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
     zoomToBounds = False
     button_id = ctx.triggered_id
     modal_freigabe = False
+    start_button_disabled = no_update
     if button_id == "route-button-live":
+        navigate.start_navigating = False 
+        startNavigation = navigate.start_navigating
         remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
                 {
                     "in ... metern": navigate.remaining_nav_instr_distances,
@@ -250,6 +255,7 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
     if startNavigation is True:
         #print("start!")
         # update position
+        start_button_disabled = True
         lon = user_store["lat"]
         lat = user_store["lng"]
         pos.set_pos(lat, lon)
@@ -288,7 +294,7 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
             progress_value, remaining_instructions,
             speed_limit_text, speed_recommendation_text, navigate.geojson, zoomToBounds,
                     get_objects.get_trafficlights(navigate.get_all_trafficlight_coordinates()),
-                    startNavigation_modal,startNavigation,modal_freigabe)
+                    startNavigation_modal,startNavigation,modal_freigabe, start_button_disabled)
 
 # change trafficlight picture
 @callback(

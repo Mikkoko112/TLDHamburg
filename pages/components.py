@@ -159,7 +159,7 @@ def navbar_demo():
                 # Use row and col to control vertical alignment of logo / brand
                     dbc.Row( 
                         [
-                        dbc.NavbarBrand("Real-Time Traffic Light Map: Demo", 
+                        dbc.NavbarBrand("Demo: Traffic-Light Navigation", 
                                         style={"color": "white"},
                             ),
                         ],
@@ -193,7 +193,7 @@ def navbar_live():
                 # Use row and col to control vertical alignment of logo / brand
                     dbc.Row( 
                         [
-                        dbc.NavbarBrand("Real-Time Traffic Light Map: Live", 
+                        dbc.NavbarBrand("Live: Traffic-Light Navigation", 
                                         style={"color": "white"},
                             ),
                         ],
@@ -266,17 +266,17 @@ def control_demo():
     return dbc.Row(
         children= [
             dbc.Col(
-                dbc.Button("Prev", id = "prev-button", color="secondary", 
+                dbc.Button("Zurück", id = "prev-button", color="secondary", 
                             disabled=True),
                 width = "auto",
             ),
             dbc.Col(
-                dbc.Button("Start", id = "start-next-button", color="secondary", 
+                dbc.Button("Weiter", id = "start-next-button", color="secondary", 
                             disabled=True, n_clicks=0),
                 width = "auto",
             ),
             dbc.Col(
-                dbc.Button("Restart", id = "restart-button", color="secondary", 
+                dbc.Button("Neustart", id = "restart-button", color="secondary", 
                             disabled=True),
                 width = "auto",
             ),
@@ -326,13 +326,12 @@ def control_live():
 def speed_recommendation_demo(): 
     return dbc.Row(children=
             [dbc.Col(
-                html.Div(html.P(["fahre mindestens\t",
-                        html.Span("-", style={"color": "green"}),
-                        "\tkm/h,", 
+                html.Div(html.P(["Fahre ", 
+                        html.B("- km/h"), ",",
                         html.Br(),
-                        "um\t",
+                        "um ",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                        "\tzu erreichen"], id="speed-recommendation"),
+                        " zu erreichen."], id="speed-recommendation"),
                     ),className="speed-recommendation-container",
                 ),
             dbc.Col(
@@ -355,13 +354,12 @@ def speed_recommendation_demo():
 def speed_recommendation_live(): 
     return dbc.Row(children=
             [dbc.Col(
-                html.Div(html.P(["fahre mindestens\t",
-                        html.Span("-", style={"color": "green"}),
-                        "\tkm/h,", 
+                html.Div(html.P(["Fahre ",
+                        html.B("- km/h"), ",",
                         html.Br(),
-                        "um\t",
+                        "um ",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                        "\tzu erreichen"], id="speed-recommendation-live"),
+                        " zu erreichen."], id="speed-recommendation-live"),
                     ), className="speed-recommendation-container",
                 ),
             dbc.Col(
@@ -577,7 +575,13 @@ def contributors():
                 html.Br(),
                 "Harry Zick",
                 html.Br(),
-                html.Br(),"Großer Dank geht raus an "]
+                html.Br(),"Großer Dank geht raus an: ",
+                html.Br(),
+                "Prof. Dr. Matthias Rarey",
+                html.Br(),
+                "Ole Berg",
+                html.Br(),
+                "Tobias Harren"]
     ), 
     className="float-end bg-primary bg-opacity-10 text-dark rounded small p-2 info-container-right")
  

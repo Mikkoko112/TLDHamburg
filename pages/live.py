@@ -40,7 +40,7 @@ def layout(**kwargs):
     data_live(),
     dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Loading..."), close_button=False),
+                dbc.ModalHeader(dbc.ModalTitle("Laden..."), close_button=False),
                 dbc.ModalBody(html.Div([dbc.Spinner(size="lg")], 
                                        className="centered-spinner",)),
             ],
@@ -83,7 +83,7 @@ def load_data_on_init(dummy_data):
     Output("start-end-layer-live", "children"),  # load start and end point into the map
     Output("route-layer-live", "data"),          # load route (geojson) into the map
     Output("tl-route-layer-live", "children"),  # load traffic lights into the map
-    Output("start-button-live", "disabled"),# True: disables the start button if no route is given
+    Output("start-button-live", "disabled", allow_duplicate=True),# True: disables the start button if no route is given
     Output("start-button-live", "n_clicks", allow_duplicate=True),
     Output("tab-2-live","disabled"),             # enables the Overview tab
 
@@ -135,6 +135,7 @@ def check_validity(starttext, endtext, bicycle_mode, route_option, user_store, n
         
         #get route from control
         navigate.update_mode(bicycle_mode, route_option)
+        #navigate.start_navigating = False
         navigate.create_route([start_lon,start_lat], [end_lon, end_lat])
        
         return (is_valid_start, 
@@ -192,6 +193,7 @@ def store_map_view(center, zoom):
     Output("start-navigation-modal", "is_open"),
     Output("start-navigation-bool", "data"),
     Output("start-freigabe-modal", "is_open"),
+    Output("start-button-live", "disabled", allow_duplicate=True),# True: disables the start button if no route is given
 
     [State("route-layer-live", "data"),
     State("start-navigation-bool", "data"), # if the person is near the route
@@ -199,9 +201,6 @@ def store_map_view(center, zoom):
     Input("interval-component", "n_intervals"), # updates every x seconds
     Input("start-button-live", "n_clicks"),
     Input("route-button-live", "n_clicks")],
-    #running=[
-    #    (Output("interval-component", "interval"), 0, 1*1000), 
-    #],
     prevent_initial_call=True
 )
 def show_instructions(data, start_navigation_bool, user_store, intervall, n_clicks, _):
@@ -211,19 +210,21 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
     progress_value = 0
     remaining_instructions = ""
     speed_limit_text = "Maximal erlaubte Geschwindigkeit: -"
-    speed_recommendation_text = ["fahre mindestens\t",
-                        html.Span("-", style={"color": "green"}),
-                        "\tkm/h,", 
+    speed_recommendation_text = ["Fahre ",
+                        html.B(" - km/h"), ",",
                         html.Br(),
-                        "um\t",
+                        "um ",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                        "\tzu erreichen"]
+                        " zu erreichen."]
     startNavigation = start_navigation_bool # False at the beginning
     startNavigation_modal = False
     zoomToBounds = False
     button_id = ctx.triggered_id
     modal_freigabe = False
+    start_button_disabled = no_update
     if button_id == "route-button-live":
+        navigate.start_navigating = False 
+        startNavigation = navigate.start_navigating
         remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
                 {
                     "in ... metern": navigate.remaining_nav_instr_distances,
@@ -250,6 +251,7 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
     if startNavigation is True:
         #print("start!")
         # update position
+        start_button_disabled = True
         lon = user_store["lat"]
         lat = user_store["lng"]
         pos.set_pos(lat, lon)
@@ -268,27 +270,29 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
         
         speed_limit_text = f"Maximal erlaubte Geschwindigkeit: {navigate.current_speed_limit}"
         if navigate.status_next_tl == "green":
-            speed_recommendation_text = ["fahre mindestens\t",
-                            html.Span(f"{navigate.current_recommended_speed}", style={"color": "green"}),
-                            "\tkm/h,", 
+            speed_recommendation_text = ["Fahre ", html.B("mindestens ", style={"color": "green"}),
                             html.Br(),
-                            "um\t",
+                            html.B(f"{navigate.current_recommended_speed} km/h", style={"color": "green"}), 
+                            ",",
+                            html.Br(),
+                            "um ",
                             html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                            "\tzu erreichen"] 
+                            " zu erreichen."] 
         elif navigate.status_next_tl == "red":
-            speed_recommendation_text = ["fahre maximal\t",
-                            html.Span(f"{navigate.current_recommended_speed}", style={"color": "green"}),
-                            "\tkm/h,", 
+            speed_recommendation_text = ["Fahre ", html.B("maximal ", style={"color": "red"}),
                             html.Br(),
-                            "um\t",
+                            html.B(f"{navigate.current_recommended_speed} km/h", style={"color": "red"}), 
+                            ",",
+                            html.Br(),
+                            "um ",
                             html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                            "\tzu erreichen"] 
+                            " zu erreichen."]  
         
     return (picture, text, 
             progress_value, remaining_instructions,
             speed_limit_text, speed_recommendation_text, navigate.geojson, zoomToBounds,
                     get_objects.get_trafficlights(navigate.get_all_trafficlight_coordinates()),
-                    startNavigation_modal,startNavigation,modal_freigabe)
+                    startNavigation_modal,startNavigation,modal_freigabe, start_button_disabled)
 
 # change trafficlight picture
 @callback(

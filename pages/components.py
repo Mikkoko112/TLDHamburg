@@ -359,7 +359,7 @@ def speed_recommendation_live():
                         html.Br(),
                         "um ",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                        " zu erreichen"], id="speed-recommendation-live"),
+                        " zu erreichen."], id="speed-recommendation-live"),
                     ), className="speed-recommendation-container",
                 ),
             dbc.Col(

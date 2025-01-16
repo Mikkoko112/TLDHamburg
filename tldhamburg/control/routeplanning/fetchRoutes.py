@@ -162,7 +162,7 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                             "distance": sum([tNode[3] for tNode in route[lastWayPoint:]]), 
                             "duration": sum([tNode[3]/((5/18)*(tNode[4] if tNode[4] != 0 else 50)) for tNode in route[lastWayPoint:]]), #same here if i have time i should change this
                             "type": 10,
-                            "instruction": f"Your destination is next.",
+                            "instruction": f"Ziel erreicht",
                             "name": "Goal",
                             "way_points": [
                                 lastWayPoint,
@@ -200,18 +200,18 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                 if leftBool or rightBool:
                     name = str(graph.es.select(_source=node[2],_target=route[i+1][2])["name"][0]) 
                     if   leftBool and not rightBool:
-                        direc = "left"
+                        direc = "links"
                     elif not leftBool and rightBool:
-                        direc = "right"
+                        direc = "rechts"
                     else:
                         direc = "Error This should not occur"
-                    
+                    naming = " auf " + name if name != "None" and name is not None else ""
                     directions.append(
                         {
                             "distance": sum([tNode[3] for tNode in route[lastWayPoint:i+1]]), 
                             "duration": sum([tNode[3]/((5/18)*(tNode[4] if tNode[4] != 0 else 50)) for tNode in route[lastWayPoint:i+1]]), 
                             "type": 0 if leftBool else 1,
-                            "instruction": f"Head {direc} on {name}",
+                            "instruction": f"Biege {direc} ab {naming}" ,
                             "name": name,
                             "way_points": [
                                 lastWayPoint,

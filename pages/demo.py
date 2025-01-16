@@ -35,7 +35,7 @@ def layout(**kwargs):
             data_demo(),
             dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Loading..."), close_button=False),
+                dbc.ModalHeader(dbc.ModalTitle("Laden..."), close_button=False),
                 dbc.ModalBody(html.Div([dbc.Spinner(size="lg")], 
                                        className="centered-spinner",))
             ],
@@ -300,7 +300,7 @@ def show_instructions(n_clicks, prev, restart, route, store):
             toggle_startnext_button = True
             #button_text = "Start"
             picture = dash.get_relative_path(f"/assets/goal.png")
-            text = "You arrived at your destination" 
+            text = "Ziel erreicht" 
         
     return (n_clicks, button_text, picture, text, store, 
             toggle_prev_button, toggle_startnext_button, toggle_restart_button,

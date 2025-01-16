@@ -33,14 +33,14 @@ def layout(**kwargs):
     dcc.Store(id="start-navigation-bool", data=False),
     dcc.Interval(
             id='interval-component',
-            interval=5*1000, # in milliseconds
+            interval=3*1000, # in milliseconds
             n_intervals=0
         ),
     navbar_live(),
     data_live(),
     dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Loading..."), close_button=False),
+                dbc.ModalHeader(dbc.ModalTitle("Laden..."), close_button=False),
                 dbc.ModalBody(html.Div([dbc.Spinner(size="lg")], 
                                        className="centered-spinner",)),
             ],
@@ -197,16 +197,13 @@ def store_map_view(center, zoom):
 
     [State("route-layer-live", "data"),
     State("start-navigation-bool", "data"), # if the person is near the route
-    Input("center-store-live", "data"), # center of user-location
-    #Input("interval-component", "n_intervals"), # updates every x seconds
+    State("center-store-live", "data"), # center of user-location
+    Input("interval-component", "n_intervals"), # updates every x seconds
     Input("start-button-live", "n_clicks"),
     Input("route-button-live", "n_clicks")],
-    #running=[
-    #    (Output("interval-component", "interval"), 0, 1*1000), 
-    #],
     prevent_initial_call=True
 )
-def show_instructions(data, start_navigation_bool, user_store, n_clicks, _):
+def show_instructions(data, start_navigation_bool, user_store, intervall, n_clicks, _):
     # return values
     picture = ""
     text = ""

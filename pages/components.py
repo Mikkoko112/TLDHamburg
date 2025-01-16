@@ -159,7 +159,7 @@ def navbar_demo():
                 # Use row and col to control vertical alignment of logo / brand
                     dbc.Row( 
                         [
-                        dbc.NavbarBrand("Real-Time Traffic Light Map: Demo", 
+                        dbc.NavbarBrand("Demo: Traffic-Light Navigation", 
                                         style={"color": "white"},
                             ),
                         ],
@@ -193,7 +193,7 @@ def navbar_live():
                 # Use row and col to control vertical alignment of logo / brand
                     dbc.Row( 
                         [
-                        dbc.NavbarBrand("Real-Time Traffic Light Map: Live", 
+                        dbc.NavbarBrand("Live: Traffic-Light Navigation", 
                                         style={"color": "white"},
                             ),
                         ],
@@ -266,17 +266,17 @@ def control_demo():
     return dbc.Row(
         children= [
             dbc.Col(
-                dbc.Button("Prev", id = "prev-button", color="secondary", 
+                dbc.Button("Zurück", id = "prev-button", color="secondary", 
                             disabled=True),
                 width = "auto",
             ),
             dbc.Col(
-                dbc.Button("Start", id = "start-next-button", color="secondary", 
+                dbc.Button("Weiter", id = "start-next-button", color="secondary", 
                             disabled=True, n_clicks=0),
                 width = "auto",
             ),
             dbc.Col(
-                dbc.Button("Restart", id = "restart-button", color="secondary", 
+                dbc.Button("Neustart", id = "restart-button", color="secondary", 
                             disabled=True),
                 width = "auto",
             ),

@@ -91,6 +91,7 @@ def searchbar_live():
     return  dbc.Row(
           [
             dbc.Col(
+                dbc.ButtonGroup([
                 dbc.InputGroup(
                     [
                         dbc.InputGroupText("Start"),
@@ -99,8 +100,20 @@ def searchbar_live():
                         dbc.FormFeedback("", type="valid", id="start-valid-live"),
                     ], 
                     ), 
-                    width="auto",
+                dbc.Button(
+                    children=html.A(children=[
+                            html.Img(id = "standort-picture", src=dash.get_relative_path(f"/assets/my_location.png"), height=30)]),
+                    id="standort-live",
+                    color="light",
+                    n_clicks=0,
                 ),
+                dbc.Tooltip(
+                    "aktuellen Standort als Startort wählen",
+                    target="standort-picture",
+                ),
+            ]),
+            width="auto",
+            ),
             dbc.Col(   
                 dbc.InputGroup(
                     [

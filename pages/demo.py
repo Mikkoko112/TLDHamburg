@@ -123,11 +123,11 @@ def check_validity(starttext, endtext, bicycle_mode, route_option, n_clicks):
                     is_valid_end, 
                     not is_valid_end, 
                     0, 
-                    no_update, 
-                    no_update, 
+                    "", 
+                    None, 
                     "",
                     True,
-                    no_update,
+                    True,
                     0,
                     )
             
@@ -197,10 +197,11 @@ def store_map_view(data, zoom, center):
     Input("restart-button", "n_clicks"),
     Input("route-button", "n_clicks"),
     State("map-store", "data"),
+    State("route-layer", "data"),
 
     prevent_initial_call=True
 )
-def show_instructions(n_clicks, prev, restart, route, store):
+def show_instructions(n_clicks, prev, restart, route, store, route_layer):
     button_id = ctx.triggered_id
     
     # return values
@@ -224,7 +225,11 @@ def show_instructions(n_clicks, prev, restart, route, store):
                         " zu erreichen."]
 
     if button_id == "route-button":
-        remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
+        if route_layer is None:
+            remaining_instructions = ""
+            toggle_startnext_button = True 
+        else:
+            remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
                         {
                             "in ... metern": navigate.remaining_nav_instr_distances,
                             "Anweisung": navigate.remaining_nav_instr_texts,

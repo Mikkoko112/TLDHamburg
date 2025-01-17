@@ -284,7 +284,7 @@ def control_demo():
                 width = "auto",
             ),
             dbc.Col(
-                dbc.Button("Weiter", id = "start-next-button", color="secondary", 
+                dbc.Button("Start", id = "start-next-button", color="secondary", 
                             disabled=True, n_clicks=0),
                 width = "auto",
             ),
@@ -615,7 +615,7 @@ def card_left():
                             html.H4("Demo", className="card-title"),
                             html.P(
                                 "Navigation wird nicht mit Live-Daten verfolgt. "
-                                "Die einzelnen Schritte der Navigation kann einzeln durchgegangen werden. "
+                                "Die einzelnen Schritte der Navigation können einzeln durchgegangen werden. "
                                 "Nicht geeignet für eine richtige Navigation. "
                                 "Dient zur Veranschaulichung des Systems.",
                                 className="card-text",

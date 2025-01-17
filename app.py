@@ -23,5 +23,5 @@ app.title = "TrafficLightNavigation"
 app.description = "Eine interaktive Karte mit optimalen Routen für einen bestimmten Start- und Zielort."
 
 if __name__ == '__main__':
-    #Timer(1, open_browser.open_browser).start()
-    app.run_server(debug=False, port=1222)
+    Timer(1, open_browser.open_browser).start()
+    app.run_server(debug=True, port=1222)

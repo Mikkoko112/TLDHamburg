@@ -260,7 +260,7 @@ def show_instructions(n_clicks, prev, restart, route, store, route_layer):
         lat, lon = navigate.demo_n_clicks(n_clicks)
         pos.set_pos(lat, lon)
 
-        button_text = "Next" 
+        button_text = "Weiter" 
         picture = dash.get_relative_path(f"/assets/{navigate.current_nav_instr_picture}")
         text = f"In {navigate.remaining_distance}m: {navigate.current_nav_instr_text}"
         store = dict(center=geocoding_utils.convert_to_lat_lon(navigate.way_points[navigate.current_way_point_index]), zoom=18, transition = "setView")
@@ -306,6 +306,7 @@ def show_instructions(n_clicks, prev, restart, route, store, route_layer):
             #button_text = "Start"
             picture = dash.get_relative_path(f"/assets/goal.png")
             text = "Ziel erreicht" 
+            speed_recommendation_text = ""
         
     return (n_clicks, button_text, picture, text, store, 
             toggle_prev_button, toggle_startnext_button, toggle_restart_button,

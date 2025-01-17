@@ -107,7 +107,11 @@ def check_validity(starttext, endtext, bicycle_mode, route_option, user_store, n
         is_valid_start = True
         is_valid_end = True
         # get the coordinates for the departure and destination
-        start_lat, start_lon = geocoding_utils.return_coordinates(starttext)
+        if starttext == "Standort":
+            start_lon = user_store["lng"]
+            start_lat = user_store["lat"]
+        else:
+            start_lat, start_lon = geocoding_utils.return_coordinates(starttext)
         end_lat, end_lon = geocoding_utils.return_coordinates(endtext)
         # if no address under this name is found, set valid False
         if start_lat == None:
@@ -125,12 +129,12 @@ def check_validity(starttext, endtext, bicycle_mode, route_option, user_store, n
                 is_valid_end, 
                 not is_valid_end, 
                 0, 
-                no_update, 
-                no_update, 
+                "", 
+                None, 
                 "",
                 True,
                 0,
-                no_update,
+                True,
                 )
         
         #get route from control
@@ -172,11 +176,27 @@ def check_validity(starttext, endtext, bicycle_mode, route_option, user_store, n
 )
 def store_map_view(center, zoom):
     if zoom >= 17:
-        #print(f"neuer Standort: {center}")
-        #print(f"zoom: {zoom}")
         return center, False 
-    #print(f"zoom: {zoom}") 
     return no_update, True
+
+# set location as start value
+@callback(
+ Output("startpunkt-live","value"),
+ Output("start-freigabe-modal", "is_open", allow_duplicate=True),
+ Output("standort-live", "n_clicks"),
+ [Input("standort-live", "n_clicks"),   
+ State("center-store-live","data")],    
+ prevent_initial_call=True
+)
+def set_location_as_start(_, user_store):
+    print("new callback")
+    input = "Standort" 
+    modal_freigabe = False
+    if user_store is None:
+            modal_freigabe = True
+            input = ""
+    return input, modal_freigabe, 0
+
 
 # go through the steps of the route with the start/next button
 # progress shows in the progressbar
@@ -192,7 +212,7 @@ def store_map_view(center, zoom):
     Output("tl-route-layer-live", "children", allow_duplicate=True),  # load traffic lights into the map
     Output("start-navigation-modal", "is_open"),
     Output("start-navigation-bool", "data"),
-    Output("start-freigabe-modal", "is_open"),
+    Output("start-freigabe-modal", "is_open", allow_duplicate=True),
     Output("start-button-live", "disabled", allow_duplicate=True),# True: disables the start button if no route is given
 
     [State("route-layer-live", "data"),
@@ -222,15 +242,19 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
     button_id = ctx.triggered_id
     modal_freigabe = False
     start_button_disabled = no_update
+    trafficlights = ""
     if button_id == "route-button-live":
         navigate.start_navigating = False 
-        startNavigation = navigate.start_navigating
-        remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
-                {
-                    "in ... metern": navigate.remaining_nav_instr_distances,
-                    "Anweisung": navigate.remaining_nav_instr_texts,
-                }), striped=True, bordered=True, hover=True)) 
-        zoomToBounds = True 
+        if data != None:
+            startNavigation = navigate.start_navigating
+            remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
+                    {
+                        "in ... metern": navigate.remaining_nav_instr_distances,
+                        "Anweisung": navigate.remaining_nav_instr_texts,
+                    }), striped=True, bordered=True, hover=True)) 
+            zoomToBounds = True 
+        else:
+            navigate.geojson = None
     elif button_id == "start-button-live":
         if user_store is None:
             modal_freigabe = True
@@ -242,7 +266,8 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
             pos.set_pos(lat, lon)
             startNavigation = navigate.start_navigation(pos)
             startNavigation_modal = not startNavigation 
-    if (data and user_store != None):
+    if (data != None):
+        trafficlights = get_objects.get_trafficlights(navigate.get_all_trafficlight_coordinates())
         remaining_instructions = (dbc.Table.from_dataframe(pd.DataFrame(
                 {
                     "in ... metern": navigate.remaining_nav_instr_distances,
@@ -291,7 +316,7 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
     return (picture, text, 
             progress_value, remaining_instructions,
             speed_limit_text, speed_recommendation_text, navigate.geojson, zoomToBounds,
-                    get_objects.get_trafficlights(navigate.get_all_trafficlight_coordinates()),
+                    trafficlights,
                     startNavigation_modal,startNavigation,modal_freigabe, start_button_disabled)
 
 # change trafficlight picture

@@ -7,27 +7,29 @@ interact with routeplanning featchers of the control. Requests and
 calulations for approximated speeds are kept ins this class.
 
 Autor: Helge Rasmus Steen
-    - _casperEval -> made py Casper
+    - _dynamicAnalysis -> made py Casper
 
 Relevant Data: 
     The Graph file is needed.
 
 '''
-from tldhamburg.control.routeplanning import fetchRoutes as fetcher
-from tldhamburg.control.evaluation  import evaluation
-from tldhamburg.control.evaluation import trafficlightapprox as tlapp
+from tldhamburg.control.routeplanning import fetchRoutes        as fetcher
+from tldhamburg.control.evaluation    import evaluation
+from tldhamburg.control.evaluation    import trafficlightapprox as tlapp
 from tldhamburg.control.routeplanning import routing 
-from tldhamburg.backend.DBMaintainer import DBMaintainer
+from tldhamburg.backend.DBMaintainer  import DBMaintainer
+from tldhamburg.backend.DataFetcher   import DataFetcher
+from tldhamburg.backend.Things        import Things
+
 import sqlite3
 
 import igraph
 import json
-from datetime import datetime as dtime
 import time
 import datetime
+from datetime import datetime as dtime
+from geopy    import distance
 from math import sqrt
-from tldhamburg.backend.DataFetcher import DataFetcher
-from tldhamburg.backend.Things import Things
 
 class RoutePlanner:
     
@@ -48,19 +50,19 @@ class RoutePlanner:
         Output
             -> The output is the distance of the two points. 
 
-        The Distance is measured in coordinate degree and not the 
-        metric system. This is done to make quick distance calculations that 
-        only need relative distances to other point pairs. Moreover this function
-        uses the euclidean distance because we only observe Hamburg and this 
-
-
+        The Distance is measured in meters. 
         '''
-        coord1 = self.routeData["features"][0]["geometry"]["coordinates"][point1ID]
-        coord2 = self.routeData["features"][0]["geometry"]["coordinates"][point2ID]
-        return sqrt(coord1[0]*coord2[0]+coord1[1]*coord2[1])
+        coord1  = self.routeData["features"][0]["geometry"]["coordinates"][point1ID]
+        coord2  = self.routeData["features"][0]["geometry"]["coordinates"][point2ID]
+        
+        
+        distSwa = distance.distance(coord1[::-1],coord2[::-1]).m
+        
+        
+        return distSwa
+        
 
-
-    def _casperEval(self,trafficLightsId:str):
+    def _dynamicAnalysis(self,trafficLightsId:str):
         status,nextPhase,nextPhaseTime,rapidUpdate = 0,0,0,False
         
        
@@ -78,27 +80,14 @@ class RoutePlanner:
         status="green" if nextPhase=="red" else "red"
         
         
+        
         zeitAktuell=dtime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
         nextPhaseTime=(switchTime-zeitAktuell).total_seconds()
+        
+        
         if nextPhaseTime < 0: 
             return trafficLightsId,9,9,0,False
         
-        return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
-        
-        #why is this?
-        thing=Things([id])
-        zyklusDaten=thing.get_cycle_second_observations(2,True)[id]
-        schaltungen=thing.get_primary_signal_observations(8,True)[id]
-        tStart=dtime.fromisoformat(zyklusDaten[1][0])
-        tEnd=dtime.fromisoformat(zyklusDaten[0][0])
-        zyklusLänge=tEnd-tStart
-        eventsInCycle=[(dtime.fromisoformat(zeit),state) for zeit,state in schaltungen if tStart<=dtime.fromisoformat(zeit)<=tEnd and state in [1,3]]
-        
-        zeitGrün=(zeitAktuell-[dtime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==3][0])%zyklusLänge
-        zeitRot=(zeitAktuell-[dtime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==1][0])%zyklusLänge
-        status="grün" if zeitGrün>zeitRot else "rot"
-        nextPhase="rot" if status=="grün" else "grün"
-        nextPhaseTime=min(zeitGrün,zeitRot)
         return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
 
     def _calcSpeed(self,trafficLightsId:str,routePoint:int)->float:
@@ -243,7 +232,7 @@ class RoutePlanner:
                 print(self.notWorkingPrimarySignals)
                 return 9,9,0,False,-1
             
-            tfLID,status,nextPhase,nextPhaseTime,rapidUpdate = self._casperEval(trafficLightsId)
+            tfLID,status,nextPhase,nextPhaseTime,rapidUpdate = self._dynamicAnalysis(trafficLightsId)
             
 
             

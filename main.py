@@ -17,8 +17,13 @@ def makeKCallsPerSecond(k:int,trafficLightId:str,routeObj):
 
 
 routeObj = RoutePlanner(".")
-routeObj.generateRoute(testDict)
 
+routeObj.generateRoute(testDict)
+#1997
+start    = time.time()
+print(routeObj.getUpdateOnTrafficLight("1997",1))
+
+print(f"{time.time()-start:.2f}s")
 '''start = time.time()
 makeKCallsPerSecond(5,"3440",routeObj)
 print(time.time()-start)'''

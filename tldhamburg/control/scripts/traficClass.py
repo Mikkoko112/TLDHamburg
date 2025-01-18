@@ -44,9 +44,9 @@ class TrafficConjunction:
 
     def __init__(self,name:str,trafficList:list,relevantORSNotes:dict):
         self.trafficLights = [name[0] for name in trafficList]
-        self.bound = self.setOffset(self.getMinMaxLocation(trafficList))
+        self.bound         = self.setOffset(self.getMinMaxLocation(trafficList))
         self.junctionNodes = self.checkIfInBound(relevantORSNotes)
-        self.name = name
+        self.name          = name
     
     def returnValue(self)->tuple:
         node = self.junctionNodes
@@ -71,18 +71,6 @@ def run():
     outDict = {}
     conjCOunt = 0
 
-    # for conjunctionName,conjunction in conj.items():    #Geht über die Conjunctions
-        
-    #     for areaName,area in fetchAreas.items():        #Geht über alle relevanten Bereiche
-    #         # if(conjunctionName == "21851"):
-    #         #             print("part of missing data")
-    #         for nodeInArea in area[1]:                  #Geht über jede Ampel im Area --!!!! dies muss geaendert werden zu einem bound check!!!
-    #             if areaName != "13937" and  nodeInArea[0] == conjunctionName:    #Wenn die Conjunction in der Area ist
-                    
-    #                 conjCOunt+=1
-    #                 trafficList =  conjunction[1]
-    #                 relevantORSNotes = notes[areaName]
-    #                 trafficConjunctionList.append(TrafficConjunction(conjunctionName,trafficList,relevantORSNotes))
 
     allPrimarySignals = []
     misstConj = []
@@ -97,7 +85,7 @@ def run():
         
             if (conjBox.contains(areaBox) or areaBox.contains(conjBox)):
                 conjCOunt+=1
-                trafficList =  conjunction[1]
+                trafficList = conjunction[1]
                 for conj in conjunction[1]:
                     allPrimarySignals.append(conj[0])
                 relevantORSNotes = notes[areaName]

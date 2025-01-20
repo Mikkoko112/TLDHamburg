@@ -370,7 +370,7 @@ class RoutePlanner:
 
         data               = self._getData(options["coordinates"])
         
-        startTempTime = time.time()
+        
         trafficLightRoutes = routing.getTrafficLightsRoute(data)
         
         self.routeData     = self._getBestRoute(trafficLightRoutes)

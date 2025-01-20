@@ -8,22 +8,15 @@ testDict = {
     "static_analysis" : "phases"
 }
 
-
-def makeKCallsPerSecond(k:int,trafficLightId:str,routeObj):
-    print(f"{1/k:.2f}s")
-    for i in range(0,15):
-        routeObj.getUpdateOnTrafficLight(trafficLightId,currentPositionID=1)
-        time.sleep(1/k)
-
+start    = time.time()
 
 routeObj = RoutePlanner(".")
+print(f"{time.time()-start:.2f}s")
 
 routeObj.generateRoute(testDict)
-#1997
-start    = time.time()
+
 print(routeObj.getUpdateOnTrafficLight("1997",1))
 
-print(f"{time.time()-start:.2f}s")
 '''start = time.time()
 makeKCallsPerSecond(5,"3440",routeObj)
 print(time.time()-start)'''

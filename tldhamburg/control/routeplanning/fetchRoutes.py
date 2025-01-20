@@ -142,6 +142,7 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
             speeds = []
             lastSpeed,lastSpeedChangeIdx = 0,0            
             lastWayPoint = 0
+            blockForTurn = -1
             #Every route is generated separately.
             for i,node in enumerate(route): 
 
@@ -189,10 +190,11 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                     )
                     lastSpeed = node[4]
                     lastSpeedChangeIdx = i
+                
                 leftBool,rightBool = False,False
                 searchDepth        = 0
                 for search in range(1,6):
-                    if i-search < 0 or i+search >= len(route) :
+                    if i-search < 0 or i+search >= len(route) or i <= blockForTurn :
                         break
                     
                     beforeORS = ORSNode(lat = route[i-search][1],lon = route[i-search][0],id = route[i-search][2])
@@ -204,7 +206,9 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                     if leftBool or rightBool:
                         searchDepth = search
                         break
-
+                    
+                if blockForTurn <= i :
+                    blockForTurn = i + searchDepth
 
                 if leftBool or rightBool:
 

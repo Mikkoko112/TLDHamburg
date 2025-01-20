@@ -66,23 +66,19 @@ class RoutePlanner:
         status,nextPhase,nextPhaseTime,rapidUpdate = 0,0,0,False
         
        
-        id = int(trafficLightsId)
-        
-        output=tlapp.TrafficLightApprox.approx_next_switch(id)
+        id     = int(trafficLightsId)
+        output = tlapp.TrafficLightApprox.approx_next_switch(id)
         
         if output is None:
             return trafficLightsId,9,9,0,False
-
         switchTime,nextPhase = output
         
 
+        status = "green" if nextPhase=="red" else "red"
         
-        status="green" if nextPhase=="red" else "red"
-        
-        
-        
-        zeitAktuell=dtime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
-        nextPhaseTime=(switchTime-zeitAktuell).total_seconds()
+                
+        zeitAktuell   = dtime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
+        nextPhaseTime = (switchTime-zeitAktuell).total_seconds()
         
         
         if nextPhaseTime < 0: 
@@ -106,7 +102,9 @@ class RoutePlanner:
         This function does not take into account that there could be other 
         than the given maximum speed. 
         '''
-        
+        if routePoint > len(self.routeData["features"][0]["geometry"]["coordinates"]):
+            print("Position if greater than the length of the route.")
+
         def getTrafficLightIndex(routeData,trafficLightsId):
 
             trafficLightPos = -1
@@ -143,7 +141,7 @@ class RoutePlanner:
 
         
 
-        id = int(trafficLightsId)
+        id  = int(trafficLightsId)
         gen = tlapp.TrafficLightApprox.approx_next_switch_generator(id)
         
         
@@ -370,7 +368,7 @@ class RoutePlanner:
 
         data               = self._getData(options["coordinates"])
         
-        
+
         trafficLightRoutes = routing.getTrafficLightsRoute(data)
         
         self.routeData     = self._getBestRoute(trafficLightRoutes)

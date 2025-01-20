@@ -1328,68 +1328,222 @@
                     "duration": 820.853928,
                     "steps": [
                         {
-                            "distance": 0,
-                            "duration": 0.0,
-                            "type": 0,
-                            "instruction": "Biege links ab  auf Dammtorstra\u00dfe",
-                            "name": "Dammtorstra\u00dfe",
-                            "way_points": [
-                                0,
-                                1
-                            ]
-                        },
-                        {
                             "distance": 29.924,
                             "duration": 2.154528,
                             "type": 0,
                             "instruction": "Biege links ab  auf Stephansplatz",
                             "name": "Stephansplatz",
                             "way_points": [
-                                1,
+                                0,
                                 2
                             ]
                         },
                         {
-                            "distance": 126.071,
-                            "duration": 9.077112,
+                            "distance": 25.671,
+                            "duration": 1.848312,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Stephansplatz",
+                            "name": "Stephansplatz",
+                            "way_points": [
+                                2,
+                                3
+                            ]
+                        },
+                        {
+                            "distance": 5.259,
+                            "duration": 0.37864800000000004,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Stephansplatz",
+                            "name": "Stephansplatz",
+                            "way_points": [
+                                3,
+                                4
+                            ]
+                        },
+                        {
+                            "distance": 3.491,
+                            "duration": 0.251352,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Stephansplatz",
+                            "name": "Stephansplatz",
+                            "way_points": [
+                                4,
+                                5
+                            ]
+                        },
+                        {
+                            "distance": 7.012,
+                            "duration": 0.504864,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Stephansplatz",
+                            "name": "Stephansplatz",
+                            "way_points": [
+                                5,
+                                6
+                            ]
+                        },
+                        {
+                            "distance": 59.194,
+                            "duration": 4.2619679999999995,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Stephansplatz",
+                            "name": "Stephansplatz",
+                            "way_points": [
+                                6,
+                                8
+                            ]
+                        },
+                        {
+                            "distance": 3.064,
+                            "duration": 0.220608,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Stephansplatz",
+                            "name": "Stephansplatz",
+                            "way_points": [
+                                8,
+                                9
+                            ]
+                        },
+                        {
+                            "distance": 6.16,
+                            "duration": 0.44352,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Stephansplatz",
+                            "name": "Stephansplatz",
+                            "way_points": [
+                                9,
+                                10
+                            ]
+                        },
+                        {
+                            "distance": 16.22,
+                            "duration": 1.16784,
                             "type": 1,
                             "instruction": "Biege rechts ab  auf Esplanade",
                             "name": "Esplanade",
                             "way_points": [
-                                2,
+                                10,
                                 11
                             ]
                         },
                         {
-                            "distance": 415.734,
-                            "duration": 29.932848,
+                            "distance": 10.299,
+                            "duration": 0.741528,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Esplanade",
+                            "name": "Esplanade",
+                            "way_points": [
+                                11,
+                                12
+                            ]
+                        },
+                        {
+                            "distance": 314.063,
+                            "duration": 22.612536,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Neuer Jungfernstieg",
+                            "name": "Neuer Jungfernstieg",
+                            "way_points": [
+                                12,
+                                27
+                            ]
+                        },
+                        {
+                            "distance": 77.045,
+                            "duration": 5.5472399999999995,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Neuer Jungfernstieg",
+                            "name": "Neuer Jungfernstieg",
+                            "way_points": [
+                                27,
+                                32
+                            ]
+                        },
+                        {
+                            "distance": 5.387,
+                            "duration": 0.38786399999999993,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Neuer Jungfernstieg",
+                            "name": "Neuer Jungfernstieg",
+                            "way_points": [
+                                32,
+                                33
+                            ]
+                        },
+                        {
+                            "distance": 8.94,
+                            "duration": 0.6436799999999999,
                             "type": 1,
                             "instruction": "Biege rechts ab  auf Kennedybr\u00fccke",
                             "name": "Kennedybr\u00fccke",
                             "way_points": [
-                                11,
+                                33,
                                 34
                             ]
                         },
                         {
-                            "distance": 1583.293,
-                            "duration": 113.997096,
+                            "distance": 14.019,
+                            "duration": 1.009368,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Kennedybr\u00fccke",
+                            "name": "Kennedybr\u00fccke",
+                            "way_points": [
+                                34,
+                                35
+                            ]
+                        },
+                        {
+                            "distance": 7.852,
+                            "duration": 0.565344,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Kennedybr\u00fccke",
+                            "name": "Kennedybr\u00fccke",
+                            "way_points": [
+                                35,
+                                36
+                            ]
+                        },
+                        {
+                            "distance": 1553.7359999999999,
+                            "duration": 111.86899199999999,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf An der Alster",
+                            "name": "An der Alster",
+                            "way_points": [
+                                36,
+                                91
+                            ]
+                        },
+                        {
+                            "distance": 7.686,
+                            "duration": 0.553392,
                             "type": 1,
                             "instruction": "Biege rechts ab ",
                             "name": "None",
                             "way_points": [
-                                34,
+                                91,
                                 92
                             ]
                         },
                         {
-                            "distance": 71.013,
-                            "duration": 5.1129359999999995,
+                            "distance": 10.631,
+                            "duration": 0.765432,
                             "type": 1,
                             "instruction": "Biege rechts ab ",
                             "name": "None",
                             "way_points": [
                                 92,
+                                93
+                            ]
+                        },
+                        {
+                            "distance": 60.382,
+                            "duration": 4.347504,
+                            "type": 1,
+                            "instruction": "Biege rechts ab ",
+                            "name": "None",
+                            "way_points": [
+                                93,
                                 95
                             ]
                         },
@@ -1416,13 +1570,46 @@
                             ]
                         },
                         {
-                            "distance": 90.859,
-                            "duration": 6.541848,
+                            "distance": 14.44,
+                            "duration": 1.03968,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Barcastra\u00dfe",
+                            "name": "Barcastra\u00dfe",
+                            "way_points": [
+                                97,
+                                98
+                            ]
+                        },
+                        {
+                            "distance": 60.607,
+                            "duration": 4.363704,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Barcastra\u00dfe",
+                            "name": "Barcastra\u00dfe",
+                            "way_points": [
+                                98,
+                                100
+                            ]
+                        },
+                        {
+                            "distance": 4.545,
+                            "duration": 0.32724,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Barcastra\u00dfe",
+                            "name": "Barcastra\u00dfe",
+                            "way_points": [
+                                100,
+                                101
+                            ]
+                        },
+                        {
+                            "distance": 11.267,
+                            "duration": 0.811224,
                             "type": 1,
                             "instruction": "Biege rechts ab  auf Sechslingspforte",
                             "name": "Sechslingspforte",
                             "way_points": [
-                                97,
+                                101,
                                 102
                             ]
                         },
@@ -1438,24 +1625,123 @@
                             ]
                         },
                         {
-                            "distance": 234.785,
-                            "duration": 28.1742,
+                            "distance": 14.291,
+                            "duration": 1.71492,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Ackermannstra\u00dfe",
+                            "name": "Ackermannstra\u00dfe",
+                            "way_points": [
+                                108,
+                                109
+                            ]
+                        },
+                        {
+                            "distance": 6.452,
+                            "duration": 0.7742399999999999,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Ackermannstra\u00dfe",
+                            "name": "Ackermannstra\u00dfe",
+                            "way_points": [
+                                109,
+                                110
+                            ]
+                        },
+                        {
+                            "distance": 6.816,
+                            "duration": 0.8179199999999999,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Ackermannstra\u00dfe",
+                            "name": "Ackermannstra\u00dfe",
+                            "way_points": [
+                                110,
+                                111
+                            ]
+                        },
+                        {
+                            "distance": 5.115,
+                            "duration": 0.6138,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Ackermannstra\u00dfe",
+                            "name": "Ackermannstra\u00dfe",
+                            "way_points": [
+                                111,
+                                112
+                            ]
+                        },
+                        {
+                            "distance": 202.111,
+                            "duration": 24.253320000000002,
                             "type": 1,
                             "instruction": "Biege rechts ab  auf Ackermannstra\u00dfe",
                             "name": "Ackermannstra\u00dfe",
                             "way_points": [
-                                108,
+                                112,
                                 117
                             ]
                         },
                         {
-                            "distance": 735.244,
-                            "duration": 62.237615999999996,
+                            "distance": 8.518,
+                            "duration": 1.02216,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Ackermannstra\u00dfe",
+                            "name": "Ackermannstra\u00dfe",
+                            "way_points": [
+                                117,
+                                118
+                            ]
+                        },
+                        {
+                            "distance": 7.959,
+                            "duration": 0.9550799999999999,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Graumannsweg",
+                            "name": "Graumannsweg",
+                            "way_points": [
+                                118,
+                                119
+                            ]
+                        },
+                        {
+                            "distance": 15.676,
+                            "duration": 1.128672,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Graumannsweg",
+                            "name": "Graumannsweg",
+                            "way_points": [
+                                119,
+                                120
+                            ]
+                        },
+                        {
+                            "distance": 4.667,
+                            "duration": 0.336024,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Graumannsweg",
+                            "name": "Graumannsweg",
+                            "way_points": [
+                                120,
+                                121
+                            ]
+                        },
+                        {
+                            "distance": 668.4,
+                            "duration": 56.633952,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf G\u00fcntherstra\u00dfe",
+                            "name": "G\u00fcntherstra\u00dfe",
+                            "way_points": [
+                                121,
+                                145
+                            ]
+                        },
+                        {
+                            "distance": 30.024,
+                            "duration": 2.161728,
                             "type": 0,
                             "instruction": "Biege links ab  auf Lenaustra\u00dfe",
                             "name": "Lenaustra\u00dfe",
                             "way_points": [
-                                117,
+                                145,
                                 146
                             ]
                         },
@@ -1471,13 +1757,46 @@
                             ]
                         },
                         {
-                            "distance": 1505.425,
-                            "duration": 180.65099999999998,
+                            "distance": 1392.397,
+                            "duration": 167.08764,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Auenstra\u00dfe",
+                            "name": "Auenstra\u00dfe",
+                            "way_points": [
+                                147,
+                                177
+                            ]
+                        },
+                        {
+                            "distance": 25.481,
+                            "duration": 3.0577199999999998,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Auenstra\u00dfe",
+                            "name": "Auenstra\u00dfe",
+                            "way_points": [
+                                177,
+                                178
+                            ]
+                        },
+                        {
+                            "distance": 40.693,
+                            "duration": 4.883159999999999,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Auenstra\u00dfe",
+                            "name": "Auenstra\u00dfe",
+                            "way_points": [
+                                178,
+                                179
+                            ]
+                        },
+                        {
+                            "distance": 46.854,
+                            "duration": 5.6224799999999995,
                             "type": 1,
                             "instruction": "Biege rechts ab  auf Maxstra\u00dfe",
                             "name": "Maxstra\u00dfe",
                             "way_points": [
-                                147,
+                                179,
                                 180
                             ]
                         },
@@ -1493,13 +1812,35 @@
                             ]
                         },
                         {
-                            "distance": 617.873,
-                            "duration": 74.14475999999999,
+                            "distance": 21.866,
+                            "duration": 2.6239199999999996,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Schellingstra\u00dfe",
+                            "name": "Schellingstra\u00dfe",
+                            "way_points": [
+                                182,
+                                183
+                            ]
+                        },
+                        {
+                            "distance": 47.649,
+                            "duration": 5.71788,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Schellingstra\u00dfe",
+                            "name": "Schellingstra\u00dfe",
+                            "way_points": [
+                                183,
+                                184
+                            ]
+                        },
+                        {
+                            "distance": 548.358,
+                            "duration": 65.80296,
                             "type": 1,
                             "instruction": "Biege rechts ab  auf B\u00f6rnestra\u00dfe",
                             "name": "B\u00f6rnestra\u00dfe",
                             "way_points": [
-                                182,
+                                184,
                                 194
                             ]
                         },
@@ -1515,35 +1856,145 @@
                             ]
                         },
                         {
-                            "distance": 140.672,
-                            "duration": 10.128384,
+                            "distance": 45.026,
+                            "duration": 3.2418720000000003,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Wandsbeker Chaussee",
+                            "name": "Wandsbeker Chaussee",
+                            "way_points": [
+                                196,
+                                197
+                            ]
+                        },
+                        {
+                            "distance": 17.097,
+                            "duration": 1.230984,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Wandsbeker Chaussee",
+                            "name": "Wandsbeker Chaussee",
+                            "way_points": [
+                                197,
+                                198
+                            ]
+                        },
+                        {
+                            "distance": 63.315999999999995,
+                            "duration": 4.558751999999999,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Wandsbeker Marktstra\u00dfe",
+                            "name": "Wandsbeker Marktstra\u00dfe",
+                            "way_points": [
+                                198,
+                                201
+                            ]
+                        },
+                        {
+                            "distance": 15.233,
+                            "duration": 1.096776,
                             "type": 1,
                             "instruction": "Biege rechts ab  auf Hammer Stra\u00dfe",
                             "name": "Hammer Stra\u00dfe",
                             "way_points": [
-                                196,
+                                201,
                                 202
                             ]
                         },
                         {
-                            "distance": 928.88,
-                            "duration": 66.87935999999999,
+                            "distance": 11.436,
+                            "duration": 0.823392,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Hammer Stra\u00dfe",
+                            "name": "Hammer Stra\u00dfe",
+                            "way_points": [
+                                202,
+                                203
+                            ]
+                        },
+                        {
+                            "distance": 5.962,
+                            "duration": 0.429264,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Hammer Stra\u00dfe",
+                            "name": "Hammer Stra\u00dfe",
+                            "way_points": [
+                                203,
+                                204
+                            ]
+                        },
+                        {
+                            "distance": 895.3149999999999,
+                            "duration": 64.46267999999999,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Hammer Stra\u00dfe",
+                            "name": "Hammer Stra\u00dfe",
+                            "way_points": [
+                                204,
+                                245
+                            ]
+                        },
+                        {
+                            "distance": 5.244,
+                            "duration": 0.37756799999999996,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf Hammer Stra\u00dfe",
+                            "name": "Hammer Stra\u00dfe",
+                            "way_points": [
+                                245,
+                                246
+                            ]
+                        },
+                        {
+                            "distance": 10.923,
+                            "duration": 0.7864559999999999,
                             "type": 0,
                             "instruction": "Biege links ab  auf J\u00fcthornstra\u00dfe",
                             "name": "J\u00fcthornstra\u00dfe",
                             "way_points": [
-                                202,
+                                246,
                                 247
                             ]
                         },
                         {
-                            "distance": 252.923,
-                            "duration": 18.210456,
+                            "distance": 9.754,
+                            "duration": 0.7022879999999999,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf J\u00fcthornstra\u00dfe",
+                            "name": "J\u00fcthornstra\u00dfe",
+                            "way_points": [
+                                247,
+                                248
+                            ]
+                        },
+                        {
+                            "distance": 11.515,
+                            "duration": 0.82908,
+                            "type": 0,
+                            "instruction": "Biege links ab  auf J\u00fcthornstra\u00dfe",
+                            "name": "J\u00fcthornstra\u00dfe",
+                            "way_points": [
+                                248,
+                                249
+                            ]
+                        },
+                        {
+                            "distance": 212.214,
+                            "duration": 15.279408,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf J\u00fcthornstra\u00dfe",
+                            "name": "J\u00fcthornstra\u00dfe",
+                            "way_points": [
+                                249,
+                                255
+                            ]
+                        },
+                        {
+                            "distance": 19.44,
+                            "duration": 1.39968,
                             "type": 1,
                             "instruction": "Biege rechts ab  auf Claudiusstra\u00dfe",
                             "name": "Claudiusstra\u00dfe",
                             "way_points": [
-                                247,
+                                255,
                                 256
                             ]
                         },
@@ -1559,46 +2010,101 @@
                             ]
                         },
                         {
-                            "distance": 511.856,
-                            "duration": 61.42272,
+                            "distance": 494.041,
+                            "duration": 59.28492,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Am Husarendenkmal",
+                            "name": "Am Husarendenkmal",
+                            "way_points": [
+                                258,
+                                273
+                            ]
+                        },
+                        {
+                            "distance": 9.165,
+                            "duration": 1.0997999999999999,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Am Husarendenkmal",
+                            "name": "Am Husarendenkmal",
+                            "way_points": [
+                                273,
+                                274
+                            ]
+                        },
+                        {
+                            "distance": 8.65,
+                            "duration": 1.038,
                             "type": 1,
                             "instruction": "Biege rechts ab  auf Rennbahnstra\u00dfe",
                             "name": "Rennbahnstra\u00dfe",
                             "way_points": [
-                                258,
+                                274,
                                 275
                             ]
                         },
                         {
-                            "distance": 508.886,
-                            "duration": 36.639792,
+                            "distance": 25.316,
+                            "duration": 1.822752,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Rennbahnstra\u00dfe",
+                            "name": "Rennbahnstra\u00dfe",
+                            "way_points": [
+                                275,
+                                276
+                            ]
+                        },
+                        {
+                            "distance": 483.57,
+                            "duration": 34.81704,
                             "type": 0,
                             "instruction": "Biege links ab ",
                             "name": "None",
                             "way_points": [
-                                275,
+                                276,
                                 298
                             ]
                         },
                         {
-                            "distance": 10.366,
-                            "duration": 0.746352,
+                            "distance": 7.562,
+                            "duration": 0.5444640000000001,
                             "type": 0,
                             "instruction": "Biege links ab ",
                             "name": "None",
                             "way_points": [
                                 298,
+                                299
+                            ]
+                        },
+                        {
+                            "distance": 2.804,
+                            "duration": 0.20188799999999998,
+                            "type": 0,
+                            "instruction": "Biege links ab ",
+                            "name": "None",
+                            "way_points": [
+                                299,
                                 300
                             ]
                         },
                         {
-                            "distance": 19.215,
-                            "duration": 1.3834799999999998,
+                            "distance": 13.328,
+                            "duration": 0.9596159999999999,
                             "type": 0,
                             "instruction": "Biege links ab ",
                             "name": "None",
                             "way_points": [
                                 300,
+                                301
+                            ]
+                        },
+                        {
+                            "distance": 5.887,
+                            "duration": 0.42386399999999996,
+                            "type": 0,
+                            "instruction": "Biege links ab ",
+                            "name": "None",
+                            "way_points": [
+                                301,
                                 302
                             ]
                         },
@@ -1636,24 +2142,68 @@
                             ]
                         },
                         {
-                            "distance": 122.423,
-                            "duration": 8.814456,
+                            "distance": 5.67,
+                            "duration": 0.40824,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Peerstall Weg",
+                            "name": "Peerstall Weg",
+                            "way_points": [
+                                305,
+                                306
+                            ]
+                        },
+                        {
+                            "distance": 80.713,
+                            "duration": 5.811336,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Peerstall Weg",
+                            "name": "Peerstall Weg",
+                            "way_points": [
+                                306,
+                                312
+                            ]
+                        },
+                        {
+                            "distance": 9.768,
+                            "duration": 0.703296,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Peerstall Weg",
+                            "name": "Peerstall Weg",
+                            "way_points": [
+                                312,
+                                313
+                            ]
+                        },
+                        {
+                            "distance": 26.272,
+                            "duration": 1.891584,
                             "type": 0,
                             "instruction": "Biege links ab  auf Peerstall Weg",
                             "name": "Peerstall Weg",
                             "way_points": [
-                                305,
+                                313,
                                 315
                             ]
                         },
                         {
-                            "distance": 55.725,
-                            "duration": 4.0122,
+                            "distance": 39.531000000000006,
+                            "duration": 2.846232,
                             "type": 1,
                             "instruction": "Biege rechts ab  auf Peerstall Weg",
                             "name": "Peerstall Weg",
                             "way_points": [
                                 315,
+                                317
+                            ]
+                        },
+                        {
+                            "distance": 16.194,
+                            "duration": 1.165968,
+                            "type": 1,
+                            "instruction": "Biege rechts ab  auf Peerstall Weg",
+                            "name": "Peerstall Weg",
+                            "way_points": [
+                                317,
                                 318
                             ]
                         },
@@ -1680,13 +2230,24 @@
                             ]
                         },
                         {
-                            "distance": 65.255,
-                            "duration": 4.698359999999999,
+                            "distance": 61.613,
+                            "duration": 4.436135999999999,
                             "type": 1,
                             "instruction": "Biege rechts ab ",
                             "name": "None",
                             "way_points": [
                                 321,
+                                322
+                            ]
+                        },
+                        {
+                            "distance": 3.642,
+                            "duration": 0.262224,
+                            "type": 1,
+                            "instruction": "Biege rechts ab ",
+                            "name": "None",
+                            "way_points": [
+                                322,
                                 323
                             ]
                         },

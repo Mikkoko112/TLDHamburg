@@ -142,6 +142,7 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
             speeds = []
             lastSpeed,lastSpeedChangeIdx = 0,0            
             lastWayPoint = 0
+            blockForTurn = -1
             #Every route is generated separately.
             for i,node in enumerate(route): 
 
@@ -189,16 +190,32 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                     )
                     lastSpeed = node[4]
                     lastSpeedChangeIdx = i
+                
+                leftBool,rightBool = False,False
+                searchDepth        = 0
+                for search in range(1,6):
+                    if i-search < 0 or i+search >= len(route) or i <= blockForTurn :
+                        break
+                    
+                    beforeORS = ORSNode(lat = route[i-search][1],lon = route[i-search][0],id = route[i-search][2])
+                    thisORS   = ORSNode(lat = node[1],           lon = node[0]           ,id = node[2])
+                    nextORS   = ORSNode(lat = route[i+search][1],lon = route[i+search][0],id = route[i+search][2])
 
-                #This is done to have compatibility with Stevans code 
-                beforeORS = ORSNode(lat = route[i-1][1],lon = route[i-1][0],id = route[i-1][2])
-                thisORS   = ORSNode(lat = node[1],lon = node[0],id = node[2])
-                nextORS   = ORSNode(lat = route[i+1][1],lon = route[i+1][0],id = route[i+1][2])
+                    leftBool:bool  =  leftTurn(beforeORS,thisORS,nextORS)
+                    rightBool:bool = rightTurn(beforeORS,thisORS,nextORS)
+                    if leftBool or rightBool:
+                        searchDepth = search
+                        break
+                    
+                if blockForTurn <= i :
+                    blockForTurn = i + searchDepth
 
-                leftBool:bool  =  leftTurn(beforeORS,thisORS,nextORS)
-                rightBool:bool = rightTurn(beforeORS,thisORS,nextORS)
                 if leftBool or rightBool:
-                    name = str(graph.es.select(_source=node[2],_target=route[i+1][2])["name"][0]) 
+
+                    thisStree = str()
+                    
+                    name = str(graph.es.select(_source=route[i+searchDepth-1][2],_target=route[i+searchDepth][2])["name"][0]) 
+                        
                     if   leftBool and not rightBool:
                         direc = "links"
                     elif not leftBool and rightBool:

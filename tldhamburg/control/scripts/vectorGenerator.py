@@ -56,7 +56,7 @@ def generateVector(mainCoord:list,coordList:list): #Vektor zeigt zum point!
     mainCoord:list <- This is the main coord one wants to use the vector as 
     coordList:list <- This is the list of coords one wants to translate into a vector
 
-    The point is computed in to different ways. The active version now is the mean value of the Path
+    The point is computed in two different ways. The active version now is the mean value of the Path
     The nearest point version can be activated but is not recommended. This will results in points
     that lay directly beside the centroid and discretion information is lost.
 
@@ -64,7 +64,6 @@ def generateVector(mainCoord:list,coordList:list): #Vektor zeigt zum point!
     '''
     #minCo,maxCo = findFurthestAndNearestCoord(mainCoord,coordList)
     meanCo = getCentroid(coordList)
-    #vec = [mainCoord[0]-meanCo[0],mainCoord[1]-meanCo[1]] #hier wird es jetzt auf das Centroid focosiert
     vec = [-1*(mainCoord[0]-meanCo[0]),-1*(mainCoord[1]-meanCo[1])] #hier wird es jetzt auf das Centroid focosiert
     
     scaleVec = sqrt(vec[0]**2+vec[1]**2)
@@ -105,7 +104,7 @@ def getDegree(vec:list)->float:
         assert (len(vec0) == 2) and (len(vec1)==2)
         return vec0[0]*vec1[1] - vec0[1]*vec1[0]
     standardVec = [0,1]
-    dot = dotProd(standardVec,vec)
+    dot         = dotProd(standardVec,vec)
 
     lengthVec = sqrt(dotProd(vec,vec)) #should be 1
     lengthStd = sqrt(dotProd(standardVec,standardVec)) #this too
@@ -115,16 +114,16 @@ def getDegree(vec:list)->float:
     return acos(dot/lengthVec) 
 
 
-def genPerPrimarySignal(coords:dict,conjunctionDict:dict)->dict:
+def genPerPrimarySignal(thingsData:dict,conjunctionDict:dict)->dict:
     '''
-    coords:dict <- This is the dict with the things data
+    thingsData:dict <- This is the dict with the things data
 
     return:dict -> A dict with every primary signal with its dedicated vector and degree
                    of ingress and egress lane. The point in the middle is the mean Value
     '''
     expep = 0
     out = dict()
-    for name,coords in coords.items():
+    for name,coords in thingsData.items():
         for conjName,body in conjunctionDict.items():
             
             if (name in body["trafficLights"] 
@@ -134,7 +133,7 @@ def genPerPrimarySignal(coords:dict,conjunctionDict:dict)->dict:
                 meanCoordCalc = getCentroid(coords[1])
                 
                 print(name,body["junctionNodes"])
-                imNodes = body["junctionNodes"]
+                imNodes   = body["junctionNodes"]
                 meanCoord = findFurthestAndNearestCoord(meanCoordCalc,imNodes)[0]
                 
                 vec0,vec2 = list(),list()
@@ -142,30 +141,29 @@ def genPerPrimarySignal(coords:dict,conjunctionDict:dict)->dict:
                     expep += 1
                     print("exception")
                 if len(coords[0]) != 0:
-                    vec0 = generateVector(meanCoordCalc,coords[0])
-                    deg = getDegree(vec0)
+                    vec0  = generateVector(meanCoord,coords[0])
+                    deg   = getDegree(vec0)
                     vec0.append(deg)
                     vec0.append(degrees(deg))
                 if len(coords) > 2:
-                    vec2 = generateVector(meanCoordCalc,coords[2])
-                    deg = getDegree(vec2)
+                    vec2  = generateVector(meanCoord,coords[2])
+                    deg   = getDegree(vec2)
                     vec2.append(deg)
                     vec2.append(degrees(deg))
                 out[name] = [vec0,meanCoord,vec2]
-                if name == "7880":
-                    exit()
+                
             
     print(expep)
     return out
 
 def startGenerator()->None:
     with open(nameOfThingsLocation,"r") as file:
-        coords = json.load(file)
+        thingsData = json.load(file)
 
     with open("../data/conjunctionDict.json","r") as file: 
         conjDict = json.load(file)
 
-    vectorData = genPerPrimarySignal(coords,conjDict)
+    vectorData = genPerPrimarySignal(thingsData,conjDict)
     
     with open("../data/vectorizationOnMeanPointInvert.json","w") as file:
         json.dump(vectorData, file, indent=4)

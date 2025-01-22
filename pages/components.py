@@ -299,7 +299,7 @@ def control_demo():
                                           id="speed-limit"),
                         ],
                     ), 
-                    width = "auto",
+                width = "auto",
             ),
         ],
         className="flex-container-control",
@@ -314,18 +314,13 @@ def control_live():
                             disabled=True),
                 width = "auto",
             ),
-            #dbc.Col(
-            #    dbc.Button("Gesamtroute", id = "overview-button-live", color="secondary", 
-            #                disabled=True),
-            #    width = "auto",
-            #),
             dbc.Col(
                     dbc.ListGroup([
                             dbc.ListGroupItem("Maximal erlaubte Geschwindigkeit: -", 
                                               id="speed-limit-live"),
                         ],
                     ), 
-                    width = "auto",
+                width = "auto",
             ),
         ],
        className="flex-container-control"
@@ -434,7 +429,7 @@ def overview_live():
 def data_demo():
     return dbc.Row([
                 dbc.Col([
-                    dcc.Store(id='map-store', data={"center": None, "zoom": None}),  # Store to keep the map zoom level
+                    dcc.Store(id="map-store", data={"center": None, "zoom": None}),  # Store to keep the map zoom level
                     dl.Map(id = "map", center=[53.549573,9.953330], zoom=10,
                     children=[
                         dl.TileLayer(),
@@ -474,8 +469,8 @@ def data_demo():
 def data_live():
     return dbc.Row([
                 dbc.Col([
-                    dcc.Store(id='map-store-live', data={"center": [53.549573,9.953330], "zoom": 10}),  # Store to keep the map zoom level
-                    dcc.Store(id='center-store-live', data=None),  # Store to keep the map zoom level
+                    dcc.Store(id="map-store-live", data={"center": [53.549573,9.953330], "zoom": 10}),  # Store to keep the map zoom level
+                    dcc.Store(id="center-store-live", data=None),  # Store to keep the map zoom level
                     dl.Map(id = "map-live", center=[53.549573,9.953330], zoom=10, 
                            #zoomControl = False, scrollWheelZoom = False, doubleClickZoom = False,
                            #touchZoom = False, dragging = False,
@@ -486,7 +481,7 @@ def data_live():
                         dl.LayerGroup(id="tl-route-layer-live"),
                         dl.LocateControl(position="topleft",id="locate-control-live", 
                                          cacheLocation = True, returnToPrevBounds = True,
-                                locateOptions={'enableHighAccuracy': True, 
+                                locateOptions={"enableHighAccuracy": True, 
                                 "setView": True, 
                                 "watch": True, 
                                 "minZoom": 17,
@@ -533,16 +528,9 @@ def data_live():
                     id="start-freigabe-modal",
                     is_open=False,
                 ),
-                # Hidden button for programmatic clicking
-                #html.Button('Get GPS', id='get-gps-button', n_clicks=0), #style={'display': 'none'}),
-                # Store components to store latitude and longitude
-                #html.Div(children="hello",id='store-latitude',),#style={'display': 'none'}),
-                #html.Div(id='store-longitude',),#style={'display': 'none'}), 
-                #html.Div(id="get-gps"),
             ],
             className="left-container", 
         )
-
 
 # components only for start site ----------------------------------------------
 
@@ -671,5 +659,3 @@ def components_startseite():
     className="startseite-components-container",
     )
    
-    
-

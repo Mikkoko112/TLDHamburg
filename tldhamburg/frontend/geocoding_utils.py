@@ -30,9 +30,6 @@ def return_coordinates(address: str, geolocator = Nominatim(user_agent="http")):
     Returns:
     Tuple[Optional[float], Optional[float]]: Latitude and Longitude as a tuple, or (None, None) if unsuccessful.
     """
-
-    #geolocator = Nominatim(user_agent="http")
-
     # initialize variables
     lat, lon = None, None
     # parameters for viewbox for hamburg

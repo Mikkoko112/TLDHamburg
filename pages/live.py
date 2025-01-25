@@ -267,6 +267,8 @@ start-freigabe-modal; disable bool for start-button-live
     Output("start-freigabe-modal", "is_open", allow_duplicate=True), # modal for information that the user did not activate gps
     Output("start-button-live", "disabled", allow_duplicate=True), # True: disables the start button if no route is given
 
+    Output("position-live", "center"),               # nur für die Präsentation
+
     [State("route-layer-live", "data"),
     State("start-navigation-bool", "data"), # if the person is near the route
     State("center-store-live", "data"), # center of user location
@@ -297,6 +299,9 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
     start_button_disabled = no_update
     trafficlights = ""
 
+    # nur für Präsentation
+    position = (0,0)
+
     # change values for variables if route-button was triggered
     if button_id == "route-button-live":
         navigate.start_navigating = False 
@@ -321,6 +326,10 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
             lon = user_store["lat"]
             lat = user_store["lng"]
             pos.set_pos(lat, lon)
+            
+            # nur für Präsentation
+            position = (lon,lat)
+            
             # if the user is not near the route, startNavigation will be False
             # and start-navigation-modal will open to inform the user
             startNavigation = navigate.start_navigation(pos)
@@ -344,6 +353,9 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
         lat = user_store["lng"]
         pos.set_pos(lat, lon)
         navigate.update_route(pos)
+
+        # nur für Präsentation
+        position = (lon,lat)
 
          # update variables for the new center
         picture = dash.get_relative_path(f"/assets/{navigate.current_nav_instr_picture}")
@@ -383,7 +395,8 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
             progress_value, remaining_instructions,
             speed_limit_text, speed_recommendation_text, navigate.geojson, zoomToBounds,
             trafficlights,
-            startNavigation_modal,startNavigation,modal_freigabe, start_button_disabled)
+            startNavigation_modal,startNavigation,modal_freigabe, start_button_disabled,
+            position) # nur für die Präsentation
 
 """
 Change traffic light picture depending on the light status. 
@@ -397,8 +410,8 @@ Output: traffic light picture; tooltip for the traffic light picture
 @callback(
     Output("tl-picture-live","src"),
     Output("tl-picture-tooltip-live", "children"),
-    State("center-store-live", "data"), # center of user location
 
+    State("center-store-live", "data"), # center of user location
     Input("route-button-live", "n_clicks"),
     Input("speed-recommendation-live", "children"),
 

@@ -479,6 +479,9 @@ def data_live():
                         dl.GeoJSON(id="route-layer-live", data=None, options={"color": "blue"}, zoomToBounds=True),
                         dl.LayerGroup(id="start-end-layer-live"),
                         dl.LayerGroup(id="tl-route-layer-live"),
+
+                        dl.Circle(id="position-live", center=(0,0), radius=10),  #nur für Präsentation
+                        
                         dl.LocateControl(position="topleft",id="locate-control-live", 
                                          cacheLocation = True, returnToPrevBounds = True,
                                 locateOptions={"enableHighAccuracy": True, 

@@ -16,7 +16,7 @@ import math
 import time
 from geopy import distance
 from timeit import default_timer as timer
-from tldhamburg.control.routeplanning.angle_at_intersection import is_left_turn_tolerance as leftTurn
+from tldhamburg.control.routeplanning.angle_at_intersection import is_left_turn_tolerance  as leftTurn
 from tldhamburg.control.routeplanning.angle_at_intersection import is_right_turn_tolerance as rightTurn
 from tldhamburg.control.routeplanning.models import ORSNode
 

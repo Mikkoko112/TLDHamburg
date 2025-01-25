@@ -1788,14 +1788,14 @@
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": [
-                                    9.99285316467285,
-                                    53.5576133728027
+                                    9.99419403076172,
+                                    53.558464050293
                                 ]
                             },
                             "properties": {
                                 "id": "1997",
                                 "object": "primary_signal",
-                                "way-point": 18
+                                "way-point": 32
                             }
                         },
                         {
@@ -1803,14 +1803,14 @@
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": [
-                                    9.99848079681396,
-                                    53.5575904846191
+                                    10.0026092529297,
+                                    53.5569152832031
                                 ]
                             },
                             "properties": {
                                 "id": "2524",
                                 "object": "primary_signal",
-                                "way-point": 44
+                                "way-point": 59
                             }
                         },
                         {
@@ -1818,14 +1818,14 @@
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": [
-                                    9.99848079681396,
-                                    53.5575904846191
+                                    10.0026092529297,
+                                    53.5569152832031
                                 ]
                             },
                             "properties": {
                                 "id": "2378",
                                 "object": "primary_signal",
-                                "way-point": 44
+                                "way-point": 59
                             }
                         },
                         {
@@ -1833,14 +1833,14 @@
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": [
-                                    9.99848079681396,
-                                    53.5575904846191
+                                    10.0026092529297,
+                                    53.5569152832031
                                 ]
                             },
                             "properties": {
                                 "id": "1902",
                                 "object": "primary_signal",
-                                "way-point": 44
+                                "way-point": 59
                             }
                         },
                         {
@@ -1848,14 +1848,14 @@
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": [
-                                    10.0068941116333,
-                                    53.5584487915039
+                                    10.008264541626,
+                                    53.5589828491211
                                 ]
                             },
                             "properties": {
                                 "id": "2585",
                                 "object": "primary_signal",
-                                "way-point": 69
+                                "way-point": 71
                             }
                         },
                         {
@@ -1863,14 +1863,14 @@
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": [
-                                    10.0092649459839,
-                                    53.559440612793
+                                    10.0105400085449,
+                                    53.5599403381348
                                 ]
                             },
                             "properties": {
                                 "id": "2683",
                                 "object": "primary_signal",
-                                "way-point": 74
+                                "way-point": 78
                             }
                         },
                         {
@@ -1878,14 +1878,14 @@
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": [
-                                    10.0120229721069,
-                                    53.5603713989258
+                                    10.0134010314941,
+                                    53.561149597168
                                 ]
                             },
                             "properties": {
                                 "id": "2550",
                                 "object": "primary_signal",
-                                "way-point": 80
+                                "way-point": 85
                             }
                         },
                         {
@@ -1893,14 +1893,14 @@
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": [
-                                    10.0317163467407,
-                                    53.5652923583984
+                                    10.0326328277588,
+                                    53.5657234191895
                                 ]
                             },
                             "properties": {
                                 "id": "11326",
                                 "object": "primary_signal",
-                                "way-point": 152
+                                "way-point": 156
                             }
                         },
                         {
@@ -1908,14 +1908,14 @@
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": [
-                                    10.0317163467407,
-                                    53.5652923583984
+                                    10.0326328277588,
+                                    53.5657234191895
                                 ]
                             },
                             "properties": {
                                 "id": "2466",
                                 "object": "primary_signal",
-                                "way-point": 152
+                                "way-point": 156
                             }
                         },
                         {
@@ -1938,14 +1938,14 @@
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": [
-                                    10.0523147583008,
-                                    53.5702095031738
+                                    10.052586555481,
+                                    53.5702590942383
                                 ]
                             },
                             "properties": {
                                 "id": "21965",
                                 "object": "primary_signal",
-                                "way-point": 186
+                                "way-point": 187
                             }
                         },
                         {
@@ -1953,14 +1953,14 @@
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": [
-                                    10.0587406158447,
-                                    53.5702247619629
+                                    10.0605802536011,
+                                    53.570442199707
                                 ]
                             },
                             "properties": {
                                 "id": "13260",
                                 "object": "primary_signal",
-                                "way-point": 194
+                                "way-point": 200
                             }
                         }
                     ]

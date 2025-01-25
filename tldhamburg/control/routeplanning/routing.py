@@ -25,7 +25,7 @@ def getNearestNode(mainNode:list,nodeList:list)->list:
     nearestDist  = inf
     nearestNode = []
     for node in nodeList:
-        dist = sqrt((node[0]-mainNode[0]**2 )+(node[1]-mainNode[1]**2 ))
+        dist = sqrt(((node[0]-mainNode[0])**2 )+((node[1]-mainNode[1])**2 ))
         if dist < nearestDist:
             nearestDist = dist
             nearestNode = node
@@ -188,26 +188,34 @@ def getRouteTrafficLights(route:list, conjFile:dict,conjList:list,vectorization:
                 
     return trafficLights
 
-def generateGeoJsonData(trafficLights:dict,conjList:dict)->dict:
-    def getPointData(conjNodes:list)->list: 
-        return conjNodes[0]
+def generateGeoJsonData(trafficLights:dict,conjList:dict,vectorData:dict)->dict:
+    def getPointData(trafficLightPos,conjNodes:list)->list: 
+        coordsOfConjunctionNodes = [node[1] for node in conjNodes]
+        nearestRouteNode = getNearestNode(trafficLightPos,coordsOfConjunctionNodes)
+        nearestRouteNodeWithIndex = [node for node in conjNodes 
+                                     if node[1] == nearestRouteNode][0]
+        return nearestRouteNodeWithIndex
 
     out = {
         "type":"FeatureCollection",
     }
     features = []
     i=1
+
     for conj,traffic in trafficLights.items():
+        
+        conjunctionDataPoint = getPointData(vectorData[traffic][1],conjList[conj])
+
         element =         {
             "type": "Feature",
             "geometry": {
                 "type": "Point",
-                "coordinates": getPointData(conjList[conj])[1]
+                "coordinates": conjunctionDataPoint[1]
             },
             "properties": {
                 "id": "{}".format(conj),
                 "object": "primary_signal",
-                "way-point": getPointData(conjList[conj])[0]
+                "way-point": conjunctionDataPoint[0]
             }
         }
         features.append(element)
@@ -241,7 +249,7 @@ def getTrafficLightsRoute(routeList:dict,test:bool=False)->dict:
                 json.dump(dic,file,indent=4)
             exit(1)
         
-        jsonData = generateGeoJsonData(trafficLightsList,conjList)
+        jsonData = generateGeoJsonData(trafficLightsList,conjList,vectorization)
         
         routeList["features"][i]["properties"]["trafficlights"] = jsonData
         

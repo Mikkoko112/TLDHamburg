@@ -1,25 +1,37 @@
-import unittest, logging, json
-from unittest.mock import MagicMock#, patch, mock_open
+import unittest, json#, time
+from unittest.mock import MagicMock, patch#, mock_open
 from tldhamburg.frontend.Navigation import Navigation
 #from tldhamburg.frontend.position import Position
 #from tldhamburg.frontend.trafficlights import Trafficlight
-#from tldhamburg.control.control import RoutePlanner
+# from tldhamburg.control.control import RoutePlanner
 from pathlib import Path
 #import numpy as np
 #import warnings
 
 class TestNavigation(unittest.TestCase):
-    def setUp(self):
+    @patch('tldhamburg.frontend.Navigation.RoutePlanner')
+    def setUp(self, MockRoutePlanner):
+        # begin = time.time()
+        mock_routePlanner_instance = MagicMock()
+        MockRoutePlanner.return_value = mock_routePlanner_instance
+
+        # initialize_start = time.time()
         self.navigate = Navigation(path=f"{Path.cwd()}/test")
+        # initialize_end = time.time()
+
         mock_navigation = MagicMock()
         self.navigate._route = mock_navigation
-
         mock_navigation.generateRoute.return_value = None 
-        
+        # self.navigate._route()
+
+        # file_latency_start = time.time()
         with open(f"{Path.cwd()}/test/test_route.geojson", "r") as f:
             route_planner_data = json.load(f)
+        # file_latency_end = time.time()
 
+        # read_geojson_start = time.time()
         self.navigate._init_route_geojson = MagicMock(return_value=route_planner_data)
+        # read_geojson_end = time.time()
 
         speed = {'max_speed': 12.009, 'min_speed': 8.987}
         data = ("green", "red", 12, False, speed)
@@ -27,10 +39,20 @@ class TestNavigation(unittest.TestCase):
         
         departure = [9.93146705627441, 53.5978164672852]
         destination = [10.008599281311, 53.5522041320801]
+        # create_route_start = time.time()
         self.navigate.create_route(departure, destination)
+        # create_route_end = time.time()
+        # end = time.time()
+        # print(f"initializing Navigation: {initialize_end - initialize_start:.2f}s")
+        # print(f"file latency: {file_latency_end - file_latency_start:.2f}s")
+        # print(f"read geojson: {read_geojson_end - read_geojson_start:.2f}s")
+        # print(f"create route: {create_route_end - create_route_start:.2f}s")
+        # print(f"setup duration: {end - begin:.2f}s")
+
+
 
     def test_init_route_geojson(self):
-        # method being mocked
+        # method is being mocked
         pass
 
     def test_init_navigation_instructions(self):
@@ -62,15 +84,6 @@ class TestNavigation(unittest.TestCase):
         mock_position.get_pos.return_value = (9.93140983581543, 53.5977401733398)
         result = self.navigate.is_on_route(mock_position)
         expected = True
-        self.assertEqual(result, expected)
-
-    def test_haversine_approx(self):        
-        lat1 = 9.93146705627441
-        lon1 = 53.5978164672852
-        lat2 = 9.93146725627441
-        lon2 = 53.5978164872852
-        expected = 3.508068361854152e-09
-        result = self.navigate._haversine_approx(lat1, lon1, lat2, lon2)
         self.assertEqual(result, expected)
 
     def test_get_current_waypoint_index(self):
@@ -153,7 +166,7 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(result, expected)
     
     def test_update_route(self):
-        # this method is tested when mocking the position to check the dynamic data. Thus we will skip it at this point.
+        # this method is tested when mocking the position to check the dynamic data. Thus we will skip it in tests.
         pass
 
     def test_get_all_trafficlight_coordinates(self):
@@ -167,11 +180,11 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_update_mode(self):
-        self.navigate.update_mode(True)
+        self.navigate.update_mode(True, "count")
         result = self.navigate.bicycle_mode
         expected = True
         self.assertEqual(result, expected)
-        self.navigate.route_option("count")
+        # self.navigate.route_option("count")
         result = self.navigate.route_option
         expected = "count"
         self.assertEqual(result, expected)

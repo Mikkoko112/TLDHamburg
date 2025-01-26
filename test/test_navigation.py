@@ -1,37 +1,25 @@
-import unittest, json#, time
-from unittest.mock import MagicMock, patch#, mock_open
+import unittest, json
+from unittest.mock import MagicMock, patch
 from tldhamburg.frontend.Navigation import Navigation
-#from tldhamburg.frontend.position import Position
-#from tldhamburg.frontend.trafficlights import Trafficlight
-# from tldhamburg.control.control import RoutePlanner
 from pathlib import Path
-#import numpy as np
-#import warnings
 
 class TestNavigation(unittest.TestCase):
     @patch('tldhamburg.frontend.Navigation.RoutePlanner')
     def setUp(self, MockRoutePlanner):
-        # begin = time.time()
         mock_routePlanner_instance = MagicMock()
         MockRoutePlanner.return_value = mock_routePlanner_instance
 
-        # initialize_start = time.time()
         self.navigate = Navigation(path=f"{Path.cwd()}/test")
-        # initialize_end = time.time()
 
         mock_navigation = MagicMock()
         self.navigate._route = mock_navigation
         mock_navigation.generateRoute.return_value = None 
-        # self.navigate._route()
 
-        # file_latency_start = time.time()
+        # exported reference data. This is what the RoutePlanner class would create
         with open(f"{Path.cwd()}/test/test_route.geojson", "r") as f:
             route_planner_data = json.load(f)
-        # file_latency_end = time.time()
 
-        # read_geojson_start = time.time()
         self.navigate._init_route_geojson = MagicMock(return_value=route_planner_data)
-        # read_geojson_end = time.time()
 
         speed = {'max_speed': 12.009, 'min_speed': 8.987}
         data = ("green", "red", 12, False, speed)
@@ -39,20 +27,10 @@ class TestNavigation(unittest.TestCase):
         
         departure = [9.93146705627441, 53.5978164672852]
         destination = [10.008599281311, 53.5522041320801]
-        # create_route_start = time.time()
         self.navigate.create_route(departure, destination)
-        # create_route_end = time.time()
-        # end = time.time()
-        # print(f"initializing Navigation: {initialize_end - initialize_start:.2f}s")
-        # print(f"file latency: {file_latency_end - file_latency_start:.2f}s")
-        # print(f"read geojson: {read_geojson_end - read_geojson_start:.2f}s")
-        # print(f"create route: {create_route_end - create_route_start:.2f}s")
-        # print(f"setup duration: {end - begin:.2f}s")
-
-
 
     def test_init_route_geojson(self):
-        # method is being mocked
+        # method is being mocked during setup
         pass
 
     def test_init_navigation_instructions(self):
@@ -69,17 +47,13 @@ class TestNavigation(unittest.TestCase):
         expected = {15: 30, 18: 50, 35: 30, 224: 50, 226: 30, 365: 50, 373: 30, 395: 50}
         self.assertEqual(self.navigate.speed_limits, expected)
 
-    def test_init_traffic_lights(self):
-        #mock_trafficlight = MagicMock(spec=Trafficlight)
-        #mock_trafficlight.return_value = None
-        
+    def test_init_traffic_lights(self):    
         # Here we will only check if the trafficlights have been initialized with the right key. The use of 'Trafficlight' will be tested later. 
         trafficlight_dict = {163: None, 270: None, 274: None, 287: None, 291: None, 292: None, 312: None, 337: None}
         expected = trafficlight_dict.keys()
         self.assertEqual(self.navigate.trafficlights.keys(), expected)
 
     def test_is_on_route(self):
-        #mock_position = MagicMock(spec=Position)
         mock_position = MagicMock()
         mock_position.get_pos.return_value = (9.93140983581543, 53.5977401733398)
         result = self.navigate.is_on_route(mock_position)
@@ -87,7 +61,6 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_get_current_waypoint_index(self):
-        #mock_position = MagicMock(spec=Position)
         mock_position = MagicMock()
         mock_position.get_pos.return_value = (9.93140983581543, 53.5977401733398)
         self.navigate.update_route(mock_position)
@@ -96,7 +69,6 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(result, expected)
     
     def test_get_current_navigation_instruction_key(self):
-        #mock_position = MagicMock(spec=Position)
         mock_position = MagicMock()
         mock_position.get_pos.return_value = (9.93138122558594, 53.5977058410645)
         self.navigate.update_route(mock_position)
@@ -111,7 +83,6 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_get_current_speed_limit(self):
-       # mock_position = MagicMock(spec=Position)
         mock_position = MagicMock()
         mock_position.get_pos.return_value = self.navigate.way_points[16]
         self.navigate.update_route(mock_position)
@@ -129,7 +100,6 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(tl2_result, expected2)
 
     def test_update_trafficlight(self):        
-        #mock_trafficlight = MagicMock(spec=Trafficlight)
         mock_trafficlight = MagicMock()
         self.navigate.next_tl = mock_trafficlight
         mock_trafficlight.things_id = "9515"
@@ -149,7 +119,6 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_start_navigation(self):
-        #mock_position = MagicMock(spec=Position)
         mock_position = MagicMock()
         mock_position.get_pos.return_value = self.navigate.way_points[28]
         result = self.navigate.start_navigation(mock_position)
@@ -157,7 +126,6 @@ class TestNavigation(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_update_status_bar(self):
-        #mock_position = MagicMock(spec=Position)
         mock_position = MagicMock()
         mock_position.get_pos.return_value = self.navigate.way_points[312]
         self.navigate.update_route(mock_position)
@@ -184,7 +152,6 @@ class TestNavigation(unittest.TestCase):
         result = self.navigate.bicycle_mode
         expected = True
         self.assertEqual(result, expected)
-        # self.navigate.route_option("count")
         result = self.navigate.route_option
         expected = "count"
         self.assertEqual(result, expected)

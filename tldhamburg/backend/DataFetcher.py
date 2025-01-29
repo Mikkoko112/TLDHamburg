@@ -156,6 +156,9 @@ class DataFetcher:
         if not self.data:
             logging.warning(f"No Data fetched yet")
         print(json.dumps(self.data, indent=4))
+
+    def clear_data(self):
+        self.data.clear()
     
     #------------------DEPRECATED-----------------
 

@@ -16,7 +16,7 @@ import math
 import time
 from geopy import distance
 from timeit import default_timer as timer
-from tldhamburg.control.routeplanning.angle_at_intersection import is_left_turn_tolerance as leftTurn
+from tldhamburg.control.routeplanning.angle_at_intersection import is_left_turn_tolerance  as leftTurn
 from tldhamburg.control.routeplanning.angle_at_intersection import is_right_turn_tolerance as rightTurn
 from tldhamburg.control.routeplanning.models import ORSNode
 
@@ -142,6 +142,7 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
             speeds = []
             lastSpeed,lastSpeedChangeIdx = 0,0            
             lastWayPoint = 0
+            blockForTurn = -1
             #Every route is generated separately.
             for i,node in enumerate(route): 
 
@@ -162,7 +163,7 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                             "distance": sum([tNode[3] for tNode in route[lastWayPoint:]]), 
                             "duration": sum([tNode[3]/((5/18)*(tNode[4] if tNode[4] != 0 else 50)) for tNode in route[lastWayPoint:]]), #same here if i have time i should change this
                             "type": 10,
-                            "instruction": f"Your destination is next.",
+                            "instruction": f"Ziel erreicht",
                             "name": "Goal",
                             "way_points": [
                                 lastWayPoint,
@@ -189,29 +190,45 @@ def getRouteFromGraph(coordsStartEnd:list,graph:igraph.GraphBase,count:int=1)->d
                     )
                     lastSpeed = node[4]
                     lastSpeedChangeIdx = i
+                
+                leftBool,rightBool = False,False
+                searchDepth        = 0
+                for search in range(1,6):
+                    if i-search < 0 or i+search >= len(route) or i <= blockForTurn :
+                        break
+                    
+                    beforeORS = ORSNode(lat = route[i-search][1],lon = route[i-search][0],id = route[i-search][2])
+                    thisORS   = ORSNode(lat = node[1],           lon = node[0]           ,id = node[2])
+                    nextORS   = ORSNode(lat = route[i+search][1],lon = route[i+search][0],id = route[i+search][2])
 
-                #This is done to have compatibility with Stevans code 
-                beforeORS = ORSNode(lat = route[i-1][1],lon = route[i-1][0],id = route[i-1][2])
-                thisORS   = ORSNode(lat = node[1],lon = node[0],id = node[2])
-                nextORS   = ORSNode(lat = route[i+1][1],lon = route[i+1][0],id = route[i+1][2])
+                    leftBool:bool  =  leftTurn(beforeORS,thisORS,nextORS)
+                    rightBool:bool = rightTurn(beforeORS,thisORS,nextORS)
+                    if leftBool or rightBool:
+                        searchDepth = search
+                        break
+                    
+                if blockForTurn <= i :
+                    blockForTurn = i + searchDepth
 
-                leftBool:bool  =  leftTurn(beforeORS,thisORS,nextORS)
-                rightBool:bool = rightTurn(beforeORS,thisORS,nextORS)
                 if leftBool or rightBool:
-                    name = str(graph.es.select(_source=node[2],_target=route[i+1][2])["name"][0]) 
+
+                    thisStree = str()
+                    
+                    name = str(graph.es.select(_source=route[i+searchDepth-1][2],_target=route[i+searchDepth][2])["name"][0]) 
+                        
                     if   leftBool and not rightBool:
-                        direc = "left"
+                        direc = "links"
                     elif not leftBool and rightBool:
-                        direc = "right"
+                        direc = "rechts"
                     else:
                         direc = "Error This should not occur"
-                    
+                    naming = " auf " + name if name != "None" and name is not None else ""
                     directions.append(
                         {
                             "distance": sum([tNode[3] for tNode in route[lastWayPoint:i+1]]), 
                             "duration": sum([tNode[3]/((5/18)*(tNode[4] if tNode[4] != 0 else 50)) for tNode in route[lastWayPoint:i+1]]), 
                             "type": 0 if leftBool else 1,
-                            "instruction": f"Head {direc} on {name}",
+                            "instruction": f"Biege {direc} ab {naming}" ,
                             "name": name,
                             "way_points": [
                                 lastWayPoint,

@@ -19,7 +19,7 @@ def dropdown():
                     active="exact",
                 )
                 for page in dash.page_registry.values()
-        ],
+        ] 
     )                  
 
 # the searchbar with the search field for the start and end location
@@ -51,11 +51,38 @@ def searchbar_demo():
                     width="auto",
                 ),
             dbc.Col(
-                 dbc.Button(
-                    "Route",id="route-button", color="primary", n_clicks=0,
-                    ), 
-                    width = "auto",
+            children=[
+                dbc.ButtonGroup(
+                    [
+                        dbc.Button(
+                            "Route",
+                            id="route-button",
+                            color="primary",
+                            n_clicks=0,
+                        ),
+                        dbc.DropdownMenu(
+                            label="",
+                            color="primary",
+                            align_end=True,
+                            group=True,
+                            children=[
+                                dbc.DropdownMenuItem("Optionen zur Routenberechnung", header=True),
+                                dbc.RadioItems(
+                                    options=[
+                                        {"label": "Ampelschaltung betrachten", "value": "phases"},
+                                        {"label": "Möglichst wenige Ampeln", "value": "count"},
+                                    ],
+                                    value="phases",
+                                    id="radioitems-input",
+                                    inline=False,
+                                    style = {"display": "block", "margin-left": "15px", "margin-right": "15px"},  #Aligns radio items vertically
+                                )
+                            ]
+                        ),
+                    ]
                 ),
+            ]
+        ),
             ],
             className="flex-searchbar-container"
         )
@@ -64,6 +91,7 @@ def searchbar_live():
     return  dbc.Row(
           [
             dbc.Col(
+                dbc.ButtonGroup([
                 dbc.InputGroup(
                     [
                         dbc.InputGroupText("Start"),
@@ -72,8 +100,20 @@ def searchbar_live():
                         dbc.FormFeedback("", type="valid", id="start-valid-live"),
                     ], 
                     ), 
-                    width="auto",
+                dbc.Button(
+                    children=html.A(children=[
+                            html.Img(id = "standort-picture", src=dash.get_relative_path(f"/assets/my_location.png"), height=30)]),
+                    id="standort-live",
+                    color="light",
+                    n_clicks=0,
                 ),
+                dbc.Tooltip(
+                    "aktuellen Standort als Startort wählen",
+                    target="standort-picture",
+                ),
+            ]),
+            width="auto",
+            ),
             dbc.Col(   
                 dbc.InputGroup(
                     [
@@ -86,11 +126,38 @@ def searchbar_live():
                     width="auto",
                 ),
             dbc.Col(
-                 dbc.Button(
-                    "Route",id="route-button-live", color="primary", n_clicks=0,
-                    ), 
-                    width = "auto",
+            children=[
+                dbc.ButtonGroup(
+                    [
+                        dbc.Button(
+                            "Route",
+                            id="route-button-live",
+                            color="primary",
+                            n_clicks=0,
+                        ),
+                        dbc.DropdownMenu(
+                            label="",
+                            color="primary",
+                            align_end=True,
+                            group=True,
+                            children=[
+                                dbc.DropdownMenuItem("Optionen zur Routenberechnung", header=True),
+                                dbc.RadioItems(
+                                    options=[
+                                        {"label": "Ampelschaltung betrachten", "value": "phases"},
+                                        {"label": "Möglichst wenige Ampeln", "value": "count"},
+                                    ],
+                                    value="phases",
+                                    id="radioitems-input-live",
+                                    inline=False,
+                                    style = {"display": "block", "margin-left": "15px", "margin-right": "15px"},  #Aligns radio items vertically
+                                )
+                            ]
+                        ),
+                    ]
                 ),
+            ]
+        ),
             ],
             className="flex-searchbar-container"
         )
@@ -105,7 +172,7 @@ def navbar_demo():
                 # Use row and col to control vertical alignment of logo / brand
                     dbc.Row( 
                         [
-                        dbc.NavbarBrand("Real-Time Traffic Light Map: Demo", 
+                        dbc.NavbarBrand("Demo: Traffic-Light Navigation", 
                                         style={"color": "white"},
                             ),
                         ],
@@ -139,7 +206,7 @@ def navbar_live():
                 # Use row and col to control vertical alignment of logo / brand
                     dbc.Row( 
                         [
-                        dbc.NavbarBrand("Real-Time Traffic Light Map: Live", 
+                        dbc.NavbarBrand("Live: Traffic-Light Navigation", 
                                         style={"color": "white"},
                             ),
                         ],
@@ -212,17 +279,17 @@ def control_demo():
     return dbc.Row(
         children= [
             dbc.Col(
-                dbc.Button("Prev", id = "prev-button", color="secondary", 
+                dbc.Button("Zurück", id = "prev-button", color="secondary", 
                             disabled=True),
                 width = "auto",
             ),
             dbc.Col(
                 dbc.Button("Start", id = "start-next-button", color="secondary", 
-                            disabled=True),
+                            disabled=True, n_clicks=0),
                 width = "auto",
             ),
             dbc.Col(
-                dbc.Button("Restart", id = "restart-button", color="secondary", 
+                dbc.Button("Neustart", id = "restart-button", color="secondary", 
                             disabled=True),
                 width = "auto",
             ),
@@ -232,7 +299,7 @@ def control_demo():
                                           id="speed-limit"),
                         ],
                     ), 
-                    width = "auto",
+                width = "auto",
             ),
         ],
         className="flex-container-control",
@@ -247,18 +314,13 @@ def control_live():
                             disabled=True),
                 width = "auto",
             ),
-            #dbc.Col(
-            #    dbc.Button("Gesamtroute", id = "overview-button-live", color="secondary", 
-            #                disabled=True),
-            #    width = "auto",
-            #),
             dbc.Col(
                     dbc.ListGroup([
                             dbc.ListGroupItem("Maximal erlaubte Geschwindigkeit: -", 
                                               id="speed-limit-live"),
                         ],
                     ), 
-                    width = "auto",
+                width = "auto",
             ),
         ],
        className="flex-container-control"
@@ -272,13 +334,12 @@ def control_live():
 def speed_recommendation_demo(): 
     return dbc.Row(children=
             [dbc.Col(
-                html.Div(html.P(["fahre mindestens\t",
-                        html.Span("-", style={"color": "green"}),
-                        "\tkm/h,", 
+                html.Div(html.P(["Fahre ", 
+                        html.B("- km/h"), ",",
                         html.Br(),
-                        "um\t",
+                        "um ",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                        "\tzu erreichen"], id="speed-recommendation"),
+                        " zu erreichen."], id="speed-recommendation"),
                     ),className="speed-recommendation-container",
                 ),
             dbc.Col(
@@ -287,20 +348,26 @@ def speed_recommendation_demo():
                 ],
                 className="tl-container",
                 ),
-            )],
+            ),
+            dbc.Tooltip(
+                    "Hier wird der Ampelstatus angezeigt.",
+                    target="tl-picture",
+                    id="tl-picture-tooltip",
+                    placement="right",
+                ),
+            ],
         className="flex-container-bottom",
     )
 
 def speed_recommendation_live(): 
     return dbc.Row(children=
             [dbc.Col(
-                html.Div(html.P(["fahre mindestens\t",
-                        html.Span("-", style={"color": "green"}),
-                        "\tkm/h,", 
+                html.Div(html.P(["Fahre ",
+                        html.B("- km/h"), ",",
                         html.Br(),
-                        "um\t",
+                        "um ",
                         html.Span("grün", style={"color": "green", "white-space": "pre"}),
-                        "\tzu erreichen"], id="speed-recommendation-live"),
+                        " zu erreichen."], id="speed-recommendation-live"),
                     ), className="speed-recommendation-container",
                 ),
             dbc.Col(
@@ -309,7 +376,14 @@ def speed_recommendation_live():
                 ],
                 className="tl-container",
                 ),
-            )],
+            ),
+            dbc.Tooltip(
+                    "Hier wird der Ampelstatus angezeigt.",
+                    target="tl-picture-live",
+                    id="tl-picture-tooltip-live",
+                    placement="right",
+                ),
+            ],
         className="flex-container-bottom",
     )
           
@@ -355,7 +429,7 @@ def overview_live():
 def data_demo():
     return dbc.Row([
                 dbc.Col([
-                    dcc.Store(id='map-store', data={"center": None, "zoom": None}),  # Store to keep the map zoom level
+                    dcc.Store(id="map-store", data={"center": None, "zoom": None}),  # Store to keep the map zoom level
                     dl.Map(id = "map", center=[53.549573,9.953330], zoom=10,
                     children=[
                         dl.TileLayer(),
@@ -395,19 +469,24 @@ def data_demo():
 def data_live():
     return dbc.Row([
                 dbc.Col([
-                    dcc.Store(id='map-store-live', data={"center": [53.549573,9.953330], "zoom": 10}),  # Store to keep the map zoom level
-                    dcc.Store(id='center-store-live', data=None),  # Store to keep the map zoom level
-                    dl.Map(id = "map-live", center=[53.549573,9.953330], zoom=10,
+                    dcc.Store(id="map-store-live", data={"center": [53.549573,9.953330], "zoom": 10}),  # Store to keep the map zoom level
+                    dcc.Store(id="center-store-live", data=None),  # Store to keep the map zoom level
+                    dl.Map(id = "map-live", center=[53.549573,9.953330], zoom=10, 
+                           #zoomControl = False, scrollWheelZoom = False, doubleClickZoom = False,
+                           #touchZoom = False, dragging = False,
                     children=[
                         dl.TileLayer(),
                         dl.GeoJSON(id="route-layer-live", data=None, options={"color": "blue"}, zoomToBounds=True),
                         dl.LayerGroup(id="start-end-layer-live"),
                         dl.LayerGroup(id="tl-route-layer-live"),
-                        dl.LocateControl(id="locate-control-live", locateOptions={'enableHighAccuracy': True, 
+                        dl.LocateControl(position="topleft",id="locate-control-live", 
+                                         cacheLocation = True, returnToPrevBounds = True,
+                                locateOptions={"enableHighAccuracy": True, 
                                 "setView": True, 
                                 "watch": True, 
-                                "maxZoom": 17,
-                                }),
+                                "minZoom": 17,
+                                },
+                                ),
                         dl.ScaleControl(position="bottomleft", imperial=False), #shows the scala 
                         dl.FullScreenControl()
                         ], 
@@ -449,16 +528,9 @@ def data_live():
                     id="start-freigabe-modal",
                     is_open=False,
                 ),
-                # Hidden button for programmatic clicking
-                #html.Button('Get GPS', id='get-gps-button', n_clicks=0), #style={'display': 'none'}),
-                # Store components to store latitude and longitude
-                #html.Div(children="hello",id='store-latitude',),#style={'display': 'none'}),
-                #html.Div(id='store-longitude',),#style={'display': 'none'}), 
-                #html.Div(id="get-gps"),
             ],
             className="left-container", 
         )
-
 
 # components only for start site ----------------------------------------------
 
@@ -473,13 +545,13 @@ def info():
             html.P([
         "Ziel des Projektes ist es, die Daten des Transparenzportal Hamburgs zur Optimierung von Navigationen zu verwenden. ", 
         "Dabei wird die Navigation von Autos betrachtet. ",
-        "Indem eine Vorhersage der Ampelschaltung ermittelt wird, wird eine Route berechnet, die eine optimale Strecke unter Berücksichtigung der Ampel-schaltung ist. ",
+        "Indem eine Vorhersage der Ampelschaltung ermittelt wird, wird eine Route berechnet, die eine optimale Strecke unter Berücksichtigung der Ampelschaltung ist. ",
         "Als Ausgang werden die letzten aktuellen Daten der Ampeln verwendet und diese für die Berechnung der Vorhersage verwendet. ",
         "Durch eine graphische App-Oberfläche ist eine geeignete Visualisierung vorhanden für den Benutzer.",
         html.Br(),
         html.Br(),
         "Außerdem wird der aktuelle Standort des Nutzers live angezeigt und bei Abwegen der Route, registriert das Programm dies und berechnet anhand der aktuellen Standortdaten eine neue Route. ",
-        "Zusätzliche Informationen, wie von anderen Navigations-anbieter bekannt, wie Geschwindigkeit, ungefähre Gesamtzeit der Strecke und Gesamtentfernung werden dem Nutzer angezeigt für die jeweilige Route."]
+        "Zusätzliche Informationen, wie von anderen Navigationsanbieter bekannt, wie Geschwindigkeit und Gesamtentfernung werden dem Nutzer angezeigt für die jeweilige Route."] #ungefähre Gesamtzeit der Strecke
     ), className="bg-primary bg-opacity-10 text-dark rounded small p-2 info-container-left ")
 
 def contributors():
@@ -504,7 +576,13 @@ def contributors():
                 html.Br(),
                 "Harry Zick",
                 html.Br(),
-                html.Br(),"Großer Dank geht raus an "]
+                html.Br(),"Großer Dank geht raus an: ",
+                html.Br(),
+                "Prof. Dr. Matthias Rarey",
+                html.Br(),
+                "Ole Berg",
+                html.Br(),
+                "Tobias Harren"]
     ), 
     className="float-end bg-primary bg-opacity-10 text-dark rounded small p-2 info-container-right")
  
@@ -525,9 +603,9 @@ def card_left():
                             html.H4("Demo", className="card-title"),
                             html.P(
                                 "Navigation wird nicht mit Live-Daten verfolgt. "
-                                "Die einzelnen Schritte der Navigation kann einzeln durchgegangen werden. "
+                                "Die einzelnen Schritte der Navigation können einzeln durchgegangen werden. "
                                 "Nicht geeignet für eine richtige Navigation. "
-                                "Dient zur Anschaulichung des Systems.",
+                                "Dient zur Veranschaulichung des Systems.",
                                 className="card-text",
                             ),
                         ],
@@ -581,5 +659,3 @@ def components_startseite():
     className="startseite-components-container",
     )
    
-    
-

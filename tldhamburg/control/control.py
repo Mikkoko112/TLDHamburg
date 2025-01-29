@@ -7,29 +7,32 @@ interact with routeplanning featchers of the control. Requests and
 calulations for approximated speeds are kept ins this class.
 
 Autor: Helge Rasmus Steen
-    - _casperEval -> made py Casper
+    - _dynamicAnalysis -> made py Casper
 
 Relevant Data: 
     The Graph file is needed.
 
 '''
-from tldhamburg.control.routeplanning import fetchRoutes as fetcher
-from tldhamburg.control.evaluation  import evaluation
-from tldhamburg.control.evaluation import trafficlightapprox as tlapp
+from tldhamburg.control.routeplanning import fetchRoutes        as fetcher
+from tldhamburg.control.evaluation    import evaluation
+from tldhamburg.control.evaluation    import trafficlightapprox as tlapp
 from tldhamburg.control.routeplanning import routing 
-from tldhamburg.backend.DBMaintainer import DBMaintainer
+from tldhamburg.backend.DBMaintainer  import DBMaintainer
+from tldhamburg.backend.DataFetcher   import DataFetcher
+from tldhamburg.backend.Things        import Things
+
 import sqlite3
 
 import igraph
 import json
-from datetime import datetime as dtime
 import time
 import datetime
+from datetime import datetime as dtime
+from geopy    import distance
 from math import sqrt
-from tldhamburg.backend.DataFetcher import DataFetcher
-from tldhamburg.backend.Things import Things
 
 class RoutePlanner:
+    
     '''
     This class allows the frontend to generate routes wih traffic light data
     and get the approximated future phasedata for primary signals.
@@ -47,52 +50,40 @@ class RoutePlanner:
         Output
             -> The output is the distance of the two points. 
 
-        The Distance is measured in coordinate degree and not the 
-        metric system. This is done to make quick distance calculations that 
-        only need relative distances to other point pairs. Moreover this function
-        uses the euclidean distance because we only observe Hamburg and this 
-
-
+        The Distance is measured in meters. 
         '''
-        coord1 = self.routeData["features"][0]["geometry"]["coordinates"][point1ID]
-        coord2 = self.routeData["features"][0]["geometry"]["coordinates"][point2ID]
-        return sqrt(coord1[0]*coord2[0]+coord1[1]*coord2[1])
+        coord1  = self.routeData["features"][0]["geometry"]["coordinates"][point1ID]
+        coord2  = self.routeData["features"][0]["geometry"]["coordinates"][point2ID]
+        
+        
+        distSwa = distance.distance(coord1[::-1],coord2[::-1]).m
+        
+        
+        return distSwa
+        
 
-
-    def _casperEval(self,trafficLightsId:str):
+    def _dynamicAnalysis(self,trafficLightsId:str):
         status,nextPhase,nextPhaseTime,rapidUpdate = 0,0,0,False
         
        
-        id = int(trafficLightsId)
-        
-        output=tlapp.TrafficLightApprox.approx_next_switch(id)
+        id     = int(trafficLightsId)
+        output = tlapp.TrafficLightApprox.approx_next_switch(id)
         
         if output is None:
             return trafficLightsId,9,9,0,False
-
         switchTime,nextPhase = output
-        status="green" if nextPhase=="red" else "red"
-        zeitAktuell=dtime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
-        nextPhaseTime=(switchTime-zeitAktuell).total_seconds()
+        
+
+        status = "green" if nextPhase=="red" else "red"
+        
+                
+        zeitAktuell   = dtime.fromtimestamp(time.time(),tz=datetime.timezone.utc)
+        nextPhaseTime = (switchTime-zeitAktuell).total_seconds()
+        
+        
         if nextPhaseTime < 0: 
             return trafficLightsId,9,9,0,False
         
-        return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
-        
-        #why is this?
-        thing=Things([id])
-        zyklusDaten=thing.get_cycle_second_observations(2,True)[id]
-        schaltungen=thing.get_primary_signal_observations(8,True)[id]
-        tStart=dtime.fromisoformat(zyklusDaten[1][0])
-        tEnd=dtime.fromisoformat(zyklusDaten[0][0])
-        zyklusLänge=tEnd-tStart
-        eventsInCycle=[(dtime.fromisoformat(zeit),state) for zeit,state in schaltungen if tStart<=dtime.fromisoformat(zeit)<=tEnd and state in [1,3]]
-        
-        zeitGrün=(zeitAktuell-[dtime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==3][0])%zyklusLänge
-        zeitRot=(zeitAktuell-[dtime.fromisoformat(schaltung[0]) for schaltung in schaltungen if schaltung[1]==1][0])%zyklusLänge
-        status="grün" if zeitGrün>zeitRot else "rot"
-        nextPhase="rot" if status=="grün" else "grün"
-        nextPhaseTime=min(zeitGrün,zeitRot)
         return (trafficLightsId,status,nextPhase,nextPhaseTime,rapidUpdate)
 
     def _calcSpeed(self,trafficLightsId:str,routePoint:int)->float:
@@ -111,7 +102,9 @@ class RoutePlanner:
         This function does not take into account that there could be other 
         than the given maximum speed. 
         '''
-        
+        if routePoint > len(self.routeData["features"][0]["geometry"]["coordinates"]):
+            print("Position if greater than the length of the route.")
+
         def getTrafficLightIndex(routeData,trafficLightsId):
 
             trafficLightPos = -1
@@ -148,7 +141,7 @@ class RoutePlanner:
 
         
 
-        id = int(trafficLightsId)
+        id  = int(trafficLightsId)
         gen = tlapp.TrafficLightApprox.approx_next_switch_generator(id)
         
         
@@ -233,13 +226,51 @@ class RoutePlanner:
             
             return out
         elif isinstance(trafficLightsId,str):
-            tfLID,status,nextPhase,nextPhaseTime,rapidUpdate = self._casperEval(trafficLightsId)
+            if trafficLightsId in self.notWorkingPrimarySignals:
+                print(self.notWorkingPrimarySignals)
+                return 9,9,0,False,-1
             
+            tfLID,status,nextPhase,nextPhaseTime,rapidUpdate = self._dynamicAnalysis(trafficLightsId)
+            
+
+            
+            #This generate a dict, that holds the last self.lookBackCount amount
+            #of calls this is done to prevent a single 9 status to put the 
+            #traffic light on the black list.
+            if not trafficLightsId in self.lastResults:
+                self.lastResults[trafficLightsId] = {
+                    "results":[],
+                    "index":0
+                }
+            else:
+                if len(self.lastResults[trafficLightsId]["results"]) < self.lookBackCount:
+                    self.lastResults[trafficLightsId]["results"].append(status)
+                else:
+
+                    self.lastResults[trafficLightsId]["results"][
+                        self.lastResults[trafficLightsId]["index"]
+                    ] = status
+
+                    self.lastResults[trafficLightsId]["index"] += 1
+                    self.lastResults[trafficLightsId][
+                        "index"] = self.lastResults[trafficLightsId][
+                        "index"]%self.lookBackCount
+
+            #print(tfLID,status,nextPhase,nextPhaseTime,rapidUpdate)
+
+            if (not trafficLightsId in self.notWorkingPrimarySignals  and 
+                len(self.lastResults[trafficLightsId]["results"]) == self.lookBackCount and 
+                all([ 
+                     oldStatus == 9   for oldStatus in self.lastResults[trafficLightsId]["results"]
+                     ])):
+                self.notWorkingPrimarySignals.append(trafficLightsId)
+
             if currentPositionID == -1 or status == 9:
                 return status,nextPhase,nextPhaseTime,rapidUpdate,speed
             else:
                 speed = self._calcSpeed(trafficLightsId,currentPositionID)
                 #print(f"--- {time.time()-start_time} s---")
+
                 return status,nextPhase,nextPhaseTime,rapidUpdate,speed
                 
             
@@ -289,8 +320,12 @@ class RoutePlanner:
         '''
         
         route = routeList.copy()
-        #value = evaluation.getMinAvgRedTime(routeList)
-        value = evaluation.getMinTrafficLights(routeList)
+        
+        if self.analysisTool == "count":
+            value = evaluation.getMinTrafficLights(routeList)
+        else: 
+            value = evaluation.getMinAvgRedTime(routeList)
+        
         #removes every other route and preserve the structure of a GeoJson file.
         route["features"] = [routeList["features"][value]]
         return route
@@ -304,7 +339,11 @@ class RoutePlanner:
                 "max_speed" : int                      This is the max speed for
                     speed in km/h evaluation _calcSpeed(). If this is not in the 
                     dict the default value is 50 km/h.
-            
+                "static_analysis" : str                 This is the function 
+                    the user choses for the first static route evaluation.
+                    "count" return the route with the least traffic light count.
+                    "phases" returns a route with the least approximates red time.
+                    The default is "phases"
             }
         Output
             -> The output is a GeoJson file with a single route
@@ -315,27 +354,38 @@ class RoutePlanner:
             self.maxSpeed  = int(options["max_speed"]) 
         else: 
             self.maxSpeed = None
+        self.notWorkingPrimarySignals = []
+        self.lastResults = {}
+
+
+        self.analysisTool = "phases"
+
+        if "static_analysis" in options.keys():
+            self.analysisTool  = options["static_analysis"] 
         
+        
+
+
         data               = self._getData(options["coordinates"])
         
-        startTempTime = time.time()
+
         trafficLightRoutes = routing.getTrafficLightsRoute(data)
         
         self.routeData     = self._getBestRoute(trafficLightRoutes)
-        
+        self.lookBackCount = 5
         self.safeRoute()
     
     def _initMapData(self):
         '''
         This sets up the graph data.
         '''
-        print("Loading Mapdata")
+        #print("Loading Mapdata")
         start_time = time.time()
         with open("tldhamburg/control/optionsfile.json","r") as file:
             options = json.load(file)
     
         self.graph = igraph.load("tldhamburg/control/{}".format(options["importantData"]["GraphData"]))
-        print(f"--- {time.time()-start_time} s---")
+        #print(f"--- {time.time()-start_time} s---")
 
     def __init__(self,path:str):
         self.path = path

@@ -1,34 +1,39 @@
 import dash
-from dash import html, no_update, dcc, callback, ctx
-from dash.dependencies import Input, Output, State
+from dash import no_update, dcc, callback, ctx
+from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 
+# import components for the page
 from .components import headline
 from .components import components_startseite
 
-
+# register_page signalizes dash that it is a page for the app
 dash.register_page(__name__,
-                    path='/',
-                    title='Startseite',
-                    name='Startseite')
-
-#external CSS stylesheets
-external_stylesheets = [
-    dbc.themes.BOOTSTRAP,
-]
+                    path="/",
+                    title="Startseite",
+                    name="Startseite")
 
 # Layout definition
-def layout(**kwargs):
+def layout():
    return dbc.Container(children = [
-    dcc.Location(id='url', refresh=True),  
-    headline(), # Include the headline
-    components_startseite(), # Include cards and information texts
+    # Update and track the current window.location object
+    dcc.Location(id="url", refresh=True),  
+    # Include the headline
+    headline(), 
+    # Include cards and information texts
+    components_startseite(), 
    ],
     fluid = True, # remove the margins
     className="startseite-container", 
 )
 
-# Decide to navigate to page demo or live
+"""
+Decide to navigate to page demo or page live.
+Input: the number of clicks of the left or right card
+Output: The card which was clicked will have a lower opacity. 
+If clicked twice in a row at the same card the page will change to the demo 
+or live page.
+"""
 @callback(
     Output("url", "pathname"),
     Output("img-right-card","style"),

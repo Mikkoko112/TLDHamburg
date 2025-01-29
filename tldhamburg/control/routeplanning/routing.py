@@ -1,4 +1,16 @@
 #!/usr/bin/env Python3
+'''
+This module is used to map the primary signals to the respective routes.
+The main function is "getTrafficLightsRoute".
+
+This modules relies heavily on the presents of the generated data and will
+not work if there is any corrupted data.  
+
+Author: Helge Rasmus Steen
+
+'''
+
+
 import requests
 import json
 import time
@@ -9,6 +21,21 @@ modif = 1000
 testName = "6585"
 
 def inbound(bound,coord:list)->bool: #vllt schneller, wenn Gegensatzt getestet
+    '''
+    Input
+        <- bound = [[...],[...]] This is the bounding box one wants to check for.
+        <- coord = [...,...] This is the coord one wants to check for.
+    
+    Output
+        -> inBound = ... The output is a bool that is true if the coord is in
+                            the bounding box and false if its is not.
+
+
+    The order of [lat,log] is not relevant as long as the bound and the 
+    coord adhere to the same order. 
+    '''
+
+
     assert (len(bound) == 2 and len(coord) == 2 
                             and all([len(b) == 2 for b in bound]))
     
@@ -22,10 +49,26 @@ def inbound(bound,coord:list)->bool: #vllt schneller, wenn Gegensatzt getestet
     return xMin <= coord[0] <= xMax and yMin <= coord[1] <= yMax
 
 def getNearestNode(mainNode:list,nodeList:list)->list:
+    '''
+    Input
+        <- mainNode = [...,...] This is the main node to check for distance
+        <- nodeLust = [[...,...],...] This is the node list to check through
+    
+    Output 
+        -> nearestNode = [...,...] This is the nearest node tho the main node
+                                    If the main node is in the list, it will
+                                    return the main node.
+
+    This function uses the euclidean norm. This assumption is made to reduce
+    calculation time. The euclidean norm work in this subspace of the non 
+    euclidean world because we only look at the relative spaces in hamburg.
+    This projection to a euclidean norm can be seen as the projection of a
+    submanifold. 
+    '''
     nearestDist  = inf
     nearestNode = []
     for node in nodeList:
-        dist = sqrt((node[0]-mainNode[0]**2 )+(node[1]-mainNode[1]**2 ))
+        dist = sqrt(((node[0]-mainNode[0])**2 )+((node[1]-mainNode[1])**2 ))
         if dist < nearestDist:
             nearestDist = dist
             nearestNode = node
@@ -33,6 +76,23 @@ def getNearestNode(mainNode:list,nodeList:list)->list:
     return nearestNode
 
 def sortNodeToConjunction(pureRoute:list,conjunctionDict)->dict:
+    '''
+    Input
+        <- pureRoute = [[...,...],...] This is the route represented as a list
+                                        of coordinates. It is in chronological 
+                                        Order.
+        <- conjunctionDict = {}        This is the conjunction dict. It contains
+                                        the bounding box of every conjunction.
+    Output
+        -> out = {
+                conjunctionName: [
+                    [int, [...,...]],
+                    ...
+                ]
+            } The output is a dict keys for every hit conjunction. It contains
+                a list with every coordinate and index of this coordinate in the
+                route.
+    '''
     out = {}
     for i,wayPoint in enumerate(pureRoute):
         for name,data in conjunctionDict.items():
@@ -46,6 +106,17 @@ def sortNodeToConjunction(pureRoute:list,conjunctionDict)->dict:
     return out
 
 def generateVectorPoint(pointOut:list,pointIn:list): #Vektor zeigt zum point!
+    '''
+    Input
+        <- pointOut = [...,...] This is the point outside of the conjunction
+        <- pointIn  = [...,...] This is the point inside  of the conjunction
+    
+    Output
+        -> vector   = [...,...] This is the vector from outside in.
+
+    This vector points from the outside of the conjunction inside and 
+    is normed.
+    '''
     vec = [pointIn[0]-pointOut[0],pointIn[1]-pointOut[1]]
     scaleVec = sqrt(vec[0]**2+vec[1]**2)
     if scaleVec == 0:
@@ -53,6 +124,16 @@ def generateVectorPoint(pointOut:list,pointIn:list): #Vektor zeigt zum point!
     return [vec[0]/scaleVec,vec[1]/scaleVec]
 
 def getCentroid(coordList:list)->list:
+    '''
+    Input
+        <- coordList = [[...,...],...] This is the list of coords that is averaged
+
+    Output
+        -> centroid  = [...,...]        This is the mean coordinate generated
+    
+    '''
+
+
     xmean,ymean = 0,0
     for item in coordList:
         xmean += item[0]
@@ -63,6 +144,22 @@ def getCentroid(coordList:list)->list:
     return [xmean,ymean]
 
 def getDegree(vec:list)->float:
+    '''
+    Input
+        <- vec = [...,...]      This is a vector. I can have more then 2 elements.
+                                This function only uses the first two indices.
+
+    Output
+        -> degree = ...         This is the degree between vec and the standard
+                                vector [0,1] in radians.
+    
+    
+    This function uses the cross product to allow the full radius span.
+    Otherwise the degree is not rotation affine and is caped between 
+    [0,pi].
+    '''
+
+
     def dotProd (vec0,vec1):
         return sum(v0*v1 for v0,v1 in zip(vec0,vec1))
 
@@ -81,9 +178,31 @@ def getDegree(vec:list)->float:
 
 
 def inDegreeOffset(inputDegree, offsetDegree):
+    '''
+    Input
+        <- inputDegree = ...    This is the degree of the route to the standard
+                                vector. It was calculated in getDegree.
+                                The input should be in degree.
+        <- offesetDegree = ...  This is the degree of the primary signal
+                                from the primary signal
+    
+    Output
+        -> inBetween   = ...   This is a bool that states if the inputDegree
+                                is in the interval of the offsetDegree
+
+        -> max_distance = ...  This is the distance between the inputDegree 
+                                and offsetDegree.
+
+    The offset is set to 65° to grantee that the hit of a primary signal. 
+    The evaluation of the minimal error selects the right direction. 
+                                
+    '''
+
+
+
     def angleDifference(theta1, theta2):
         """
-        Berechnet den kürzesten Abstand (zyklisch) zwischen zwei Winkeln in Grad.
+        Calcualtes the distance between two angles
         """
         diff = (theta2 - theta1) % 360
         
@@ -112,14 +231,51 @@ def inDegreeOffset(inputDegree, offsetDegree):
     return inBetween, max_distance
     
 
-def roundValues(value:float)->list: #bad naming in relation to other functions
+def roundValues(value:float)->list: 
+    '''
+    Input
+        <- value = ... this is the value that is to be round.
+
+    Output
+        -> roundedValue = ... this is the value rounded to the modif-st
+                                decimal place
+
+    This function is equivalent to the round(value,modif) function.
+    
+    '''
     return (round(value*modif)/modif)
 
 def lanesOverlap(primarydegIn,primarydegOut,inDeg,outDeg)->bool:
+    '''
+    Input
+        <- primarydegIn  = ... This is the drive in  degree of the primary signal
+        <- primarydegOut = ... This is the drive out degree of the primary signal
+        <- inDeg  = ... This is the drive  in degree of the route
+        <- outDeg = ... This is the drive out degree of the route 
+    
+    Output
+        -> checkResults = [[bool,float],[bool,float]] This is a list of two
+                                                        inDegreeOffset calls.
+    
+    '''
+
+
     return [inDegreeOffset(roundValues(inDeg) ,primarydegIn ),
             inDegreeOffset(roundValues(outDeg),primarydegOut)]
 
-def getBestPrimarySignal(possibleSignals,conjId:str="0")->str:
+def getBestPrimarySignal(possibleSignals)->str:
+    '''
+    Input
+        <- possibleSignals = [[primarySignalName,
+                                 driveInError,
+                                driveOutError],
+                             ...] These are the results of every primary signals
+                                    with the respective errors. 
+    Output
+        -> outPrimarySignal = ... This is the best primary signal.
+    '''
+    
+    
     smallestError = inf
     outPrimarySignal = ""
     
@@ -127,30 +283,45 @@ def getBestPrimarySignal(possibleSignals,conjId:str="0")->str:
     for i,item in enumerate(possibleSignals):
         
         values = item[1]+item[2]
-        '''if conjId == testName:
-            print(item[0],values)'''
         if values < smallestError:
             outPrimarySignal = item[0]
             smallestError = values
     
-    #if conjId == testName:
-    #    print(outPrimarySignal,smallestError)
 
     return outPrimarySignal
 
 def getRouteTrafficLights(route:list, conjFile:dict,conjList:list,vectorization:dict)->dict:
+    '''
+    Input
+        <- route = [...]    This is the pure route with only coordinates
+        <- conjFile = {...} This is the conjunction dict file. 
+        <- conjList = [...] This is the list of conjunctions with relevant
+                            nodes and indices
+        <- vectorization = {...} This is the vectorization data.
+    
+    Output
+        -> trafficLights = {...} This is a dict with conjunction names with
+                                    the key being the conjunction id and 
+                                    the value being the relevant primary signal
+
+    '''
     trafficLights,debugVector = dict(),[]
+    #This lists every hit conjunction.
     for name,data in conjList.items():
         pointList    = [dat[1] for dat in data]
         pointIndex   = [dat[0] for dat in data]
         allPossiblePrimarysignal = []
+        #Iterates over every possible primary signals in the conjunctions
         for primarySignalName in conjFile[name]['trafficLights']:
             
             meanofPoints =  vectorization[primarySignalName][1]
-
-            vecIn  = generateVectorPoint(meanofPoints,route[pointIndex[ 0]-1]) 
-            vecOut = generateVectorPoint(meanofPoints,route[pointIndex[-1]+1]) 
-
+            try:
+                vecIn  = generateVectorPoint(meanofPoints,route[pointIndex[ 0]-1]) 
+                vecOut = generateVectorPoint(meanofPoints,route[pointIndex[-1]+1]) 
+            except IndexError:
+                #This needs to be done to catch the cases in which the traffic 
+                #light is directly on the beginning or end of the route
+                continue
             degIn  = degrees(getDegree(vecIn))
             degOut = degrees(getDegree(vecOut))
 
@@ -189,26 +360,47 @@ def getRouteTrafficLights(route:list, conjFile:dict,conjList:list,vectorization:
                 
     return trafficLights
 
-def generateGeoJsonData(trafficLights:dict,conjList:dict)->dict:
-    def getPointData(conjNodes:list)->list: #needs Change
-        return conjNodes[0]
+def generateGeoJsonData(trafficLights:dict,conjList:dict,vectorData:dict)->dict:
+    '''
+    Input
+        <- trafficLights = {...}    This is a dict with conjunctions as keys
+                                    and the value being the relevant primary
+                                    signal
+        <- conjList      = [...]   This is the list of the relevant conjunctions.
+        <- vectorData    = {...}   This is the vector data.
+    
+
+    Output
+        -> primarySignalData = {...} This is the property section of the geojson
+                                        file
+    '''
+    def getPointData(trafficLightPos,conjNodes:list)->list: 
+        coordsOfConjunctionNodes  = [node[1] for node in conjNodes]
+        nearestRouteNode          = getNearestNode(trafficLightPos,coordsOfConjunctionNodes)
+        nearestRouteNodeWithIndex = [node for node in conjNodes 
+                                     if node[1] == nearestRouteNode][0]
+        return nearestRouteNodeWithIndex
 
     out = {
         "type":"FeatureCollection",
     }
     features = []
     i=1
+
     for conj,traffic in trafficLights.items():
+        
+        conjunctionDataPoint = getPointData(vectorData[traffic][1],conjList[conj])
+
         element =         {
             "type": "Feature",
             "geometry": {
                 "type": "Point",
-                "coordinates": getPointData(conjList[conj])[1]
+                "coordinates": conjunctionDataPoint[1]
             },
             "properties": {
                 "id": "{}".format(conj),
                 "object": "primary_signal",
-                "way-point": getPointData(conjList[conj])[0]
+                "way-point": conjunctionDataPoint[0]
             }
         }
         features.append(element)
@@ -218,9 +410,29 @@ def generateGeoJsonData(trafficLights:dict,conjList:dict)->dict:
     return out
 
 def purifyRoute(route:dict,index:int=0)->list:
+    '''
+    Input
+        <- route = ... This is a dict in GeoJson file that represents the route
+        <- Index = ... This is the index of the route one wants the coordinates too
+
+    Output
+        -> coordinateRoute = [[...,...],...] This is the list of coordinates 
+                                                representing the route.
+    
+    '''
     return list(route['features'][index]['geometry']['coordinates'])
 
 def getTrafficLightsRoute(routeList:dict,test:bool=False)->dict:
+    '''
+    Input
+        <- routeList = {...} This is the route as a geojson dict.
+    
+    Output
+        -> routeList = {...} This is the route as a geojson dict with primary 
+                                signal information.
+    
+    '''
+
     with open("tldhamburg/control/data/conjunctionDict.json","r") as file:
         conjDict = json.load(file)
     
@@ -242,7 +454,7 @@ def getTrafficLightsRoute(routeList:dict,test:bool=False)->dict:
                 json.dump(dic,file,indent=4)
             exit(1)
         
-        jsonData = generateGeoJsonData(trafficLightsList,conjList)
+        jsonData = generateGeoJsonData(trafficLightsList,conjList,vectorization)
         
         routeList["features"][i]["properties"]["trafficlights"] = jsonData
         

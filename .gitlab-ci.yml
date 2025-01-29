@@ -33,6 +33,28 @@ unit-test-backend-job:
     - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   
+unit-test-control-job:
+  stage: control
+  image: python:3.12-slim
+  cache:
+    paths:
+      - .cache/pip 
+  script:
+    - source venv/bin/activate
+    - python test/testDataPresent.py
+    - python test/testfetchAreas.py
+    - python test/testRouting.py
+    - python test/testSquareCount.py
+    - cd tldhamburg/control/scripts/
+    - python testVectorGenerator.py
+    - cd ../../../
+    
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  
+
+
 unit-test-frontend-job:
   stage: frontend
   image: python:3.12-slim

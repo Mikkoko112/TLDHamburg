@@ -8,16 +8,29 @@ from .trafficlightapprox import TrafficLightApprox
 
 
 def getMinTrafficLights(routeListDict: dict) -> int:
-    """Find the route with the least number of traffic lights.
-    This is a testing-prototype and shoudl not be used."""
+    """
+    Input
+        <- routeListDict = ...          This is the list of Routes in form of a
+                GeoJson file.
+
+
+    Output
+        -> idx = int                    This is an index for the route dict.
+
+    This function will return the index of the route with the least traffic
+    lights
+    """
     routeList = routeListDict["features"]
-    minCount, idx = 0, 0
+    minCount, idx = -1, 0
+    if len(routeList) == 1: 
+        return 0
+    
     for i, route in enumerate(routeList):
         trafficLights = route["properties"]["trafficlights"]["features"]
-        if minCount == 0:
+        if minCount == -1:
             minCount = len(trafficLights)
             idx = i
-        if minCount < len(trafficLights):
+        if minCount > len(trafficLights):
             minCount = len(trafficLights)
             idx = i
     return idx
@@ -36,29 +49,28 @@ def getMinAvgRedTime(routeListDict: dict, support_points: int = 20) -> int:
     Returns:
         If a route with estimated wait-time smaller than infinity can be found:
             int: index of the route with lowest estimated wait time
-    Raises:
-        RuntimeError: if a route with wait-time less than infinity cannot be found
+        If this is not the case, the getMinTrafficLights function is called.
     """
     routeList = routeListDict["features"]
     minIndex = -1
     minWeight = float("inf")
-
+    if len(routeList) == 1: 
+        return 0
+    
     for i, route in enumerate(routeList):
         trafficLights = route["properties"]["trafficlights"]["features"]
         routeWeight = 0
+
         for light in trafficLights:
-            trafficLightsId = int(light["properties"]["id"])
-            fetcher = DataFetcher()
-            fetcher.fetch_data(
-                params={"$filter": f"@iot.id eq {trafficLightsId}", "$expand": "Thing"}
-            )
-            if fetcher.get_data() is None:
-                continue
+            
             try:
-                id = fetcher.get_data()[0]["Thing"]["@iot.id"]
+                
                 # green, red = TrafficLightApprox.mean_light_phases(light_id, support_points)
-                meanOutput = TrafficLightApprox.mean_light_phases(id, support_points)
+                trafficLightID = int(light["properties"]["id"])
+
+                meanOutput = TrafficLightApprox.mean_light_phases(trafficLightID, support_points)
                 if meanOutput is None:
+                    
                     continue
                 green, red = meanOutput[0], meanOutput[1]
 
@@ -77,8 +89,10 @@ def getMinAvgRedTime(routeListDict: dict, support_points: int = 20) -> int:
             minWeight = routeWeight
     # if minIndex is still -1 here, then something went wrong.
     if minIndex == -1:
-        raise RuntimeError(
-            f"getMinAvgRedTime({routeList}, {support_points}) error:\n"
-            "All routes in the input dictionary have infinite wait-time estimates."
-        )
+        return getMinTrafficLights(routeListDict)
+        # raise RuntimeError(
+        #     f"getMinAvgRedTime({routeList}, {support_points}) error:\n"
+        #     "All routes in the input dictionary have infinite wait-time estimates."
+        # )
+    
     return minIndex

@@ -2,8 +2,8 @@ from tldhamburg.control.control import RoutePlanner
 import json
 import time
 testDict = {
-    "coordinates":[[9.9885268,53.5573318],
-                   [10.085635385830994,53.558576099999996 ]],
+    "coordinates":[[9.9853126,53.5678859],
+                   [10.0084222,53.5524079 ]],
     "max_speed"  : 50,
     "static_analysis" : "phases"
 }

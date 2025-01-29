@@ -356,7 +356,7 @@ def getRouteTrafficLights(route:list, conjFile:dict,conjList:list,vectorization:
                                                 check[1][1]])
                 #break
         if len(allPossiblePrimarysignal) > 0:
-            trafficLights[name] = getBestPrimarySignal(allPossiblePrimarysignal,name)
+            trafficLights[name] = getBestPrimarySignal(allPossiblePrimarysignal)
                 
     return trafficLights
 

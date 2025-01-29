@@ -29,7 +29,7 @@ import time
 import datetime
 from datetime import datetime as dtime
 from geopy    import distance
-from math import sqrt
+from math     import sqrt
 
 class RoutePlanner:
     
@@ -133,7 +133,9 @@ class RoutePlanner:
             
             sumOfSpeeds = []
             for i in range(routePoint,trafficLightPos):
+
                 allSpeeds = self.routeData["features"][0]["properties"]["speeds"]
+                
                 for speed in allSpeeds:
                     if speed["way_points"][0] <= i <= speed["way_points"][1]:
                         sumOfSpeeds.append(speed["maxspeed"])

@@ -314,11 +314,12 @@ def getRouteTrafficLights(route:list, conjFile:dict,conjList:list,vectorization:
         #Iterates over every possible primary signals in the conjunctions
         for primarySignalName in conjFile[name]['trafficLights']:
             
-            meanofPoints =  vectorization[primarySignalName][1]
             try:
+                meanofPoints =  vectorization[primarySignalName][1]
+            
                 vecIn  = generateVectorPoint(meanofPoints,route[pointIndex[ 0]-1]) 
                 vecOut = generateVectorPoint(meanofPoints,route[pointIndex[-1]+1]) 
-            except IndexError:
+            except (IndexError,KeyError):
                 #This needs to be done to catch the cases in which the traffic 
                 #light is directly on the beginning or end of the route
                 continue

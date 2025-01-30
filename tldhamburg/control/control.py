@@ -355,12 +355,12 @@ class RoutePlanner:
         if "max_speed" in options.keys():
             self.maxSpeed  = int(options["max_speed"]) 
         else: 
-            self.maxSpeed = None
+            self.maxSpeed  = None
         self.notWorkingPrimarySignals = []
-        self.lastResults = {}
+        self.lastResults   = {}
 
 
-        self.analysisTool = "phases"
+        self.analysisTool  = "phases"
 
         if "static_analysis" in options.keys():
             self.analysisTool  = options["static_analysis"] 

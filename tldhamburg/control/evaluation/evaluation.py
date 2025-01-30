@@ -49,8 +49,7 @@ def getMinAvgRedTime(routeListDict: dict, support_points: int = 20) -> int:
     Returns:
         If a route with estimated wait-time smaller than infinity can be found:
             int: index of the route with lowest estimated wait time
-    Raises:
-        RuntimeError: if a route with wait-time less than infinity cannot be found
+        If this is not the case, the getMinTrafficLights function is called.
     """
     routeList = routeListDict["features"]
     minIndex = -1

@@ -472,6 +472,8 @@ def data_live():
                     dcc.Store(id="map-store-live", data={"center": [53.549573,9.953330], "zoom": 10}),  # Store to keep the map zoom level
                     dcc.Store(id="center-store-live", data=None),  # Store to keep the map zoom level
                     dl.Map(id = "map-live", center=[53.549573,9.953330], zoom=10, 
+                           # to prevent user to zoom in or drag the map use the 
+                           # lines which are commented out:  
                            #zoomControl = False, scrollWheelZoom = False, doubleClickZoom = False,
                            #touchZoom = False, dragging = False,
                     children=[
@@ -479,9 +481,6 @@ def data_live():
                         dl.GeoJSON(id="route-layer-live", data=None, options={"color": "blue"}, zoomToBounds=True),
                         dl.LayerGroup(id="start-end-layer-live"),
                         dl.LayerGroup(id="tl-route-layer-live"),
-
-                        dl.Circle(id="position-live", center=(0,0), radius=10),  #nur für Präsentation
-                        
                         dl.LocateControl(position="topleft",id="locate-control-live", 
                                          cacheLocation = True, returnToPrevBounds = True,
                                 locateOptions={"enableHighAccuracy": True, 

@@ -1,7 +1,6 @@
 import json
 import logging
 import numpy as np
-from numpy import pi
 from pathlib import Path
 from tldhamburg.frontend.position import Position
 from tldhamburg.frontend.trafficlights import Trafficlight
@@ -10,20 +9,23 @@ import geopy.distance
 from shapely.geometry import Point, LineString
 from shapely.ops import nearest_points
 from bisect import bisect_right
-from math import radians, cos, sin, asin, sqrt
 
 class Navigation:
     """
-    documentation
-
-    directions are the navigation instructions e.g. when and where to turn left
+    The class builds all static data necessary for the navigation and updates dynamic data based on a Position object.
+    Usage:
+        Initialize Navigation(), then create_route()
+        When navigating:
+            Update location of the Position()
+            use update_route(position:Position) to update Navigation parameters
+            read Navigation parameters of interest
     """
-    _path = None
-    _route = None            # of class Route
+    _path = None            # to save geojson
+    _route = None           # class: Route
     departure = None
     destination = None
     start_navigating = True 
-    route_deviation_tolerance = 200 # in meters
+    route_deviation_tolerance = 100 # in meters
 
     geojson = None          # actual content of geojson file
     
@@ -32,7 +34,7 @@ class Navigation:
     distance_integral = []  # accumulated distance
     duration_integral = []  # accumulated approx. time
     speed_limits = {}       # dict of ascending waypoints and associated speed limits
-    trafficlights = {}     # dict of ascending waypoints and associated traffic lights
+    trafficlights = {}      # dict of ascending waypoints and associated traffic lights
 
     # dict of waypoints and associated navigation instructions (directions) as well as distance and duration data
     navigation_instructions = {} 
@@ -113,8 +115,6 @@ class Navigation:
              )
         self.next_tl, self.next_next_tl = self._get_impending_two_trafficlights()
 
-
- 
     def _init_route_geojson(self):
         """loads dict(route) that was created"""
         with open(f"{self._path}/route.geojson", "r") as f:
@@ -124,7 +124,7 @@ class Navigation:
     def _init_navigation_instructions(self):
         """
         in: geojson file
-        out: direction instructions, corresponding pictures, endpoints list
+        out: dict(havigation instructions)
         """
         route = self.geojson
         # https://github.com/GIScience/openrouteservice-docs#instruction-types
@@ -145,24 +145,6 @@ class Navigation:
         
         navigation_instructions = {}
 
-        """
-        # determine distances between points SHAPELY
-        distance_integral = []
-        lat, lon = self.way_points[0]
-        last_point = Point(lat, lon)
-        for lat, lon in self.way_points:
-            next_point = Point(lat, lon)
-            distance = last_point.distance(next_point)
-            print(f"distance last, next: {distance}")
-            distance_integral.append(distance)
-            last_point = next_point
-        print(f"total distance: {distance_integral[-1]}")
-        total_distance = distance_integral[-1]
-        
-        total_duration = 0
-        # duration_integral = [0]
-        """
-
         # determine distances between points Geopy
         distance_integral = []
         last_point = self.way_points_lon_lat[0]
@@ -176,7 +158,6 @@ class Navigation:
         total_distance = distance_integral[-1]
         
         total_duration = 0
-        # duration_integral = [0]
 
 
         steps = route["features"][0]["properties"]["segments"]["steps"]
@@ -195,32 +176,8 @@ class Navigation:
                 "duration": step["duration"],
                 "num_waypoints": num_waypoints # overlapping waypoints between steps
                 }
-
-            """
-            # assuming approx. equal distance between waypoints of given step
-            # this was a very bad assumption. It does not reflext how it works... nice try
-            if num_waypoints == 0:
-                distance_per_waypoint = 0
-                duration_per_waypoint = 0
-            else:
-                distance_per_waypoint = round(step["distance"] / num_waypoints, 3)
-                duration_per_waypoint = round(step["duration"] / num_waypoints, 3)
-            start_idx = len(distance_integral)
-            end_idx = start_idx + num_waypoints
-            # print(f"num_waypoints = {num_waypoints}, distance = {step["distance"]}\n dist_per_wp = {distance_per_waypoint}")
-            for i in range(start_idx, end_idx):
-                if start_idx == 0:
-                    distance_integral.append(0)
-                    duration_integral.append(0)
-                else:
-                    distance_integral.append(distance_integral[i-1] + distance_per_waypoint)
-                    duration_integral.append(duration_integral[i-1] + duration_per_waypoint)
-                    # print(f"last: {distance_integral[i-1]} add {distance_per_waypoint} = {distance_integral[i]} (at pos {i})")
-        """
             
-        # if len(self.way_points) == len(distance_integral):
         self.distance_integral = distance_integral
-        # self.duration_integral = duration_integral
         self.total_distance = total_distance
         self.total_duration = total_duration
 
@@ -254,9 +211,9 @@ class Navigation:
     def is_on_route(self, current_position:Position):
         """
         Check if the current position is on or near the route.
-        in: position(lat,lon)
+        in: Position(lat,lon)
         out: bool(on_route)
-        Adjust tolerance in settings 'route_deviation_tolerance'
+        Adjust 'route_deviation_tolerance' in class parameters
         """
         # determine nearest point within route
         lat, lon = current_position.get_pos()
@@ -274,36 +231,11 @@ class Navigation:
             logging.info(f"distance to route: {distance}, tolerance: {self.route_deviation_tolerance}\n\tcurrent Position: {lat, lon}\n\tnearest point: {nearest_way_point}")
 
         return on_route
-    
-    def _haversine_approx(self, lat1, lon1, lat2, lon2):
-        """
-        Approximate distance between two points using haversine formular.
-        """
-        x = (lon2 - lon1) * (pi / 180.0)  
-        y = (lat2 - lat1) * (pi / 180.0)  
-        return (x ** 2 + y ** 2) ** 0.5  
-    
-    # def _haversine_approx(self, lat1, lon1, lat2, lon2):
-    #     """
-    #     Calculate the great circle distance in kilometers between two points 
-    #     on the earth (specified in decimal degrees)
-    #     https://stackoverflow.com/questions/4913349/haversine-formula-in-python-bearing-and-distance-between-two-gps-points
-    #     """
-    #     # convert decimal degrees to radians 
-    #     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
-
-    #     # haversine formula 
-    #     dlon = lon2 - lon1 
-    #     dlat = lat2 - lat1 
-    #     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    #     c = 2 * asin(sqrt(a)) 
-    #     r = 6371 # Radius of earth in kilometers. Use 3956 for miles. Determines return value units.
-    #     return c * r
 
     def _get_current_waypoint_index(self):
         """determine nearest waypoint"""
         lat, lon = self.current_position.get_pos()
-        distances = np.array([self._haversine_approx(lat, lon, lat_wp, lon_wp) for lat_wp, lon_wp in self.way_points])
+        distances = np.array([geopy.distance.geodesic((lon, lat), (lon_wp, lat_wp)).meters for lat_wp, lon_wp in self.way_points])
         nearest = np.argmin(distances)
         return nearest
 
@@ -380,17 +312,13 @@ class Navigation:
         Updates the status of the Trafficlight object and updates the speed
         recommendation if trafficlight is the next one 
         """
-        # TODO umbauen
-        # color,_,_,_,speed
-        color,nextPhase,nextPhaseTime,rapidUpdate,speed= (        
+        color,_,_,_,speed= (        
             self._route.getUpdateOnTrafficLight(trafficlight.things_id, self.current_way_point_index))
         set_color = trafficlight.set_status(color)
         if trafficlight == self.next_tl:
             self.status_next_tl = set_color
             self._update_recommended_speed(color,speed)
 
-        # TODO ausbauen
-        #print(f"id = {trafficlight.things_id}, status = {color}, nextPhase = {nextPhase}, nextPhaseTime = {nextPhaseTime}, rapidUpdate = {rapidUpdate}, speed = {speed}")
     
     def _update_recommended_speed(self, color, speed):
         """
@@ -499,8 +427,10 @@ class Navigation:
              )
         
         # distance to next direction
-        self.remaining_distance = round((self.distance_integral[cur_nav_instr_key-1] 
+        self.remaining_distance = round((self.distance_integral[cur_nav_instr_key]
                                         - self.distance_integral[self.current_way_point_index]))
+        if self.current_way_point_index == len(self.way_points)-1:
+            self.start_navigating = False
 
         # update instruction list
         remaining_nav_instr_texts = []

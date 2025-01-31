@@ -2,6 +2,12 @@ import json
 from pathlib import Path
 
 class Position:
+    """
+    This class saves the coordinates of your location. It is currently in a very simple state - but: 
+    Any position logic like e.g. smoothing positions if there are interrupances during navigation like in tunnels etc.
+    shall be handled in this class, as Navigation() (to which this class is complementary) will work irrespective 
+    of technical errors during position locating.
+    """
     _lat = 0
     _lon = 0
     def __init__(self):

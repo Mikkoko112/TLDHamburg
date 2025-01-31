@@ -1,16 +1,9 @@
-import json
-import time
-from pathlib import Path
-
-
-def get_trafficlights(): # Nike ausbauen
-    directory = f"{Path.cwd()}/Frontend/schnittstelle"
-    with open(f"{directory}/trafficlights.geojson", "r") as f:
-        data = json.load(f)
-    return data
-
 class Trafficlight:
-    things_id = None            # things object
+    """
+    This class represents a traffic light and any data that you want to store.
+    In the current status it is used to store the status and some static data.
+    """
+    things_id = None            # id
     _lat = None
     _lon = None
     object_type = None          # signal type
@@ -36,6 +29,4 @@ class Trafficlight:
         return status
 
     def get_status(self):
-        return self.status
-        
-    
+        return self.status   

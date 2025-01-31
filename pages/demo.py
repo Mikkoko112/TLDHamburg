@@ -347,6 +347,7 @@ def show_instructions(n_clicks, prev, restart, route, store, route_layer):
 
         # last step: goal
         elif n_clicks == len(navigate.way_points):
+            navigate.start_navigating = True
             toggle_startnext_button = True
             picture = dash.get_relative_path(f"/assets/goal.png")
             text = "Ziel erreicht" 

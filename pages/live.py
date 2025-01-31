@@ -321,6 +321,7 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
             lon = user_store["lat"]
             lat = user_store["lng"]
             pos.set_pos(lat, lon)
+            
             # if the user is not near the route, startNavigation will be False
             # and start-navigation-modal will open to inform the user
             startNavigation = navigate.start_navigation(pos)
@@ -383,7 +384,8 @@ def show_instructions(data, start_navigation_bool, user_store, intervall, n_clic
             progress_value, remaining_instructions,
             speed_limit_text, speed_recommendation_text, navigate.geojson, zoomToBounds,
             trafficlights,
-            startNavigation_modal,startNavigation,modal_freigabe, start_button_disabled)
+            startNavigation_modal,startNavigation,modal_freigabe, start_button_disabled,
+            )
 
 """
 Change traffic light picture depending on the light status. 
@@ -397,8 +399,8 @@ Output: traffic light picture; tooltip for the traffic light picture
 @callback(
     Output("tl-picture-live","src"),
     Output("tl-picture-tooltip-live", "children"),
-    State("center-store-live", "data"), # center of user location
 
+    State("center-store-live", "data"), # center of user location
     Input("route-button-live", "n_clicks"),
     Input("speed-recommendation-live", "children"),
 

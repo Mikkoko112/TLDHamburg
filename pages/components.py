@@ -472,6 +472,8 @@ def data_live():
                     dcc.Store(id="map-store-live", data={"center": [53.549573,9.953330], "zoom": 10}),  # Store to keep the map zoom level
                     dcc.Store(id="center-store-live", data=None),  # Store to keep the map zoom level
                     dl.Map(id = "map-live", center=[53.549573,9.953330], zoom=10, 
+                           # to prevent user to zoom in or drag the map use the 
+                           # lines which are commented out:  
                            #zoomControl = False, scrollWheelZoom = False, doubleClickZoom = False,
                            #touchZoom = False, dragging = False,
                     children=[

@@ -279,7 +279,6 @@ def show_instructions(n_clicks, prev, restart, route, store, route_layer):
     
     # restart the route instructions and picture if restart-button was triggered
     elif button_id == "restart-button":
-        #navigate.start_navigating = True
         n_clicks = 0
         picture = ""
         # update pos with the first waypoint

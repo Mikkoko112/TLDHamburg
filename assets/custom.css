@@ -1,13 +1,13 @@
 
 .flex-searchbar-container {
-    margin-left: auto; /* Entspricht ms-auto */
+    margin-left: auto; /* ms-auto */
     margin-right: 0.5rem;
-    margin-top: 1rem; /* Entspricht mt-3 */
+    margin-top: 1rem; /* mt-3 */
     margin-bottom: 1rem;
-    display: flex; /* Flexbox für das Flex-Verhalten */
-    flex-wrap: nowrap; /* Entspricht flex-nowrap */
-    height: 3vh; /* Höhe */
-    align-items: center; /* Entspricht align="center" */
+    display: flex; /* Flexbox for Flex-behavior */
+    flex-wrap: nowrap; /* flex-nowrap */
+    height: 3vh; 
+    align-items: center; /* align="center" */
 }
 
 .flex-bikemode-container {
@@ -15,35 +15,35 @@
 }
 
 .navbar-container {
-    display: flex; /* Flexbox für das Flex-Verhalten */
-    text-decoration: none; /* Entfernt die Unterstreichung von Text */
-    align-items: center; /* Entspricht align="center" */
-    margin: 0; /* Entspricht g-0 (nuller Abstand) */
+    display: flex; /* Flexbox for Flex-behavior */
+    text-decoration: none; /* remove underlining of text */
+    align-items: center; /* align="center" */
+    margin: 0; /* g-0 */
     padding-left: 0.5rem;
 }
 
 .picture-container {
-    width: 20vw;                 /* Breite 20% der Ansichtshöhe */
-    margin-right: 1rem;           /* rechter Außenabstand von 8px */
+    width: 20vw;                
+    margin-right: 1rem;           /* right margin of 8px */
 }
 
 .instruction-container {
-    font-size: 28px;               /* Schriftgröße auf 28px setzen */
-    margin-bottom: 1rem;           /* Unteren Außenabstand von 8px */
-    margin-top: 1rem;              /* Oberen Außenabstand von 8px */
+    font-size: 28px;              
+    margin-bottom: 1rem;          
+    margin-top: 1rem;              
 }
 
 .flex-container-top {
-    display: flex;             /* Aktiviert Flexbox-Layout */
-    align-items: center;       /* Richtet die Elemente oben im Flex-Container aus */
-    margin-right: 2vw;         /* Rechter Außenabstand von 2vw */
-    height: 40vh;              /* Höhe 40% der Ansichtshöhe */
+    display: flex;             /* activates Flexbox-Layout */
+    align-items: center;       /* align elements in Flex-Container */
+    margin-right: 2vw;        
+    height: 40vh;             
 }
 
 .flex-container-control {
-    display: flex;               /* Aktiviert das Flexbox-Layout */
-    justify-content: flex-start; /* Horizontale Ausrichtung nach links */
-    margin-left: 0.5rem;           /* Linker Außenabstand von 1vw */
+    display: flex;               /* activates Flexbox-Layout */
+    justify-content: flex-start; 
+    margin-left: 0.5rem;          
     margin-bottom: 1rem;
 }
 
@@ -52,35 +52,35 @@
 }
 
 .tl-container {
-    display: flex;               /* Aktiviert das Flexbox-Layout */
-    width: 7vw;                 /* Setzt die Breite auf 7% der Viewport-Breite */
-    height: 24vh;               /* Setzt die Höhe auf 25% der Viewport-Höhe */
-    margin-bottom: 1rem;
+    display: flex;               /* activates Flexbox-Layout */
+    width: 7vw;                 
+    height: 24vh;   
+    margin-bottom: 1rem;            
 }
 
 .flex-container-bottom {
-    font-size: 28px;               /* Schriftgröße auf 28px setzen */
-    display: flex;                 /* Aktiviert das Flexbox-Layout */
-    align-items: center;       /* Richtet die Elemente oben im Flex-Container aus */
-    margin-bottom: 1rem;            /* Unteren Außenabstand von 8px */
-    margin-top: 1rem;               /* Oberen Außenabstand von 8px */
-    margin-left: 0.5rem;              /* Linker Außenabstand von 1vw */
-    margin-right: 2rem;             /* Rechter Außenabstand von 2vw */
-    gap: 1rem;                       /* Abstand zwischen den Elementen im Flex-Container */
+    font-size: 28px;               
+    display: flex;                 /* activates Flexbox-Layout */
+    align-items: center;      
+    margin-bottom: 1rem;           
+    margin-top: 1rem;              
+    margin-left: 0.5rem;             
+    margin-right: 2rem;            
+    gap: 1rem;                      
     width: auto;
 }
 
 .progress-container {
-    height: 2vw;              /* Höhe des Elements auf 25px setzen */
-    margin-left: 0.5rem;          /* Linker Außenabstand von 1vw */
-    margin-right: 2rem;         /* Rechter Außenabstand von 2vw */
+    height: 2vw;              
+    margin-left: 0.5rem;         
+    margin-right: 2rem;        
 }
 
 .overview-container {
-    width: 100%;             /* Setzt die Breite auf 100% des übergeordneten Elements */
-    height: 84vh;            /* Setzt die Höhe auf 84% der Viewport-Höhe */
-    padding: 0;              /* Kein Padding */
-    overflow: scroll;        /* Ermöglicht das Scrollen, wenn der Inhalt die Box übersteigt */
+    width: 100%;             
+    height: 84vh;           
+    padding: 0;             
+    overflow: scroll;       
 }
 
 .left-container {
@@ -89,25 +89,24 @@
 }
 
 .info-container-left {
-    width: 14rem;                  /* Breite auf 15rem setzen */
-    height: 46rem;               /* Höhe auf 44.7rem setzen */
-    margin-left: 0.5rem;             /* Linker Außenabstand von 20px */
-    margin-top: 7px;               /* Oberer Außenabstand von 7px */
-    /*overflow: scroll;*/
+    width: 14rem;                 
+    height: 46rem;               
+    margin-left: 0.5rem;             
+    margin-top: 7px;               
 }
 
 .info-container-right {
-    width: 14rem;                  /* Breite auf 14rem setzen */
-    height: 46rem;               /* Höhe auf 46rem setzen */
-    margin-right: 0.5rem;            /* Rechter Außenabstand von 20px */
-    margin-top: 7px;               /* Oberer Außenabstand von 7px */
+    width: 14rem;                 
+    height: 46rem;               
+    margin-right: 0.5rem;           
+    margin-top: 7px;              
 }
 
 .startseite-components-container {
     align-items: center;
-    display: flex;                 /* Aktiviert das Flexbox-Layout */
+    display: flex;                
     flex-wrap: wrap;           /* Allow columns to wrap on smaller screens */
-    justify-content: flex-start; /* Horizontale Ausrichtung nach links */
+    justify-content: flex-start;
     margin: 0; /* Adjust margins to prevent outer spacing issues */
 }
 
@@ -202,14 +201,14 @@
     }
 
     .flex-bikemode-container {
-        height: 3vh; /* Höhe */
+        height: 3vh; 
     }
 
     .navbar-container {
-        display: flex; /* Flexbox für das Flex-Verhalten */
-        text-decoration: none; /* Entfernt die Unterstreichung von Text */
-        align-items: center; /* Entspricht align="center" */
-        margin: 0; /* Entspricht g-0 (nuller Abstand) */
+        display: flex; 
+        text-decoration: none; 
+        align-items: center; /* align="center" */
+        margin: 0; /*  g-0  */
         padding-left: 0.5rem;
     }
 
@@ -239,29 +238,3 @@
         height: 1vw; /* Further reduce height */
     }
 }
-
-
-/*
-.navbar-container {
-    padding-left: 0.3rem; /* Keep padding but adjust if needed 
-    font-size: 16px; /* Reduce the font size for smaller screens 
-}
-
-.flex-searchbar-container {
-    height: 2vh; /* Höhe 
-    margin-top: 0.5rem; /* Adjust top margin for spacing 
-    margin-bottom: 0.5rem; /* Adjust bottom margin for spacing 
-}
-
-/* Make search bar elements smaller 
-.flex-searchbar-container input[type="text"] {
-    width: 80%; /* Set to 80% of its container 
-    height: 30px; /* Set a smaller height 
-    font-size: 14px; /* Adjust font size 
-}
-
-.flex-searchbar-container button {
-    height: 40px; /* Match button height to input 
-    font-size: 14px; /* Adjust button font size 
-}
-*/

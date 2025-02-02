@@ -2,6 +2,27 @@ from tldhamburg.backend.DataFetcher import DataFetcher
 import json
 from datetime import datetime
 
+
+'''
+This script generates static data which might be used for statically evalueating
+possible routes and grouping simultaneous traffic lights for more complex pre-
+diction algorithms. The structure of the generated files is as follows:
+    ../data/struct.json: This lists all classes of simultaneously switching traffic
+                         lights for each scrossing where the trafficLightsID is used
+                         as a key for which the entry is a list cotaining lists of 
+                         Things identified by their @iot.id as well as their name.
+    ../data/structRev.json: This allows to access the equivallence classes from struct.json
+                            quickly by listing the name and the trafficLightsID for each Thing,
+                            usinf the @iot.id as a key, as well as the classIndex which is the 
+                            index of the equivalence class in the relevant crossing the Thing is
+                            part of.
+    ../data/weights.json: This contains the expected wait time for the primary signal of each Thing,
+                          using the @iot.id as a key.
+
+Autor: Caspar Kiehn
+'''
+
+
 def getWeight(Observations):
     weightCurr=0
     for i, data in enumerate(Observations):

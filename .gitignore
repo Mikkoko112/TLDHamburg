@@ -1,9 +1,13 @@
+# Large datasets stored externally
+/Control/data/shHamburg.gml
+/data/hamburg.gml
+/tldhamburg/control/data/hamburg.gml
+/tldhamburg/control/data/shHamburg.gml
+/tldhamburg/control/data/shHamburgCopy.gml
+/signal_observations/observations_all_datastreams.json.gz
+
 # MANUAL GITIGNORE
 .DS_Store
-
-# Large datasets stored externally in Proton Drive
-tldhamburg/control/data/*.gml
-signal_observations/observations_all_datastreams.json.gz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

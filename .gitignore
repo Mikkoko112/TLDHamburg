@@ -1,6 +1,10 @@
 # MANUAL GITIGNORE
 .DS_Store
 
+# Large datasets stored externally in Proton Drive
+tldhamburg/control/data/*.gml
+signal_observations/observations_all_datastreams.json.gz
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
